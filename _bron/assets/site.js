@@ -171,9 +171,7 @@
         return;
       }
       if (!WEB3FORMS_KEY) {
-        const body = `${f.get("bericht")}\n\n${f.get("naam")}\n${f.get("email")}`;
-        setStatus(`Uw e-mailprogramma wordt geopend. Gebeurt er niets? Mail ons rechtstreeks op ${MAIL}.`);
-        location.href = `mailto:${MAIL}?subject=${encodeURIComponent(f.get("onderwerp"))}&body=${encodeURIComponent(body)}`;
+        setStatus(`Het formulier is nog niet actief. Mail ons op ${MAIL} of bel ons gerust.`, "err");
         return;
       }
       if (!f.get("h-captcha-response")) {

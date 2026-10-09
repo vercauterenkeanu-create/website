@@ -377,7 +377,7 @@ const contactBlock = () => `<div class="contact-card reveal">
     <div class="hp" aria-hidden="true"><label>Laat dit leeg<input type="checkbox" id="botcheck" name="botcheck" tabindex="-1" autocomplete="off"></label></div>
     <div id="captcha-slot"></div>
     <div class="form-foot">
-      <small id="form-status" aria-live="polite">Uw bericht opent in uw e-mailprogramma.</small>
+      <small id="form-status" aria-live="polite"></small>
       <button class="btn btn-dark" type="submit" id="form-submit">Verstuur bericht ${ICON.arrow}</button>
     </div>
   </form>

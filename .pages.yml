@@ -16,8 +16,11 @@ content:
     filename: "{year}-{month}-{day}-{primary}.md"
     view:
       primary: titel
-      sort: datum
-      order: desc
+      fields: [titel, datum]
+      sort: [datum, titel]
+      default:
+        sort: datum
+        order: desc
     fields:
       - name: titel
         label: Titel
@@ -69,8 +72,11 @@ content:
     filename: "{primary}.md"
     view:
       primary: roepnaam
-      sort: volgorde
-      order: asc
+      fields: [roepnaam, naam]
+      sort: [volgorde, roepnaam]
+      default:
+        sort: volgorde
+        order: asc
     fields:
       - name: roepnaam
         label: Roepnaam
@@ -167,8 +173,11 @@ content:
     filename: "{primary}-nest.md"
     view:
       primary: letter
-      sort: geboren
-      order: desc
+      fields: [letter, geboren, moeder]
+      sort: [geboren, letter]
+      default:
+        sort: geboren
+        order: desc
     fields:
       - name: letter
         label: Letter van het nest
