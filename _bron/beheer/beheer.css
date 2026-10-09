@@ -282,3 +282,35 @@ dialog.kiezer::backdrop { background: rgba(15, 13, 10, .55); }
 @media (max-width: 560px) {
   .balk .status { font-size: 0; gap: 0; }
 }
+
+/* ---------- Opslaan / publiceren ---------- */
+.balk .b-btn.opslaan-knop:disabled, .balk .b-btn.goud:disabled { opacity: .45; cursor: default; }
+.status.concept::before { background: #8fb3e0; }
+
+/* ---------- Uitklapbare groepen in het paneel ---------- */
+details.groep { border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+details.groep > summary { cursor: pointer; list-style: none; padding: 12px 14px; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+details.groep > summary::-webkit-details-marker { display: none; }
+details.groep > summary::before { content: "\25B8"; color: var(--gold-3); transition: rotate .15s; }
+details.groep[open] > summary::before { rotate: 90deg; }
+details.groep[open] > summary { border-bottom: 1px solid var(--line); }
+.groep-in, .groep-velden { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.groep-in { padding: 14px; }
+.concept-info { color: var(--text); }
+
+/* ---------- Kleur kiezen ---------- */
+.kleur-veld { display: flex; align-items: center; gap: 8px; }
+.kleur-veld input[type="color"] { width: 44px; height: 40px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; flex: none; }
+.kleur-veld input.kleur-code { width: 110px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; font: 600 14px/1 ui-monospace, Consolas, monospace; }
+.veld.standaard input[type="color"] { opacity: .55; }
+
+/* ---------- Menu-volgorde ---------- */
+.menu-lijst { display: grid; gap: 6px; }
+.menu-rij { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto; gap: 4px; align-items: center; padding: 4px 4px 4px 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.menu-rij.uit { background: var(--ivory); }
+.menu-rij input[type="text"] { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; background: #fff; }
+.menu-rij input[type="text"]:disabled { background: transparent; border-color: transparent; color: var(--muted); }
+.menu-vink input { width: 18px; height: 18px; accent-color: var(--gold-3); cursor: pointer; }
+@media (max-width: 900px) {
+  .balk .b-btn.opslaan-knop, .balk .b-btn.goud { padding: 9px 12px; }
+}

@@ -9,10 +9,23 @@
       "bovenschrift": "Contact",
       "titel": "Kom *kennismaken*",
       "intro": "Vragen over onze honden of over onze nesten? Stuur ons een bericht of bel ons gerust.",
-      "foto": "/media/200000200.webp"
+      "fotos": [
+        "/media/200000200.webp"
+      ]
     },
     {
-      "type": "contact"
+      "type": "contact",
+      "bovenschrift": "Contact",
+      "titel": "Kom *kennismaken*",
+      "intro": "Vragen over onze honden of over onze nesten? Stuur ons een bericht of bel ons gerust.",
+      "formulierTitel": "Stuur ons een bericht",
+      "formulierTekst": "We antwoorden zo snel mogelijk.",
+      "onderwerpen": [
+        "Informatie over onze nesten",
+        "Vraag over onze honden",
+        "Iets anders"
+      ],
+      "knoptekst": "Verstuur bericht"
     }
   ]
 }

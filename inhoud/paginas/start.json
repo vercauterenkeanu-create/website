@@ -9,11 +9,35 @@
       "bovenschrift": "Whippetkennel · Opwijk · sinds 2020",
       "titel": "Gefokt voor snelheid, grootgebracht met *hart.*",
       "intro": "Vai Avanti – Italiaans voor ‘ga door’ – is een kleine, toegewijde whippetkennel. Wij fokken gezonde, sociale whippets en racen met trots op de renbanen van België, Nederland, Duitsland en ver daarbuiten.",
-      "foto": "/media/200000179.webp",
-      "nieuwsTonen": true
+      "nieuwsTonen": true,
+      "fotos": [
+        "/media/200000179.webp"
+      ],
+      "knop1tekst": "Ontmoet onze honden",
+      "knop1link": "honden.html",
+      "knop2tekst": "Verwacht in 2027",
+      "knop2link": "nesten.html#verwacht"
     },
     {
-      "type": "cijfers"
+      "type": "cijfers",
+      "cijfers": [
+        {
+          "getal": "2020",
+          "tekst": "Kennelnaam erkend door de KMSH"
+        },
+        {
+          "getal": "{nesten}",
+          "tekst": "Nesten gefokt: het {nestletters}-nest"
+        },
+        {
+          "getal": "{titels}",
+          "tekst": "Titels en ereplaatsen van onze honden"
+        },
+        {
+          "getal": "272",
+          "tekst": "MyDogDNA-checkpoints, allemaal clear"
+        }
+      ]
     },
     {
       "type": "honden",
@@ -24,19 +48,46 @@
     {
       "type": "nieuws",
       "bovenschrift": "Van de renbaan",
-      "titel": "Laatste *nieuws*"
+      "titel": "Laatste *nieuws*",
+      "linktekst": "Alle {verslagen} wedstrijdverslagen",
+      "leestekst": "Lees het verslag"
     },
     {
       "type": "gezondheid",
       "bovenschrift": "Gezondheid voorop",
       "titel": "Getest, gedocumenteerd en *transparant*",
-      "intro": "Een snelle whippet is pas een goede whippet als hij ook gezond is. Daarom laten wij onze fokhonden uitgebreid onderzoeken en tonen we de resultaten per hond."
+      "intro": "Een snelle whippet is pas een goede whippet als hij ook gezond is. Daarom laten wij onze fokhonden uitgebreid onderzoeken en tonen we de resultaten per hond.",
+      "knoptekst": "Bekijk de resultaten per hond",
+      "knoplink": "honden.html",
+      "punten": [
+        {
+          "icoon": "DNA",
+          "titel": "DNA-testen",
+          "tekst": "Myostatin deficiency en Factor VII deficiency: N/N (normal)."
+        },
+        {
+          "icoon": "Hart",
+          "titel": "Hart & rug",
+          "tekst": "Hartonderzoek en rugscreening (LTV en SP) bij onze fokdieren."
+        },
+        {
+          "icoon": "Klembord",
+          "titel": "Heupen & ellebogen",
+          "tekst": "Officieel gescreend, met resultaten tot Excellent / A1."
+        },
+        {
+          "icoon": "Schild",
+          "titel": "MyDogDNA",
+          "tekst": "Volledige DNA-screening: clear op alle 272 checkpoints."
+        }
+      ]
     },
     {
       "type": "nesten",
       "bovenschrift": "Pups & nesten",
       "titel": "Onze *nesten*",
-      "intro": "Elk nest krijgt zijn eigen letter. Klik op een nest voor alle pups, hun foto's en gezondheidsresultaten."
+      "intro": "Elk nest krijgt zijn eigen letter. Klik op een nest voor alle pups, hun foto's en gezondheidsresultaten.",
+      "linktekst": "Alle nesten en pups"
     },
     {
       "type": "overons",
@@ -46,10 +97,25 @@
       "foto1": "/media/200000141.webp",
       "foto2": "/media/200000410.webp",
       "citaat": "Vai Avanti: een naam die past bij alles wat ik met mijn honden wil bereiken, namelijk doorgaan.",
-      "citaatVan": "Shany Van der Meulen"
+      "citaatVan": "Shany Van der Meulen",
+      "jaartal": "2018",
+      "jaartekst": "Lylo, onze eerste",
+      "knoptekst": "Lees ons verhaal",
+      "knoplink": "over-ons.html"
     },
     {
-      "type": "contact"
+      "type": "contact",
+      "bovenschrift": "Contact",
+      "titel": "Kom *kennismaken*",
+      "intro": "Vragen over onze honden of over onze nesten? Stuur ons een bericht of bel ons gerust.",
+      "formulierTitel": "Stuur ons een bericht",
+      "formulierTekst": "We antwoorden zo snel mogelijk.",
+      "onderwerpen": [
+        "Informatie over onze nesten",
+        "Vraag over onze honden",
+        "Iets anders"
+      ],
+      "knoptekst": "Verstuur bericht"
     }
   ]
 }

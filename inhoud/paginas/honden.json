@@ -1,0 +1,27 @@
+{
+  "titel": "Onze honden",
+  "inMenu": true,
+  "menuVolgorde": 10,
+  "omschrijving": "Maak kennis met de whippets van Vai Avanti: afstamming, gezondheidsresultaten en palmares per hond.",
+  "blokken": [
+    {
+      "type": "paginakop",
+      "bovenschrift": "Onze honden",
+      "titel": "Het team achter *de naam*",
+      "intro": "Klik op een hond voor afstamming, gezondheidsresultaten, palmares en foto's.",
+      "fotos": [
+        "/media/200000500.webp"
+      ]
+    },
+    {
+      "type": "hondenlijst"
+    },
+    {
+      "type": "uitnesten",
+      "bovenschrift": "Uit onze nesten",
+      "titel": "Ook *Vai Avanti*",
+      "intro": "Deze honden komen uit onze nesten en wonen bij hun eigen baasjes.",
+      "linktekst": "Alle nesten"
+    }
+  ]
+}

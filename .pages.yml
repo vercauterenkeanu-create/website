@@ -285,6 +285,9 @@ content:
       - name: inMenu
         label: Toon in het menu
         type: boolean
+      - name: menuNaam
+        label: Naam in het menu (leeg = de naam van de pagina)
+        type: string
       - name: menuVolgorde
         label: Plaats in het menu
         type: number
@@ -322,6 +325,15 @@ content:
                     - Wit
                     - Beige
                     - Donker
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: tekstfoto
             label: Tekst met foto
             fields:
@@ -358,6 +370,15 @@ content:
                     - Wit
                     - Beige
                     - Donker
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: fotos
             label: Foto's
             fields:
@@ -382,6 +403,15 @@ content:
                     - Wit
                     - Beige
                     - Donker
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: citaat
             label: Citaat
             fields:
@@ -399,6 +429,15 @@ content:
                     - Wit
                     - Beige
                     - Donker
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: aankondiging
             label: Aankondiging met knop
             fields:
@@ -425,6 +464,15 @@ content:
                   values:
                     - Donker
                     - Licht
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: paginakop
             label: Paginakop met foto
             fields:
@@ -437,10 +485,70 @@ content:
                 type: string
               - name: intro
                 label: Introtekst
+                description: 'Automatisch ingevuld: {verslagen} = aantal verslagen, {sinds} = eerste jaar, {honden}, {nesten}, {nestletters} (T-, U-, X- en Y), {titels}.'
                 type: text
-              - name: foto
-                label: Achtergrondfoto
+              - name: fotos
+                label: Foto's
+                description: Meer dan één foto? Dan wisselen ze vanzelf af (diavoorstelling).
                 type: image
+                options:
+                  multiple:
+                    max: 40
+              - name: knoptekst
+                label: Tekst op de knop (leeg = geen knop)
+                type: string
+              - name: knoplink
+                label: Knop gaat naar
+                type: string
+              - name: hoogte
+                label: Hoogte
+                type: select
+                options:
+                  values:
+                    - Normaal
+                    - Klein
+                    - Groot
+              - name: uitlijning
+                label: Tekst
+                type: select
+                options:
+                  values:
+                    - Links
+                    - Midden
+              - name: donkerte
+                label: Foto donkerder maken
+                type: select
+                options:
+                  values:
+                    - Normaal
+                    - Weinig
+                    - Veel
+              - name: fotoFocus
+                label: Belangrijkste deel van de foto
+                type: select
+                options:
+                  values:
+                    - Midden
+                    - Boven
+                    - Onder
+              - name: wissel
+                label: 'Diavoorstelling: volgende foto na'
+                type: select
+                options:
+                  values:
+                    - 6 sec
+                    - 4 sec
+                    - 8 sec
+                    - 12 sec
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: hero
             label: Grote foto met titel
             fields:
@@ -454,19 +562,101 @@ content:
               - name: intro
                 label: Introtekst
                 type: text
-              - name: foto
-                label: Grote foto
+              - name: fotos
+                label: Foto's
+                description: Meer dan één foto? Dan wisselen ze vanzelf af (diavoorstelling).
                 type: image
+                options:
+                  multiple:
+                    max: 40
+              - name: knop1tekst
+                label: 'Eerste knop: tekst (leeg = geen knop)'
+                type: string
+              - name: knop1link
+                label: Eerste knop gaat naar
+                type: string
+              - name: knop2tekst
+                label: 'Tweede knop: tekst (leeg = geen knop)'
+                type: string
+              - name: knop2link
+                label: Tweede knop gaat naar
+                type: string
               - name: nieuwsTonen
                 label: Laatste nieuws tonen in de foto
                 type: boolean
+              - name: hoogte
+                label: Hoogte
+                type: select
+                options:
+                  values:
+                    - Normaal
+                    - Klein
+                    - Groot
+              - name: uitlijning
+                label: Tekst
+                type: select
+                options:
+                  values:
+                    - Links
+                    - Midden
+              - name: donkerte
+                label: Foto donkerder maken
+                type: select
+                options:
+                  values:
+                    - Normaal
+                    - Weinig
+                    - Veel
+              - name: fotoFocus
+                label: Belangrijkste deel van de foto
+                type: select
+                options:
+                  values:
+                    - Midden
+                    - Boven
+                    - Onder
+              - name: wissel
+                label: 'Diavoorstelling: volgende foto na'
+                type: select
+                options:
+                  values:
+                    - 6 sec
+                    - 4 sec
+                    - 8 sec
+                    - 12 sec
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: cijfers
             label: Kerncijfers
             fields:
-              - name: uitleg
-                label: Uitleg
+              - name: cijfers
+                label: Cijfers
+                description: 'Automatisch ingevuld: {verslagen} = aantal verslagen, {sinds} = eerste jaar, {honden}, {nesten}, {nestletters} (T-, U-, X- en Y), {titels}.'
+                type: object
+                list: true
+                fields:
+                  - name: getal
+                    label: Getal
+                    type: string
+                  - name: tekst
+                    label: Tekst
+                    type: string
+              - name: kleurAchtergrond
+                label: Achtergrond
                 type: string
-                hidden: true
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: honden
             label: Onze honden (overzicht)
             fields:
@@ -480,6 +670,62 @@ content:
               - name: intro
                 label: Introtekst
                 type: text
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
+          - name: hondenlijst
+            label: Alle honden (kaartjes)
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: intro
+                label: Introtekst
+                type: text
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
+          - name: uitnesten
+            label: Honden uit onze nesten
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: intro
+                label: Introtekst
+                type: text
+              - name: linktekst
+                label: Tekst van de link rechts (leeg = geen link)
+                type: string
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: nieuws
             label: Laatste nieuws
             fields:
@@ -489,6 +735,34 @@ content:
               - name: titel
                 label: Titel
                 description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: linktekst
+                label: Tekst van de link rechts (leeg = geen link)
+                description: 'Automatisch ingevuld: {verslagen} = aantal verslagen, {sinds} = eerste jaar, {honden}, {nesten}, {nestletters} (T-, U-, X- en Y), {titels}.'
+                type: string
+              - name: leestekst
+                label: Tekst onder elk verslag
+                type: string
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
+          - name: verslagen
+            label: Alle verslagen (archief)
+            fields:
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
                 type: string
           - name: gezondheid
             label: Gezondheid
@@ -503,6 +777,45 @@ content:
               - name: intro
                 label: Introtekst
                 type: text
+              - name: knoptekst
+                label: Tekst op de knop (leeg = geen knop)
+                type: string
+              - name: knoplink
+                label: Knop gaat naar
+                type: string
+              - name: punten
+                label: Punten
+                type: object
+                list: true
+                fields:
+                  - name: icoon
+                    label: Icoon
+                    type: select
+                    options:
+                      values:
+                        - DNA
+                        - Hart
+                        - Klembord
+                        - Schild
+                        - Vinkje
+                        - Beker
+                        - Telefoon
+                        - Locatie
+                  - name: titel
+                    label: Titel
+                    type: string
+                  - name: tekst
+                    label: Tekst
+                    type: text
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: nesten
             label: Onze nesten (overzicht)
             fields:
@@ -516,13 +829,45 @@ content:
               - name: intro
                 label: Introtekst
                 type: text
+              - name: linktekst
+                label: Tekst van de link rechts (leeg = geen link)
+                type: string
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
+          - name: nestenlijst
+            label: Alle nesten met pups
+            fields:
+              - name: verwachtTonen
+                label: Verwachte nesten bovenaan tonen
+                type: boolean
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: verwacht
             label: Verwachte nesten
             fields:
-              - name: uitleg
-                label: Uitleg
+              - name: kleurAchtergrond
+                label: Achtergrond
                 type: string
-                hidden: true
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: overons
             label: Over ons (kort)
             fields:
@@ -542,11 +887,32 @@ content:
               - name: foto2
                 label: Kleine foto
                 type: image
+              - name: jaartal
+                label: Jaartal op de foto (leeg = niet tonen)
+                type: string
+              - name: jaartekst
+                label: Tekst onder het jaartal
+                type: string
               - name: citaat
                 label: Citaat
                 type: text
               - name: citaatVan
                 label: Citaat van
+                type: string
+              - name: knoptekst
+                label: Tekst op de knop (leeg = geen knop)
+                type: string
+              - name: knoplink
+                label: Knop gaat naar
+                type: string
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
                 type: string
           - name: team
             label: Teamleden
@@ -571,13 +937,51 @@ content:
                     options:
                       format: markdown
                       media: false
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
           - name: contact
             label: Contactformulier
             fields:
-              - name: uitleg
-                label: Uitleg
+              - name: bovenschrift
+                label: Klein opschrift
                 type: string
-                hidden: true
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: intro
+                label: Introtekst
+                type: text
+              - name: formulierTitel
+                label: Titel van het formulier
+                type: string
+              - name: formulierTekst
+                label: Tekst onder die titel
+                type: string
+              - name: onderwerpen
+                label: Keuzes bij 'Onderwerp'
+                description: De eerste keuze wordt gekozen bij 'Informeer naar de nesten', de tweede bij vragen over de honden.
+                type: string
+                list: true
+              - name: knoptekst
+                label: Tekst op de verstuurknop
+                type: string
+              - name: kleurAchtergrond
+                label: Achtergrond
+                type: string
+              - name: kleurTekst
+                label: Tekst
+                type: string
+              - name: kleurAccent
+                label: Accent (goud)
+                type: string
   - name: site
     label: Instellingen
     type: file
@@ -601,6 +1005,12 @@ content:
           - name: tekst
             label: Tekst
             type: text
+          - name: knoptekst
+            label: Tekst op de knop
+            type: string
+          - name: knoplink
+            label: Knop gaat naar
+            type: string
       - name: contact
         label: Contactgegevens
         type: object
@@ -620,16 +1030,91 @@ content:
           - name: facebook
             label: Link naar Facebook
             type: string
-      - name: paginafotos
-        label: Foto bovenaan de vaste pagina's
+      - name: thema
+        label: Kleuren en lettertypes
         type: object
         fields:
-          - name: honden
-            label: Onze honden
-            type: image
-          - name: nesten
-            label: Nesten
-            type: image
-          - name: nieuws
-            label: Nieuws
-            type: image
+          - name: accent
+            label: Accentkleur (nu goud)
+            type: string
+            description: 'Kleurcode zoals #c9a052. Leeg = standaard.'
+          - name: donker
+            label: Donkere kleur
+            type: string
+            description: 'Kleurcode zoals #c9a052. Leeg = standaard.'
+          - name: licht
+            label: Achtergrond
+            type: string
+            description: 'Kleurcode zoals #c9a052. Leeg = standaard.'
+          - name: beige
+            label: Tweede achtergrond
+            type: string
+            description: 'Kleurcode zoals #c9a052. Leeg = standaard.'
+          - name: tekst
+            label: Tekstkleur
+            type: string
+            description: 'Kleurcode zoals #c9a052. Leeg = standaard.'
+          - name: titelLetter
+            label: Lettertype van de titels
+            type: select
+            options:
+              values:
+                - Cormorant Garamond
+                - Playfair Display
+                - Lora
+                - Libre Baskerville
+                - DM Serif Display
+                - Cinzel
+          - name: tekstLetter
+            label: Lettertype van de tekst
+            type: select
+            options:
+              values:
+                - Manrope
+                - Inter
+                - Nunito Sans
+                - Lato
+                - Open Sans
+                - Raleway
+      - name: menu
+        label: Knop rechts in het menu
+        type: object
+        fields:
+          - name: knoptekst
+            label: Tekst (leeg = geen knop)
+            type: string
+          - name: knoplink
+            label: Gaat naar
+            type: string
+      - name: voettekst
+        label: Voettekst
+        type: object
+        fields:
+          - name: tekst
+            label: Tekst onder het logo
+            type: text
+          - name: kolommen
+            label: Kolommen met links
+            type: object
+            list: true
+            fields:
+              - name: titel
+                label: Titel
+                type: string
+              - name: links
+                label: Links
+                type: object
+                list: true
+                fields:
+                  - name: label
+                    label: Tekst
+                    type: string
+                  - name: link
+                    label: Gaat naar
+                    type: string
+          - name: contactTitel
+            label: Titel van de kolom met contactgegevens
+            type: string
+          - name: onderschrift
+            label: Helemaal onderaan
+            type: string

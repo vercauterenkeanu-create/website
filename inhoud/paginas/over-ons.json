@@ -9,7 +9,9 @@
       "bovenschrift": "Ons verhaal",
       "titel": "Doorgaan. *Altijd vooruit.*",
       "intro": "Vai Avanti is Italiaans voor ‘ga door’. Een naam die past bij alles wat we met onze honden willen bereiken.",
-      "foto": "/media/200000470.webp"
+      "fotos": [
+        "/media/200000470.webp"
+      ]
     },
     {
       "type": "team",

@@ -1,0 +1,21 @@
+{
+  "titel": "Wedstrijdverslagen",
+  "menuNaam": "Nieuws",
+  "inMenu": true,
+  "menuVolgorde": 30,
+  "omschrijving": "Alle {verslagen} wedstrijdverslagen van Vai Avanti sinds {sinds}: uitslagen, foto's en verhalen van de renbaan.",
+  "blokken": [
+    {
+      "type": "paginakop",
+      "bovenschrift": "Nieuws",
+      "titel": "Van de *renbaan*",
+      "intro": "Alle {verslagen} wedstrijdverslagen sinds {sinds}, met foto's. Filter op een hond om enkel zijn of haar verslagen te zien.",
+      "fotos": [
+        "/media/200000232.webp"
+      ]
+    },
+    {
+      "type": "verslagen"
+    }
+  ]
+}

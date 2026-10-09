@@ -3,7 +3,9 @@
     "tonen": true,
     "titel": "Twee nieuwe nesten",
     "label": "Verwacht in 2027",
-    "tekst": "Met veel trots kondigen wij twee nesten aan voor 2027. Interesse? Neem gerust contact met ons op voor meer informatie."
+    "tekst": "Met veel trots kondigen wij twee nesten aan voor 2027. Interesse? Neem gerust contact met ons op voor meer informatie.",
+    "knoptekst": "Informeer naar de nesten",
+    "knoplink": "contact.html#nesten"
   },
   "contact": {
     "telefoon": "+32 493 18 02 90",
@@ -12,9 +14,54 @@
     "instagram": "https://www.instagram.com/vai.avanti2020/",
     "facebook": "https://www.facebook.com/vai.avanti2020"
   },
-  "paginafotos": {
-    "honden": "/media/200000500.webp",
-    "nesten": "/media/200000201.webp",
-    "nieuws": "/media/200000232.webp"
-  }
+  "menu": {
+    "knoptekst": "Contact",
+    "knoplink": "contact.html"
+  },
+  "voettekst": {
+    "tekst": "Whippetkennel uit {plaats}, België. Gezonde racewhippets, gefokt met passie sinds 2020.",
+    "kolommen": [
+      {
+        "titel": "Ontdek",
+        "links": [
+          {
+            "label": "Onze honden",
+            "link": "honden.html"
+          },
+          {
+            "label": "Nesten",
+            "link": "nesten.html"
+          },
+          {
+            "label": "Wedstrijdverslagen",
+            "link": "nieuws.html"
+          },
+          {
+            "label": "Gezondheid",
+            "link": "index.html#gezondheid"
+          }
+        ]
+      },
+      {
+        "titel": "Kennel",
+        "links": [
+          {
+            "label": "Over ons",
+            "link": "over-ons.html"
+          },
+          {
+            "label": "Verwacht in 2027",
+            "link": "nesten.html#verwacht"
+          },
+          {
+            "label": "Contact",
+            "link": "contact.html"
+          }
+        ]
+      }
+    ],
+    "contactTitel": "Contact",
+    "onderschrift": "Kennelnaam erkend door de KMSH"
+  },
+  "thema": {}
 }

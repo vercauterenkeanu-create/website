@@ -10,12 +10,15 @@
   const SITE_ROOT = new URL("../", location.href).href;
   const CODE_OP_TOESTEL = "va-beheer-koppelcode";
   const SLEUTEL_PAD = "_bron/beheer/sleutel.json";
-  const { esc, slug, BLOKKEN, VELDEN, bouwModel, createSite, fmtDate, pageFile } = window.VA;
+  const { esc, slug, BLOKKEN, VELDEN, KLEUR_VELDEN, LETTERS, bouwModel, createSite, fmtDate, pageFile, themaCss, fontsHref, isKleur } = window.VA;
+  const LIVE = REPO.branch, CONCEPT = "concept";
 
-  const VASTE_PAGINAS = ["start", "over-ons", "contact"];
+  const VASTE_PAGINAS = ["start", "honden", "nesten", "nieuws", "over-ons", "contact"];
   const GERESERVEERD = new Set(["index", "honden", "nesten", "nieuws", "404", "beheer", "start", "contact", "over-ons", "assets", "img", "media"]);
   const INHOUD_TYPES = ["tekst", "tekstfoto", "fotos", "citaat", "aankondiging", "paginakop"];
-  const SITE_TYPES = ["hero", "cijfers", "honden", "nieuws", "gezondheid", "nesten", "verwacht", "overons", "team", "contact"];
+  const SITE_TYPES = ["hero", "cijfers", "honden", "hondenlijst", "uitnesten", "nieuws", "verslagen", "gezondheid", "nesten", "nestenlijst", "verwacht", "overons", "team", "contact"];
+  // Kleur die het kleurvakje toont zolang er niets gekozen is
+  const STANDAARD_KLEUR = { kleurAchtergrond: "#ffffff", kleurTekst: "#1d1a15", kleurAccent: "#c9a052", accent: "#c9a052", donker: "#0f0d0a", licht: "#fffcf6", beige: "#f6f1e7", tekst: "#1d1a15" };
   const SECTIES = [["paginas", "Pagina's"], ["nieuws", "Verslagen"], ["honden", "Honden"], ["nesten", "Nesten"], ["instellingen", "Instellingen"]];
 
   const I = {
@@ -45,7 +48,11 @@
     uploads: {},            // "/media/x.jpg" -> { blob, url, opgeslagen }
     geschiedenis: [],
     weergave: "computer", tab: "bewerken",
-    status: { tekst: "Alles opgeslagen", soort: "" }
+    status: { tekst: "Alles staat online", soort: "" },
+    bronTak: LIVE,          // waar de inhoud vandaan komt: main (= online) of het concept
+    conceptVoor: false,     // staat er in het concept iets dat nog niet online is?
+    open: new Set(),        // opengeklapte groepen in het paneel
+    naarInstelling: ""      // na een klik op menu/voettekst in het voorbeeld
   };
   const opslag = {
     get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -53,6 +60,7 @@
     del: k => { try { localStorage.removeItem(k); } catch (e) { /* privévenster */ } }
   };
   const kloon = o => JSON.parse(JSON.stringify(o));
+  const normaalKleur = c => { c = String(c).trim().toLowerCase(); return c.length === 4 ? "#" + [...c.slice(1)].map(x => x + x).join("") : c; };
   const $ = (sel, root = document) => root.querySelector(sel);
   const h = (tag, attrs = {}, ...kids) => {
     const el = document.createElement(tag);
@@ -90,8 +98,8 @@
   const b64NaarTekst = b64 => new TextDecoder().decode(b64NaarBytes(b64));
   const tekstNaarB64 = t => bytesNaarB64(new TextEncoder().encode(t));
 
-  async function bewaarBestanden(bestanden, weg, bericht, token) {
-    const ref = await gh(`git/ref/heads/${REPO.branch}`, { token });
+  async function bewaarBestanden(bestanden, weg, bericht, token, tak = LIVE) {
+    const ref = await gh(`git/ref/heads/${tak}`, { token });
     const vorige = await gh(`git/commits/${ref.object.sha}`, { token });
     const boom = [];
     for (const b of bestanden) {
@@ -103,8 +111,39 @@
     for (const p of weg) boom.push({ path: p, mode: "100644", type: "blob", sha: null });
     const nieuweBoom = await gh("git/trees", { method: "POST", body: { base_tree: vorige.tree.sha, tree: boom }, token });
     const commit = await gh("git/commits", { method: "POST", body: { message: bericht, tree: nieuweBoom.sha, parents: [ref.object.sha] }, token });
-    await gh(`git/refs/heads/${REPO.branch}`, { method: "PATCH", body: { sha: commit.sha, force: false }, token });
+    await gh(`git/refs/heads/${tak}`, { method: "PATCH", body: { sha: commit.sha, force: false }, token });
     return commit.sha;
+  }
+
+  /* ---------- Concept en publiceren ----------
+     Opslaan bewaart in de tak "concept" (niet online). Publiceren zet het concept in "main";
+     GitHub bouwt dan de site. Wijzigingen die intussen online kwamen (bv. via Pages CMS) gaan mee in het concept. */
+  async function refVan(tak) {
+    try { return await gh(`git/ref/heads/${tak}`); } catch (e) { if (e.status === 404) return null; throw e; }
+  }
+  const vergelijk = () => gh(`compare/${LIVE}...${CONCEPT}`);
+  const haalLiveBinnen = () => gh("merges", { method: "POST", body: { base: CONCEPT, head: LIVE, commit_message: "Online versie meegenomen in het concept" } });
+  async function maakConceptKlaar() {
+    const live = await gh(`git/ref/heads/${LIVE}`);
+    const concept = await refVan(CONCEPT);
+    if (!concept) { await gh("git/refs", { method: "POST", body: { ref: `refs/heads/${CONCEPT}`, sha: live.object.sha } }); return; }
+    if (concept.object.sha === live.object.sha) return;
+    const v = await vergelijk();
+    if (v.ahead_by === 0) await gh(`git/refs/heads/${CONCEPT}`, { method: "PATCH", body: { sha: live.object.sha, force: true } });
+    else if (v.behind_by > 0) await haalLiveBinnen();
+  }
+  async function publiceerConcept() {
+    const live = await gh(`git/ref/heads/${LIVE}`), concept = await refVan(CONCEPT);
+    if (!concept || concept.object.sha === live.object.sha) return null;
+    const v = await vergelijk();
+    if (v.ahead_by === 0) return null;
+    if (v.behind_by === 0) {
+      await gh(`git/refs/heads/${LIVE}`, { method: "PATCH", body: { sha: concept.object.sha, force: false } });
+      return concept.object.sha;
+    }
+    const m = await gh("merges", { method: "POST", body: { base: LIVE, head: CONCEPT, commit_message: "Gepubliceerd via beheer" } });
+    await gh(`git/refs/heads/${CONCEPT}`, { method: "PATCH", body: { sha: m.sha, force: false } });
+    return m.sha;
   }
 
   /* ---------- Wachtwoord <-> koppelcode ---------- */
@@ -132,11 +171,25 @@
     S.data = await (await fetch("data.json", { cache: "no-store" })).json();
     S.bestanden = {};
     for (const [pad, b] of Object.entries(S.data.bestanden)) S.bestanden[pad] = { data: kloon(b.inhoud), sha: b.sha };
+    S.bronTak = LIVE; S.conceptVoor = false;
     if (S.token && !S.demo) {
+      // Staat er een concept klaar dat nog niet online is? Dan werken we daarop verder.
+      const live = await gh(`git/ref/heads/${LIVE}`);
+      let bron = live.object.sha;
+      const concept = await refVan(CONCEPT);
+      if (concept && concept.object.sha !== live.object.sha) {
+        const v = await vergelijk();
+        if (v.ahead_by > 0) {
+          S.bronTak = CONCEPT; S.conceptVoor = true; bron = concept.object.sha;
+          if (v.behind_by > 0) {
+            try { const m = await haalLiveBinnen(); if (m && m.sha) bron = m.sha; }
+            catch (e) { if (e.status !== 409) throw e; melding("Let op: het concept botst met een wijziging die intussen online kwam. Laat het aan Keanu weten."); }
+          }
+        }
+      }
       // Is er sinds de laatste bouw iets veranderd? Haal dan enkel die bestanden opnieuw op.
-      const ref = await gh(`git/ref/heads/${REPO.branch}`);
-      if (ref.object.sha !== S.data.commit) {
-        const boom = await gh(`git/trees/${ref.object.sha}?recursive=1`);
+      if (bron !== S.data.commit) {
+        const boom = await gh(`git/trees/${bron}?recursive=1`);
         const nu = Object.fromEntries(boom.tree.filter(t => t.type === "blob" && /^inhoud\/.+\.json$/.test(t.path)).map(t => [t.path, t.sha]));
         for (const pad of Object.keys(S.bestanden)) if (!(pad in nu)) delete S.bestanden[pad];
         await Promise.all(Object.entries(nu).filter(([pad, sha]) => !S.bestanden[pad] || S.bestanden[pad].sha !== sha).map(async ([pad, sha]) => {
@@ -207,12 +260,13 @@
   /* ---------- Pagina's ---------- */
   const paginaData = () => S.bestanden[S.pagina].data;
   const paginaNaam = pad => (S.bestanden[pad] && S.bestanden[pad].data.titel) || idVan(pad);
+  const paginaVolgorde = (a, b) => (VASTE_PAGINAS.indexOf(idVan(a)) + 1 || 99) - (VASTE_PAGINAS.indexOf(idVan(b)) + 1 || 99) || paginaNaam(a).localeCompare(paginaNaam(b));
   function linkOpties() {
-    const eigen = bestandenIn("paginas").filter(p => !VASTE_PAGINAS.includes(idVan(p))).map(p => ({ label: paginaNaam(p), href: pageFile(idVan(p)) }));
     return [
-      { label: "Startpagina", href: "index.html" }, { label: "Onze honden", href: "honden.html" }, { label: "Nesten", href: "nesten.html" },
-      { label: "Verwachte nesten", href: "nesten.html#verwacht" }, { label: "Nieuws", href: "nieuws.html" }, { label: "Over ons", href: "over-ons.html" },
-      { label: "Contact", href: "contact.html" }, { label: "Contact, vraag over nesten", href: "contact.html#nesten" }, ...eigen
+      ...bestandenIn("paginas").sort(paginaVolgorde).map(p => ({ label: paginaNaam(p), href: pageFile(idVan(p)) })),
+      { label: "Verwachte nesten (op Nesten)", href: "nesten.html#verwacht" }, { label: "Gezondheid (op de startpagina)", href: "index.html#gezondheid" },
+      { label: "Contact, vraag over nesten", href: "contact.html#nesten" }, { label: "Contact, vraag over honden", href: "contact.html#honden" },
+      ...bestandenIn("honden").map(p => ({ label: `Hond: ${S.bestanden[p].data.roepnaam || idVan(p)}`, href: `hond-${slug(idVan(p))}.html` }))
     ];
   }
 
@@ -222,7 +276,7 @@
     if (S.uploads[p]) return S.uploads[p].url;
     const m = S.data.mediaInfo[p];
     if (m) return SITE_ROOT + (groot ? "img/" : "img/t/") + m.name + ".webp";
-    return `https://raw.githubusercontent.com/${REPO.owner}/${REPO.repo}/${REPO.branch}${p}`;
+    return `https://raw.githubusercontent.com/${REPO.owner}/${REPO.repo}/${S.bronTak}${p}`;
   }
   function vImg(p, { alt = "", cls = "", pos = "", sizes = "(max-width: 640px) 100vw, 50vw" } = {}) {
     if (!p) return `<span class="no-photo${cls ? " " + cls : ""}"></span>`;
@@ -294,7 +348,17 @@
       var b = e.target.closest("[data-blok]");
       parent.postMessage({ vaBlok: b ? +b.dataset.blok : null, vaZone: e.target.closest(".site-header") ? "kop" : e.target.closest(".site-footer") ? "voet" : "" }, "*");
     }, true);
-    document.addEventListener("submit", function (e) { e.preventDefault(); }, true);`;
+    document.addEventListener("submit", function (e) { e.preventDefault(); }, true);
+    setInterval(function () {
+      document.querySelectorAll(".slides").forEach(function (box) {
+        box.t = (box.t || 0) + 1;
+        if (box.t < (parseInt(box.dataset.wissel, 10) || 6)) return;
+        box.t = 0;
+        var im = box.querySelectorAll("img"), i = 0;
+        im.forEach(function (x, j) { if (x.classList.contains("on")) i = j; });
+        im[i].classList.remove("on"); im[(i + 1) % im.length].classList.add("on");
+      });
+    }, 1000);`;
 
   let voorbeeldDoc = null, voorbeeldSleutel = "";
   const huidigItem = sectie => { const pad = S.item[sectie]; return pad && actief(pad) ? pad : null; };
@@ -307,20 +371,20 @@
     }
     if (S.sectie === "nieuws") {
       const pad = huidigItem("nieuws");
-      if (!pad) return { actief: "nieuws", sleutel: "nieuws", main: B.nieuwsBody() };
+      if (!pad) return { actief: "nieuws", sleutel: "nieuws", main: B.paginaBody("nieuws") };
       const p = M.nieuws.find(x => x.id === idVan(pad));
       return { actief: "nieuws", sleutel: pad, main: `${B.nieuwsKop()}<div class="wrap" style="padding:56px 0 40px"><div class="reports">${p ? B.verslag(p, true) : ""}</div></div>${B.blokNieuws({ bovenschrift: "Zo staat het op de startpagina", titel: "Laatste *nieuws*" })}` };
     }
     if (S.sectie === "honden") {
       const pad = huidigItem("honden");
       const d = pad && M.honden.find(x => x.id === slug(idVan(pad)));
-      return { actief: "honden", sleutel: pad || "honden", main: d ? B.hondBody(d) : B.hondenBody() };
+      return { actief: "honden", sleutel: pad || "honden", main: d ? B.hondBody(d) : B.paginaBody("honden") };
     }
     if (S.sectie === "nesten") {
       const pad = huidigItem("nesten");
       const ruw = pad && S.bestanden[pad].data;
       const l = ruw && M.nesten.find(x => x.id === slug(ruw.letter || idVan(pad)));
-      return { actief: "nesten", sleutel: pad || "nesten", main: l ? B.nestenKop() + B.nestBlok(l) : B.nestenBody() };
+      return { actief: "nesten", sleutel: pad || "nesten", main: l ? B.nestenKop() + B.nestBlok(l) : B.paginaBody("nesten") };
     }
     const start = (S.bestanden["inhoud/paginas/start.json"] || { data: { blokken: [] } }).data;
     return { actief: "", sleutel: "instellingen", main: B.renderBlocks(start.blokken) };
@@ -333,8 +397,16 @@
       const M = bouwModel(raw());
       const B = createSite({ img: vImg, shot: vShot, imgUrl: p => p ? fotoUrl(p, true) : "", showMail: true, model: M });
       const v = voorbeeldInhoud(B, M);
+      const thema = M.site.thema || {};
       if (!volledig && voorbeeldDoc && voorbeeldDoc.querySelector("main") && v.sleutel === voorbeeldSleutel) {
         voorbeeldDoc.querySelector("main").innerHTML = v.main;
+        // Menu, voettekst, kleuren en lettertypes kunnen ook veranderd zijn
+        const kop = voorbeeldDoc.querySelector(".site-header"), voet = voorbeeldDoc.querySelector(".site-footer");
+        if (kop) kop.outerHTML = B.header(v.actief);
+        if (voet) voet.outerHTML = B.footer();
+        voorbeeldDoc.getElementById("va-thema").textContent = themaCss(thema);
+        const fonts = voorbeeldDoc.getElementById("va-fonts");
+        if (fonts.getAttribute("href") !== fontsHref(thema)) fonts.setAttribute("href", fontsHref(thema));
         markeerGekozen();
         return;
       }
@@ -342,8 +414,8 @@
       voorbeeldSleutel = v.sleutel;
       frame.onload = () => { voorbeeldDoc = frame.contentDocument; voorbeeldDoc.scrollingElement.scrollTop = scroll; markeerGekozen(); };
       frame.srcdoc = `<!doctype html><html lang="nl-BE"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><base href="${SITE_ROOT}">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/logo.css"><style>${VOORBEELD_CSS}</style></head>
+<link id="va-fonts" href="${esc(fontsHref(thema))}" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/logo.css"><style id="va-thema">${themaCss(thema)}</style><style>${VOORBEELD_CSS}</style></head>
 <body>${B.header(v.actief)}<main>${v.main}</main>${B.footer()}<script>${VOORBEELD_JS}<\/script></body></html>`;
     }, volledig ? 0 : 140);
   }
@@ -374,7 +446,11 @@
   window.addEventListener("message", e => {
     if (!e.data || !("vaBlok" in e.data)) return;
     if (S.sectie === "paginas" && e.data.vaBlok !== null) { S.blok = e.data.vaBlok; S.paginaInst = false; S.tab = "bewerken"; }
-    else if (e.data.vaZone === "kop" || e.data.vaZone === "voet") { S.sectie = "instellingen"; S.tab = "bewerken"; tekenAlles(); return; }
+    else if (e.data.vaZone === "kop" || e.data.vaZone === "voet") {
+      S.sectie = "instellingen"; S.tab = "bewerken"; S.naarInstelling = e.data.vaZone === "kop" ? "inst-menu" : "inst-voettekst";
+      S.open.add(e.data.vaZone === "kop" ? "Menu bovenaan" : "Voettekst");
+      tekenAlles(); return;
+    }
     else return;
     tekenPaneel(); markeerGekozen(); werkTabsBij();
   });
@@ -383,7 +459,11 @@
   // obj = het object met de waarde, pad = het bestand dat verandert (voor ongedaan maken)
   function veld(def, obj, pad, opNieuw) {
     const id = "v" + Math.random().toString(36).slice(2, 8);
-    const zet = (waarde, volledig, groep) => { voorWijziging([pad], groep ? id : null); obj[def.naam] = waarde; gewijzigd(volledig); if (opNieuw) opNieuw(); };
+    const zet = (waarde, volledig, groep) => {
+      voorWijziging(Array.isArray(pad) ? pad : [pad], groep ? id : null);
+      if (waarde === undefined) delete obj[def.naam]; else obj[def.naam] = waarde;
+      gewijzigd(volledig); if (opNieuw) opNieuw();
+    };
     const wrap = h("div", { class: "veld" });
     const label = h("label", { for: id }, def.label);
     const hulp = def.hulp ? h("div", { class: "hulp" }, def.hulp) : "";
@@ -412,6 +492,35 @@
       input.checked = !!v;
       input.addEventListener("change", () => zet(input.checked));
       wrap.append(h("label", { class: "schakel", for: id }, input, h("span", { class: "spoor" }), def.label));
+      return wrap;
+    }
+    if (def.type === "kleur") {
+      const toon = () => isKleur(obj[def.naam]) ? normaalKleur(obj[def.naam]) : (STANDAARD_KLEUR[def.naam] || "#c9a052");
+      const kiezer = h("input", { id, type: "color" });
+      const code = h("input", { type: "text", class: "kleur-code", maxlength: "7", placeholder: "standaard", "aria-label": def.label + " (kleurcode)" });
+      const terug = h("button", { type: "button", class: "b-btn klein", title: "Terug naar de kleur van de site" }, "Standaard");
+      const bij = () => { kiezer.value = toon(); code.value = obj[def.naam] || ""; wrap.classList.toggle("standaard", !obj[def.naam]); terug.hidden = !obj[def.naam]; };
+      kiezer.addEventListener("input", () => { zet(kiezer.value, false, true); code.value = kiezer.value; wrap.classList.remove("standaard"); terug.hidden = false; });
+      code.addEventListener("change", () => {
+        const c = code.value.trim();
+        if (!c) zet(undefined);
+        else if (isKleur(c.startsWith("#") ? c : "#" + c)) zet((c.startsWith("#") ? c : "#" + c).toLowerCase());
+        else melding("Gebruik een kleurcode zoals #c9a052, of kies met het vakje.");
+        bij();
+      });
+      terug.addEventListener("click", () => { zet(undefined); bij(); });
+      bij();
+      wrap.append(label, h("div", { class: "kleur-veld" }, kiezer, code, terug));
+      if (hulp) wrap.append(hulp);
+      return wrap;
+    }
+    if (def.type === "keuze" && def.opties.length > 4) {
+      const sel = h("select", { id });
+      const huidig = v || def.opties[0];
+      for (const o of def.opties) sel.append(h("option", { value: o, selected: o === huidig || null }, o));
+      sel.addEventListener("change", () => zet(sel.value, true));
+      wrap.append(label, sel);
+      if (hulp) wrap.append(hulp);
       return wrap;
     }
     if (def.type === "keuze") {
@@ -483,7 +592,7 @@
         box.innerHTML = "";
         const lijst = obj[def.naam] || [];
         lijst.forEach((item, i) => {
-          const titel = item.roepnaam || item.naam || item.titel || `${i + 1}`;
+          const titel = item.roepnaam || item.naam || item.titel || item.label || [item.getal, item.tekst].filter(Boolean).join(" ") || `${i + 1}`;
           const kaart = h("details", { class: "lijst-item", open: lijst.length <= 2 || i === openIndex || null },
             h("summary", { class: "kop" }, h("span", {}, titel, item.jaar ? ` · ${item.jaar}` : ""), h("span", { class: "kop-knoppen" },
               h("button", { type: "button", class: "icoonknop", "aria-label": "Omhoog", disabled: i === 0 || null, html: I.op, onclick: e => { e.preventDefault(); const l = [...lijst]; [l[i - 1], l[i]] = [l[i], l[i - 1]]; zet(l, true); teken(i - 1); } }),
@@ -498,6 +607,28 @@
       return wrap;
     }
     return wrap;
+  }
+  // Velden onder elkaar; velden met een "groep" komen samen in een uitklapbaar vak
+  function velden(paneel, defs, obj, pad, opNieuw) {
+    const groepen = {};
+    for (const def of defs) {
+      if (!def.groep) { paneel.append(veld(def, obj, pad, opNieuw)); continue; }
+      if (!groepen[def.groep]) {
+        const naam = def.groep;
+        const inhoud = h("div", { class: "groep-in" });
+        const vak = h("details", { class: "groep", open: S.open.has(naam) || null, id: def.groepId || null }, h("summary", {}, naam), inhoud);
+        vak.addEventListener("toggle", () => { if (vak.open) S.open.add(naam); else S.open.delete(naam); });
+        paneel.append(vak);
+        groepen[naam] = inhoud;
+      }
+      groepen[def.groep].append(veld(def, obj, pad, opNieuw));
+    }
+  }
+  function groep(paneel, naam, id, ...inhoud) {
+    const vak = h("details", { class: "groep", id, open: S.open.has(naam) || null }, h("summary", {}, naam), h("div", { class: "groep-in" }, ...inhoud));
+    vak.addEventListener("toggle", () => { if (vak.open) S.open.add(naam); else S.open.delete(naam); });
+    paneel.append(vak);
+    return vak;
   }
   function opmaakBalk(ta) {
     const rond = (voor, na = voor) => {
@@ -616,9 +747,9 @@
       h("button", { type: "button", class: "b-link terug", html: I.terug + " Alle blokken van " + esc(paginaNaam(S.pagina)), onclick: () => { S.blok = null; tekenPaneel(); markeerGekozen(); } }),
       h("div", {}, h("h3", {}, `Blok ${i + 1} van ${lijst.length}`), h("h2", {}, def.label)),
       def.omschrijving ? h("p", { class: "uitleg" }, def.omschrijving) : "");
-    if (b.type === "verwacht" || b.type === "contact") paneel.append(h("button", { type: "button", class: "b-btn", html: I.tandwiel + " Naar de instellingen", onclick: () => { S.sectie = "instellingen"; tekenAlles(); } }));
-    else if (!def.velden.length) paneel.append(h("div", { class: "info" }, "Dit blok heeft geen eigen tekst om aan te passen. Je kunt het wel verplaatsen of weghalen."));
-    for (const v of def.velden) paneel.append(veld(v, b, S.pagina));
+    if (b.type === "verwacht" || b.type === "contact") paneel.append(h("button", { type: "button", class: "b-btn", style: "justify-self:start", html: I.tandwiel + " Naar de instellingen", onclick: () => { S.sectie = "instellingen"; S.naarInstelling = b.type === "verwacht" ? "inst-verwacht" : "inst-contact"; S.open.add(b.type === "verwacht" ? "Verwachte nesten" : "Contactgegevens"); tekenAlles(); } }));
+    else if (!def.velden.length) paneel.append(h("div", { class: "info" }, "Dit blok heeft geen eigen tekst om aan te passen. Je kunt het wel verplaatsen, weghalen of een eigen kleur geven."));
+    velden(paneel, [...def.velden, ...KLEUR_VELDEN], b, S.pagina);
     paneel.append(h("div", { class: "acties" },
       h("button", { type: "button", class: "b-btn klein", html: I.op + " Omhoog", disabled: i === 0 || null, onclick: () => { verplaatsBlok(i, i - 1); markeerGekozen(true); } }),
       h("button", { type: "button", class: "b-btn klein", html: I.neer + " Omlaag", disabled: i === lijst.length - 1 || null, onclick: () => { verplaatsBlok(i, i + 1); markeerGekozen(true); } }),
@@ -630,10 +761,11 @@
     paneel.append(
       h("button", { type: "button", class: "b-link terug", html: I.terug + " Alle blokken", onclick: () => { S.paginaInst = false; tekenPaneel(); } }),
       h("div", {}, h("h3", {}, "Pagina-instellingen"), h("h2", {}, paginaNaam(pad))),
-      veld({ naam: "titel", label: "Naam van de pagina", type: "regel", hulp: "Staat in het menu en bovenaan het browservenster." }, d, pad, () => vernieuwVoorbeeld(true)));
-    if (id !== "start" && id !== "contact") {
+      veld({ naam: "titel", label: "Naam van de pagina", type: "regel", hulp: "Staat bovenaan het browservenster en in het menu." }, d, pad, () => vernieuwVoorbeeld(true)));
+    if (id !== "start") {
       paneel.append(veld({ naam: "inMenu", label: "Toon in het menu", type: "aanuit" }, d, pad, () => { vernieuwVoorbeeld(true); tekenPaneel(); }));
       if (d.inMenu) {
+        paneel.append(veld({ naam: "menuNaam", label: "Naam in het menu (leeg = de naam van de pagina)", type: "regel" }, d, pad));
         const items = menuNu().filter(m => m.key !== id);
         const huidig = Number(d.menuVolgorde ?? 50);
         const sel = h("select", { id: "menuplaats" });
@@ -666,7 +798,7 @@
       voorWijziging([pad]);
       const laatste = Math.max(40, ...menuNu().map(m => m.order));
       S.verwijderd.delete(pad);
-      S.bestanden[pad] = { sha: null, data: { titel: naam, inMenu: true, menuVolgorde: laatste + 10, omschrijving: "", blokken: [{ type: "paginakop", bovenschrift: "Vai Avanti", titel: naam, intro: "", foto: "" }, { type: "tekst", ...kloon(BLOKKEN.tekst.nieuw) }] } };
+      S.bestanden[pad] = { sha: null, data: { titel: naam, inMenu: true, menuVolgorde: laatste + 10, omschrijving: "", blokken: [{ type: "paginakop", bovenschrift: "Vai Avanti", titel: naam, intro: "", fotos: [] }, { type: "tekst", ...kloon(BLOKKEN.tekst.nieuw) }] } };
       S.nieuw.add(pad);
       S.pagina = pad; S.blok = null; S.paginaInst = false;
       sluit(); tekenAlles();
@@ -811,25 +943,103 @@
   /* ---------- Paneel: instellingen ---------- */
   function tekenInstellingen(paneel) {
     const pad = "inhoud/site.json", s = S.bestanden[pad].data;
-    s.verwacht = s.verwacht || {}; s.contact = s.contact || {}; s.paginafotos = s.paginafotos || {};
+    for (const k of ["verwacht", "contact", "thema", "menu", "voettekst"]) s[k] = s[k] || {};
     const vol = () => vernieuwVoorbeeld(true);
     paneel.append(
       h("div", {}, h("h3", {}, "Hele site"), h("h2", {}, "Instellingen")),
-      h("p", { class: "uitleg" }, "Deze gegevens staan op meerdere plaatsen op de site en gelden overal."),
-      h("h3", { style: "margin-top:6px" }, "Verwachte nesten"),
+      h("p", { class: "uitleg" }, "Deze instellingen gelden op alle pagina's. Klik op een onderdeel om het open te klappen."));
+
+    if (S.conceptVoor) paneel.append(h("div", { class: "info concept-info" },
+      h("b", {}, "Er is een concept dat nog niet online staat. "), "Klik op Publiceren om het online te zetten, of gooi het weg om terug te gaan naar wat nu online staat.",
+      h("div", { style: "margin-top:10px" }, h("button", { type: "button", class: "b-btn klein gevaar", onclick: conceptWeggooien }, "Concept weggooien"))));
+
+    const T = LETTERS ? [{ naam: "titelLetter", label: "Lettertype van de titels", type: "keuze", opties: Object.keys(LETTERS.titel) }, { naam: "tekstLetter", label: "Lettertype van de tekst", type: "keuze", opties: Object.keys(LETTERS.tekst) }] : [];
+    const themaVak = h("div", { class: "groep-velden" });
+    velden(themaVak, [
+      { naam: "accent", label: "Accentkleur (nu goud)", type: "kleur", hulp: "Titels in schuinschrift, knoppen, lijntjes en opschriften." },
+      { naam: "donker", label: "Donkere kleur", type: "kleur", hulp: "Het menu, de donkere blokken, de koppen en de voettekst." },
+      { naam: "licht", label: "Achtergrond", type: "kleur" },
+      { naam: "beige", label: "Tweede achtergrond (de beige vlakken)", type: "kleur" },
+      { naam: "tekst", label: "Tekstkleur", type: "kleur" },
+      ...T
+    ], s.thema, pad);
+    groep(paneel, "Kleuren en lettertypes", "inst-thema", themaVak,
+      h("button", { type: "button", class: "b-btn klein", style: "justify-self:start", onclick: () => { voorWijziging([pad]); s.thema = {}; gewijzigd(true); tekenPaneel(); } }, "Alles terug naar de standaard"));
+
+    groep(paneel, "Menu bovenaan", "inst-menu",
+      h("p", { class: "uitleg", style: "margin:0" }, "Vink aan welke pagina's in het menu staan. Met de pijltjes verander je de volgorde. Een naam invullen kan, anders staat de naam van de pagina er."),
+      menuEditor(),
+      veld({ naam: "knoptekst", label: "Knop rechts in het menu: tekst (leeg = geen knop)", type: "regel" }, s.menu, pad),
+      veld({ naam: "knoplink", label: "Die knop gaat naar", type: "link" }, s.menu, pad));
+
+    const voetVak = h("div", { class: "groep-velden" });
+    velden(voetVak, [
+      { naam: "tekst", label: "Tekst onder het logo", type: "tekst", hulp: "{plaats} = de gemeente uit de contactgegevens." },
+      { naam: "kolommen", label: "Kolommen met links", type: "lijst", velden: [{ naam: "titel", label: "Titel van de kolom", type: "regel" }, { naam: "links", label: "Links", type: "lijst", velden: [{ naam: "label", label: "Tekst", type: "regel" }, { naam: "link", label: "Gaat naar", type: "link" }] }] },
+      { naam: "contactTitel", label: "Titel van de kolom met contactgegevens", type: "regel" },
+      { naam: "onderschrift", label: "Helemaal onderaan, na © Vai Avanti", type: "regel" }
+    ], s.voettekst, pad);
+    groep(paneel, "Voettekst", "inst-voettekst", voetVak);
+
+    groep(paneel, "Verwachte nesten", "inst-verwacht",
       veld({ naam: "tonen", label: "Aankondiging tonen op de site", type: "aanuit" }, s.verwacht, pad, vol),
       veld({ naam: "label", label: "Klein opschrift (bv. Verwacht in 2027)", type: "regel" }, s.verwacht, pad, vol),
       veld({ naam: "titel", label: "Titel", type: "regel", hulp: "Zet *sterretjes* rond een woord om het goud en schuin te maken." }, s.verwacht, pad),
       veld({ naam: "tekst", label: "Tekst", type: "tekst" }, s.verwacht, pad),
-      h("h3", { style: "margin-top:10px" }, "Contactgegevens"),
+      veld({ naam: "knoptekst", label: "Tekst op de knop (leeg = geen knop)", type: "regel" }, s.verwacht, pad),
+      veld({ naam: "knoplink", label: "Knop gaat naar", type: "link" }, s.verwacht, pad));
+
+    groep(paneel, "Contactgegevens", "inst-contact",
       ...["telefoon:Telefoon", "email:E-mailadres", "plaats:Postcode en gemeente", "instagram:Link naar Instagram", "facebook:Link naar Facebook"]
-        .map(x => { const [naam, label] = x.split(":"); return veld({ naam, label, type: "regel" }, s.contact, pad, vol); }),
-      h("h3", { style: "margin-top:10px" }, "Foto bovenaan de vaste pagina's"),
-      veld({ naam: "honden", label: "Onze honden", type: "foto" }, s.paginafotos, pad),
-      veld({ naam: "nesten", label: "Nesten", type: "foto" }, s.paginafotos, pad),
-      veld({ naam: "nieuws", label: "Nieuws", type: "foto" }, s.paginafotos, pad),
-      h("h3", { style: "margin-top:10px" }, "Dit toestel"),
+        .map(x => { const [naam, label] = x.split(":"); return veld({ naam, label, type: "regel" }, s.contact, pad, vol); }));
+
+    paneel.append(h("h3", { style: "margin-top:10px" }, "Dit toestel"),
       h("div", { class: "acties", style: "border-top:0;padding-top:0" }, h("button", { class: "b-btn klein", onclick: afmelden }, S.demo ? "Aanmelden met wachtwoord" : "Afmelden op dit toestel")));
+  }
+  // Welke pagina's staan in het menu, in welke volgorde en met welke naam
+  function menuEditor() {
+    const box = h("div", { class: "menu-lijst" });
+    const teken = () => {
+      box.innerHTML = "";
+      const paden = bestandenIn("paginas").filter(p => idVan(p) !== "start");
+      const orde = p => Number(S.bestanden[p].data.menuVolgorde ?? 50);
+      const inMenu = paden.filter(p => S.bestanden[p].data.inMenu).sort((a, b) => orde(a) - orde(b));
+      const rest = paden.filter(p => !S.bestanden[p].data.inMenu).sort(paginaVolgorde);
+      const herschik = lijst => lijst.forEach((p, k) => { S.bestanden[p].data.menuVolgorde = (k + 1) * 10; });
+      for (const p of [...inMenu, ...rest]) {
+        const d = S.bestanden[p].data, aan = !!d.inMenu, j = inMenu.indexOf(p);
+        const vink = h("input", { type: "checkbox", "aria-label": `${paginaNaam(p)} in het menu` });
+        vink.checked = aan;
+        vink.addEventListener("change", () => {
+          voorWijziging(paden);
+          d.inMenu = vink.checked;
+          herschik(vink.checked ? [...inMenu, p] : inMenu.filter(x => x !== p));
+          gewijzigd(); teken();
+        });
+        const naam = h("input", { type: "text", placeholder: d.titel || idVan(p), "aria-label": `Naam van ${paginaNaam(p)} in het menu`, disabled: !aan || null });
+        naam.value = d.menuNaam || "";
+        naam.addEventListener("input", () => { voorWijziging([p], "menunaam-" + p); if (naam.value.trim()) d.menuNaam = naam.value; else delete d.menuNaam; gewijzigd(); });
+        const schuif = r => { voorWijziging(inMenu); const l = [...inMenu]; [l[j], l[j + r]] = [l[j + r], l[j]]; herschik(l); gewijzigd(); teken(); };
+        box.append(h("div", { class: "menu-rij" + (aan ? "" : " uit") },
+          h("label", { class: "menu-vink", title: "In het menu" }, vink),
+          naam,
+          h("button", { type: "button", class: "icoonknop", "aria-label": "Naar voren", disabled: !aan || j === 0 || null, html: I.op, onclick: () => schuif(-1) }),
+          h("button", { type: "button", class: "icoonknop", "aria-label": "Naar achteren", disabled: !aan || j === inMenu.length - 1 || null, html: I.neer, onclick: () => schuif(1) })));
+      }
+    };
+    teken();
+    return box;
+  }
+  async function conceptWeggooien() {
+    if (isVuil() && !confirm("Je hebt ook nog niet-opgeslagen wijzigingen. Die gaan dan ook verloren. Doorgaan?")) return;
+    if (!confirm("Alles wat opgeslagen is maar nog niet gepubliceerd, wordt weggegooid. Doorgaan?")) return;
+    try {
+      const live = await gh(`git/ref/heads/${LIVE}`);
+      await gh(`git/refs/heads/${CONCEPT}`, { method: "PATCH", body: { sha: live.object.sha, force: true } });
+      S.uploads = {}; S.geschiedenis = [];
+      await start();
+      melding("Het concept is weggegooid. Je ziet weer wat online staat.");
+    } catch (e) { melding(`Weggooien mislukt: ${e.detail || e.message}`); }
   }
 
   function tekenPaneel() {
@@ -845,20 +1055,29 @@
     } else if (S.sectie === "instellingen") tekenInstellingen(paneel);
     else tekenVerzameling(paneel, S.sectie);
     $("#paneel").scrollTop = lijstWeergave ? scroll : 0;
+    if (S.naarInstelling) {
+      const doel = document.getElementById(S.naarInstelling);
+      if (doel) { doel.open = true; doel.scrollIntoView({ block: "start" }); }
+      S.naarInstelling = "";
+    }
     werkStatusBij();
   }
 
   /* ---------- Status ---------- */
-  // Soorten: "" opgeslagen · "bezig" (opslaan of foto klaarmaken, knop uit) · "publiceren" · "ok" · "fout"
+  // Soorten: "" alles online · "vuil" niet opgeslagen · "concept" opgeslagen maar niet online
+  //          "bezig" (opslaan, publiceren of foto klaarmaken: knoppen uit) · "publiceren" · "ok" · "fout"
   function werkStatusBij(tekst, soort) {
     if (tekst !== undefined) S.status = { tekst, soort: soort || "" };
     const vuil = S.data ? isVuil() : false;
     let toon = S.status;
     if (toon.soort !== "bezig" && vuil) toon = { tekst: "Niet opgeslagen wijzigingen", soort: "vuil" };
+    else if (toon.soort !== "bezig" && toon.soort !== "fout" && S.conceptVoor) toon = { tekst: "Opgeslagen, nog niet online", soort: "concept" };
     const el = $("#status");
     if (el) { el.textContent = toon.tekst; el.title = toon.tekst; el.className = "status " + toon.soort; }
-    const knop = $("#knop-opslaan");
-    if (knop) knop.disabled = toon.soort === "bezig" || !vuil;
+    const bezig = toon.soort === "bezig";
+    const knop = $("#knop-opslaan"), pub = $("#knop-publiceren");
+    if (knop) knop.disabled = bezig || !vuil;
+    if (pub) pub.disabled = bezig || (!vuil && !S.conceptVoor);
   }
   function werkTabsBij() {
     const werk = $(".werk");
@@ -867,7 +1086,7 @@
     schaalVoorbeeld();
   }
 
-  /* ---------- Opslaan ---------- */
+  /* ---------- Opslaan en publiceren ---------- */
   function definitievePaden() {
     // Nieuwe verslagen, honden en nesten krijgen pas bij het opslaan hun bestandsnaam (uit titel/naam)
     for (const pad of [...S.nieuw]) {
@@ -883,38 +1102,56 @@
       for (const k of Object.keys(S.item)) if (S.item[k] === pad) S.item[k] = doel;
     }
   }
-  async function opslaan() {
-    if (!S.token || S.demo) return melding("Opslaan kan pas na aanmelden met het wachtwoord.");
+  // Wijzigingen bewaren in het concept. Geeft false terug als het niet doorging.
+  async function bewaarConcept() {
     definitievePaden();
     const { bestanden, weg } = wijzigingen();
-    if (!bestanden.length && !weg.length) return melding("Er is niets gewijzigd.");
-    werkStatusBij("Bezig met opslaan…", "bezig");
+    if (!bestanden.length && !weg.length) return true;
+    await maakConceptKlaar();
+    // Heeft iemand anders deze bestanden intussen aangepast?
+    const boom = await gh(`git/trees/${CONCEPT}?recursive=1`);
+    const nu = Object.fromEntries(boom.tree.map(t => [t.path, t.sha]));
+    const botsing = [...bestanden.filter(b => b.oudeSha && nu[b.pad] && nu[b.pad] !== b.oudeSha).map(b => b.pad), ...weg.filter(p => nu[p] && S.bestanden[p] && nu[p] !== S.bestanden[p].sha)];
+    if (botsing.length && !confirm(`Iemand anders heeft intussen ook iets aangepast aan:\n${botsing.map(p => "• " + p.split("/").slice(1).join("/")).join("\n")}\n\nToch opslaan? Hun wijziging aan die bestanden gaat dan verloren.`)) return false;
+    const soorten = new Set([...bestanden.map(b => b.pad), ...weg].filter(p => p.startsWith("inhoud/")).map(p => p.split("/")[1]));
+    const bericht = soorten.size === 1 && soorten.has("nieuws") ? "Wedstrijdverslag aangepast via beheer"
+      : soorten.size === 1 && soorten.has("honden") ? "Honden aangepast via beheer"
+      : soorten.size === 1 && soorten.has("nesten") ? "Nesten aangepast via beheer"
+      : soorten.size === 1 && soorten.has("paginas") ? "Pagina's aangepast via beheer"
+      : "Website aangepast via beheer";
+    await bewaarBestanden(bestanden, weg, bericht, undefined, CONCEPT);
+    for (const b of bestanden) { if (b.upload) S.uploads[b.upload].opgeslagen = true; else if (S.bestanden[b.pad]) S.bestanden[b.pad].sha = b.sha; }
+    for (const p of weg) delete S.bestanden[p];
+    S.nieuw = new Set(); S.verwijderd = new Set();
+    S.conceptVoor = true; S.bronTak = CONCEPT;
+    onthoudOrigineel();
+    return true;
+  }
+  async function opslaan(publiceren) {
+    if (!S.token || S.demo) return melding("Opslaan en publiceren kan pas na aanmelden met het wachtwoord.");
+    const vuil = isVuil();
+    if (!vuil && !publiceren) return melding(S.conceptVoor ? "Alles is al opgeslagen. Klik op Publiceren om het online te zetten." : "Er is niets gewijzigd.");
+    if (!vuil && publiceren && !S.conceptVoor) return melding("Alles staat al online.");
+    werkStatusBij(publiceren ? "Bezig met publiceren…" : "Bezig met opslaan…", "bezig");
     try {
-      // Heeft iemand anders deze bestanden intussen aangepast?
-      const boom = await gh(`git/trees/${REPO.branch}?recursive=1`);
-      const nu = Object.fromEntries(boom.tree.map(t => [t.path, t.sha]));
-      const botsing = [...bestanden.filter(b => b.oudeSha && nu[b.pad] && nu[b.pad] !== b.oudeSha).map(b => b.pad), ...weg.filter(p => nu[p] && S.bestanden[p] && nu[p] !== S.bestanden[p].sha)];
-      if (botsing.length && !confirm(`Iemand anders heeft intussen ook iets aangepast aan:\n${botsing.map(p => "• " + p.split("/").slice(1).join("/")).join("\n")}\n\nToch opslaan? Hun wijziging aan die bestanden gaat dan verloren.`)) {
-        werkStatusBij("Niet opgeslagen", "fout");
+      if (!(await bewaarConcept())) { werkStatusBij(publiceren ? "Niet gepubliceerd" : "Niet opgeslagen", "fout"); return; }
+      if (!publiceren) {
+        werkStatusBij("Opgeslagen, nog niet online", "concept");
+        melding("Opgeslagen. Bezoekers zien het pas na Publiceren.");
+        tekenPaneel();
         return;
       }
-      const soorten = new Set([...bestanden.map(b => b.pad), ...weg].filter(p => p.startsWith("inhoud/")).map(p => p.split("/")[1]));
-      const bericht = soorten.size === 1 && soorten.has("nieuws") ? "Wedstrijdverslag aangepast via beheer"
-        : soorten.size === 1 && soorten.has("honden") ? "Honden aangepast via beheer"
-        : soorten.size === 1 && soorten.has("nesten") ? "Nesten aangepast via beheer"
-        : "Website aangepast via beheer";
-      const sha = await bewaarBestanden(bestanden, weg, bericht);
-      for (const b of bestanden) { if (b.upload) S.uploads[b.upload].opgeslagen = true; else if (S.bestanden[b.pad]) S.bestanden[b.pad].sha = b.sha; }
-      for (const p of weg) delete S.bestanden[p];
-      S.nieuw = new Set(); S.verwijderd = new Set();
-      onthoudOrigineel();
-      werkStatusBij("Opgeslagen · wordt gepubliceerd…", "publiceren");
+      const sha = await publiceerConcept();
+      S.conceptVoor = false;
+      werkStatusBij("Wordt gepubliceerd…", "publiceren");
       tekenPaneel();
-      volgPublicatie(sha);
+      if (sha) volgPublicatie(sha); else werkStatusBij("Alles staat online", "ok");
     } catch (e) {
       console.error(e);
-      werkStatusBij("Opslaan mislukt", "fout");
-      melding(e.status === 401 || e.status === 403 ? "Aanmelden is verlopen. Meld je opnieuw aan met het wachtwoord." : `Opslaan mislukt: ${e.detail || e.message}. Probeer het opnieuw.`);
+      werkStatusBij(publiceren ? "Publiceren mislukt" : "Opslaan mislukt", "fout");
+      melding(e.status === 401 || e.status === 403 ? "Aanmelden is verlopen. Meld je opnieuw aan met het wachtwoord."
+        : e.status === 409 ? "Het concept botst met een wijziging die intussen online kwam. Laat het aan Keanu weten."
+        : `${publiceren ? "Publiceren" : "Opslaan"} mislukt: ${e.detail || e.message}. Probeer het opnieuw.`);
     }
   }
   async function volgPublicatie(sha) {
@@ -966,7 +1203,8 @@
       h("span", { class: "status", id: "status" }),
       h("button", { class: "b-btn", title: "Ongedaan maken (Ctrl+Z)", "aria-label": "Ongedaan maken", html: I.ongedaan, onclick: ongedaanMaken }),
       h("a", { class: "b-btn verberg-smal", href: SITE_ROOT, target: "_blank", rel: "noopener", html: "Bekijk site " + I.extern }),
-      h("button", { class: "b-btn goud", id: "knop-opslaan", onclick: opslaan }, "Opslaan"),
+      h("button", { class: "b-btn opslaan-knop", id: "knop-opslaan", title: "Bewaart je werk. Bezoekers zien het nog niet. (Ctrl+S)", onclick: () => opslaan(false) }, "Opslaan"),
+      h("button", { class: "b-btn goud", id: "knop-publiceren", title: "Bewaart en zet alles online", onclick: () => opslaan(true) }, "Publiceren"),
       h("div", { class: "mobiel-tabs" },
         h("button", { "data-tab": "bewerken", onclick: () => { S.tab = "bewerken"; werkTabsBij(); } }, "Bewerken"),
         h("button", { "data-tab": "voorbeeld", onclick: () => { S.tab = "voorbeeld"; werkTabsBij(); } }, "Voorbeeld")));
@@ -1068,6 +1306,7 @@
     $("#app").innerHTML = '<p style="padding:24px">Inhoud wordt geladen…</p>';
     try {
       await laad();
+      S.status = { tekst: "Alles staat online", soort: "" };
       tekenAlles();
       if (S.demo) melding("Je kijkt rond zonder aan te melden: alles werkt, behalve opslaan.");
     } catch (e) {
@@ -1081,7 +1320,7 @@
   /* ---------- Toetsen en vertrekken ---------- */
   window.addEventListener("resize", () => { const b = $(".balk"); if (b) document.documentElement.style.setProperty("--balk-h", b.offsetHeight + "px"); schaalVoorbeeld(); });
   window.addEventListener("keydown", e => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); opslaan(); }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); opslaan(false); }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.target.closest("input,textarea")) { e.preventDefault(); ongedaanMaken(); }
   });
   window.addEventListener("beforeunload", e => { if (S.data && isVuil()) { e.preventDefault(); e.returnValue = ""; } });

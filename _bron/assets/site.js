@@ -8,6 +8,18 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
+  /* ---------- Diavoorstelling in de koppen ---------- */
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) $$(".slides").forEach(box => {
+    const beelden = $$("img", box);
+    let i = 0;
+    setInterval(() => {
+      if (document.hidden) return;
+      beelden[i].classList.remove("on");
+      i = (i + 1) % beelden.length;
+      beelden[i].classList.add("on");
+    }, (parseInt(box.dataset.wissel, 10) || 6) * 1000);
+  });
+
   /* ---------- Header en menu ---------- */
   const header = $(".site-header");
   const toggle = $(".menu-toggle");
@@ -150,7 +162,8 @@
 
     const subjects = { nesten: 0, honden: 1 };
     const pick = location.hash.slice(1);
-    if (pick in subjects) $("#onderwerp").selectedIndex = subjects[pick];
+    const onderwerp = $("#onderwerp");
+    if (onderwerp && pick in subjects && onderwerp.options.length > subjects[pick]) onderwerp.selectedIndex = subjects[pick];
 
     if (WEB3FORMS_KEY) {
       $("#captcha-slot").innerHTML = '<div class="h-captcha" data-captcha="true" data-lang="nl"></div>';
@@ -180,7 +193,7 @@
       }
       f.delete("botcheck");
       f.append("access_key", WEB3FORMS_KEY);
-      f.append("subject", "Website Vai Avanti: " + f.get("onderwerp"));
+      f.append("subject", "Website Vai Avanti" + (f.get("onderwerp") ? ": " + f.get("onderwerp") : ""));
       f.append("from_name", "Website Vai Avanti");
       submitBtn.disabled = true;
       setStatus("Bericht wordt verstuurd…");

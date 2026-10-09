@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const yaml = require("js-yaml");
-const { BLOKKEN } = require("../assets/blokken.js");
+const { BLOKKEN, KLEUR_VELDEN, LETTERS } = require("../assets/blokken.js");
 
 const FILE = path.join(__dirname, "..", "..", ".pages.yml");
 const cfg = yaml.load(fs.readFileSync(FILE, "utf8"));
@@ -12,7 +12,9 @@ const veld = v => {
   const base = { name: v.naam, label: v.label };
   if (v.hulp) base.description = v.hulp;
   switch (v.type) {
-    case "regel": case "link": return { ...base, type: "string" };
+    case "regel": case "link": case "kleur": return { ...base, type: "string" };
+    case "woorden": return { ...base, type: "string", list: true };
+    case "datum": return { ...base, type: "date", options: { format: "yyyy-MM-dd" } };
     case "tekst": return { ...base, type: "text" };
     case "opmaak": return { ...base, type: "rich-text", options: { format: "markdown", media: false } };
     case "foto": return { ...base, type: "image" };
@@ -25,7 +27,7 @@ const veld = v => {
 };
 const blocks = Object.entries(BLOKKEN).map(([name, b]) => ({
   name, label: b.label,
-  fields: b.velden.length ? b.velden.map(veld) : [{ name: "uitleg", label: "Uitleg", type: "string", hidden: true }]
+  fields: [...b.velden, ...KLEUR_VELDEN].map(veld)
 }));
 
 const paginas = {
@@ -35,6 +37,7 @@ const paginas = {
   fields: [
     { name: "titel", label: "Naam van de pagina", type: "string", required: true },
     { name: "inMenu", label: "Toon in het menu", type: "boolean" },
+    { name: "menuNaam", label: "Naam in het menu (leeg = de naam van de pagina)", type: "string" },
     { name: "menuVolgorde", label: "Plaats in het menu", type: "number", description: "Onze honden = 10, Nesten = 20, Nieuws = 30, Over ons = 40." },
     { name: "omschrijving", label: "Korte omschrijving voor Google", type: "text" },
     { name: "blokken", label: "Blokken", type: "block", list: true, blockKey: "type", blocks }
@@ -47,13 +50,25 @@ const instellingen = {
       { name: "tonen", label: "Tonen op de site", type: "boolean" },
       { name: "label", label: "Klein opschrift (bijvoorbeeld Verwacht in 2027)", type: "string" },
       { name: "titel", label: "Titel", type: "string", description: "Zet *sterretjes* rond een woord om het goud en schuin te maken." },
-      { name: "tekst", label: "Tekst", type: "text" }] },
+      { name: "tekst", label: "Tekst", type: "text" },
+      { name: "knoptekst", label: "Tekst op de knop", type: "string" }, { name: "knoplink", label: "Knop gaat naar", type: "string" }] },
     { name: "contact", label: "Contactgegevens", type: "object", fields: [
       { name: "telefoon", label: "Telefoon", type: "string" }, { name: "email", label: "E-mailadres", type: "string" },
       { name: "plaats", label: "Postcode en gemeente", type: "string" }, { name: "instagram", label: "Link naar Instagram", type: "string" },
       { name: "facebook", label: "Link naar Facebook", type: "string" }] },
-    { name: "paginafotos", label: "Foto bovenaan de vaste pagina's", type: "object", fields: [
-      { name: "honden", label: "Onze honden", type: "image" }, { name: "nesten", label: "Nesten", type: "image" }, { name: "nieuws", label: "Nieuws", type: "image" }] }
+    { name: "thema", label: "Kleuren en lettertypes", type: "object", fields: [
+      ...["accent:Accentkleur (nu goud)", "donker:Donkere kleur", "licht:Achtergrond", "beige:Tweede achtergrond", "tekst:Tekstkleur"].map(x => ({ name: x.split(":")[0], label: x.split(":")[1], type: "string", description: "Kleurcode zoals #c9a052. Leeg = standaard." })),
+      { name: "titelLetter", label: "Lettertype van de titels", type: "select", options: { values: Object.keys(LETTERS.titel) } },
+      { name: "tekstLetter", label: "Lettertype van de tekst", type: "select", options: { values: Object.keys(LETTERS.tekst) } }] },
+    { name: "menu", label: "Knop rechts in het menu", type: "object", fields: [
+      { name: "knoptekst", label: "Tekst (leeg = geen knop)", type: "string" }, { name: "knoplink", label: "Gaat naar", type: "string" }] },
+    { name: "voettekst", label: "Voettekst", type: "object", fields: [
+      { name: "tekst", label: "Tekst onder het logo", type: "text" },
+      { name: "kolommen", label: "Kolommen met links", type: "object", list: true, fields: [
+        { name: "titel", label: "Titel", type: "string" },
+        { name: "links", label: "Links", type: "object", list: true, fields: [{ name: "label", label: "Tekst", type: "string" }, { name: "link", label: "Gaat naar", type: "string" }] }] },
+      { name: "contactTitel", label: "Titel van de kolom met contactgegevens", type: "string" },
+      { name: "onderschrift", label: "Helemaal onderaan", type: "string" }] }
   ]
 };
 

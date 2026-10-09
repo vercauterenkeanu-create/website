@@ -35,12 +35,14 @@ const M = VA.bouwModel(raw);
 const { site, paginas, honden, nesten, nieuws } = M;
 
 /* ---------- Foto's: verkleinen naar site/img (groot) en site/img/t (miniatuur) ---------- */
-const blockPhotos = b => Object.entries(b || {}).flatMap(([k, v]) => k === "leden" ? VA.arr(v).flatMap(blockPhotos) : (/^foto/.test(k) ? VA.arr(v) : []));
+// Foto's in een blok: velden foto, fotos, foto1, foto2, ook in lijsten (bv. teamleden)
+const blockPhotos = b => Object.entries(b || {}).flatMap(([k, v]) =>
+  Array.isArray(v) && v.some(x => x && typeof x === "object") ? v.flatMap(blockPhotos) : (/^foto(s|\d)?$/.test(k) ? VA.arr(v) : []));
 const mediaInfo = {};
 async function processMedia() {
   const all = new Set([
     ...honden.flatMap(d => d.photos), ...nesten.flatMap(l => [...l.photos, ...l.pups.flatMap(p => p.photos)]),
-    ...nieuws.flatMap(p => p.photos), ...Object.values(site.paginafotos), ...paginas.flatMap(p => p.blokken.flatMap(blockPhotos))
+    ...nieuws.flatMap(p => p.photos), ...paginas.flatMap(p => p.blokken.flatMap(blockPhotos))
   ].filter(v => typeof v === "string" && v));
   fs.mkdirSync(path.join(OUT, "img", "t"), { recursive: true });
   const cacheFile = path.join(OUT, "img", "maten.json");
@@ -108,10 +110,10 @@ ${og ? `<meta property="og:image" content="${SITE_URL}${og}">` : ""}
 <script>document.documentElement.classList.add("js");</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="${VA.fontsHref(site.thema)}" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css">
 <link rel="stylesheet" href="assets/logo.css">
-</head>
+${VA.themaCss(site.thema) ? `<style>${VA.themaCss(site.thema)}</style>\n` : ""}</head>
 <body id="top">
 ${S.header(active)}
 <main>
@@ -141,28 +143,25 @@ async function main() {
   if (cfg.web3formsKey) js = js.replace('const WEB3FORMS_KEY = "";', `const WEB3FORMS_KEY = ${JSON.stringify(cfg.web3formsKey)};`);
   fs.writeFileSync(path.join(OUT, "assets", "site.js"), js);
 
-  // Pagina's uit blokken
+  // Alle pagina's bestaan uit blokken (ook Onze honden, Nesten en Nieuws)
   for (const p of paginas) {
     const first = p.blokken.find(b => blockPhotos(b).length);
     layout({
       file: pageFile(p.id), active: p.id === "start" ? "" : p.id,
-      title: p.id === "start" ? "Vai Avanti · Whippetkennel uit Opwijk" : `${p.titel || p.id} · Vai Avanti`,
-      desc: p.omschrijving || "Vai Avanti, whippetkennel uit Opwijk (België).",
+      title: p.id === "start" ? "Vai Avanti · Whippetkennel uit Opwijk" : `${M.vul(p.titel || p.id)} · Vai Avanti`,
+      desc: M.vul(p.omschrijving || "") || "Vai Avanti, whippetkennel uit Opwijk (België).",
       ogImage: first ? blockPhotos(first)[0] : "", body: S.renderBlocks(p.blokken)
     });
   }
-  // Vaste pagina's
-  layout({ file: "honden.html", active: "honden", title: "Onze honden · Vai Avanti", desc: "Maak kennis met de whippets van Vai Avanti: afstamming, gezondheidsresultaten en palmares per hond.", ogImage: site.paginafotos.honden, body: S.hondenBody() });
+  // Een pagina per hond
   for (const d of honden) layout({
     file: `hond-${d.id}.html`, active: "honden", title: `${d.call}${d.name ? ` (${d.name})` : ""} · Vai Avanti`,
     desc: `${d.call}${d.name ? `, officieel ${d.name}` : ""}${d.born ? `, geboren ${d.born}` : ""}. ${d.highlight ? d.highlight + ". " : ""}Afstamming, gezondheid en palmares.`,
     ogImage: d.cover, body: S.hondBody(d)
   });
-  layout({ file: "nesten.html", active: "nesten", title: "Nesten · Vai Avanti", desc: `Alle nesten van whippetkennel Vai Avanti met hun pups${site.verwacht && site.verwacht.tonen ? ", en de nesten die verwacht worden" : ""}.`, ogImage: site.paginafotos.nesten, body: S.nestenBody() });
-  const eersteJaar = Math.min(...nieuws.map(p => p.year).filter(Boolean));
-  layout({ file: "nieuws.html", active: "nieuws", title: "Wedstrijdverslagen · Vai Avanti", desc: `Alle ${nieuws.length} wedstrijdverslagen van Vai Avanti sinds ${eersteJaar}: uitslagen, foto's en verhalen van de renbaan.`, ogImage: site.paginafotos.nieuws, body: S.nieuwsBody() });
   const start = paginas.find(p => p.id === "start");
-  layout({ file: "404.html", active: "", title: "Pagina niet gevonden · Vai Avanti", desc: "Deze pagina bestaat niet (meer).", body: S.nietGevondenBody(start && (start.blokken.find(b => b.type === "hero") || {}).foto) });
+  const startHero = start && start.blokken.find(b => b.type === "hero");
+  layout({ file: "404.html", active: "", title: "Pagina niet gevonden · Vai Avanti", desc: "Deze pagina bestaat niet (meer).", body: S.nietGevondenBody(startHero && (VA.arr(startHero.fotos)[0] || startHero.foto)) });
 
   // Beheerpagina + een kopie van alle inhoud (met versie-nummers van GitHub)
   const dir = path.join(OUT, "beheer");
@@ -170,7 +169,7 @@ async function main() {
   for (const f of fs.readdirSync(path.join(SRC, "beheer"))) fs.copyFileSync(path.join(SRC, "beheer", f), path.join(dir, f));
   fs.writeFileSync(path.join(dir, "data.json"), JSON.stringify({ mediaInfo, commit: process.env.GITHUB_SHA || null, bestanden, gebouwd: new Date().toISOString() }));
 
-  const pages = new Set(["honden.html", "nesten.html", "nieuws.html", "404.html", ...paginas.map(p => pageFile(p.id)), ...honden.map(d => `hond-${d.id}.html`)]);
+  const pages = new Set(["404.html", ...paginas.map(p => pageFile(p.id)), ...honden.map(d => `hond-${d.id}.html`)]);
   for (const f of fs.readdirSync(OUT)) if (f.endsWith(".html") && !pages.has(f)) fs.unlinkSync(path.join(OUT, f));
   console.log(`${pages.size} pagina's gebouwd · ${paginas.length} eigen pagina's · ${honden.length} honden · ${nesten.length} nesten · ${nieuws.length} verslagen`);
 }

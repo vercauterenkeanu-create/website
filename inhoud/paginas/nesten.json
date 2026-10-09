@@ -1,0 +1,21 @@
+{
+  "titel": "Nesten",
+  "inMenu": true,
+  "menuVolgorde": 20,
+  "omschrijving": "Alle nesten van whippetkennel Vai Avanti met hun pups, en de nesten die verwacht worden.",
+  "blokken": [
+    {
+      "type": "paginakop",
+      "bovenschrift": "Pups & nesten",
+      "titel": "Onze *nesten*",
+      "intro": "Elk nest krijgt zijn eigen letter. Hier vindt u alle pups uit onze nesten, met hun foto's, gezondheidsresultaten en stamboom.",
+      "fotos": [
+        "/media/200000201.webp"
+      ]
+    },
+    {
+      "type": "nestenlijst",
+      "verwachtTonen": true
+    }
+  ]
+}
