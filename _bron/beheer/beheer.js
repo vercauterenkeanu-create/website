@@ -833,7 +833,7 @@
         h("li", {}, "GitHub → profielfoto → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token."),
         h("li", {}, `Naam: "Beheer Vai Avanti". Kies een vervaldatum (bijvoorbeeld 1 jaar).`),
         h("li", {}, `Repository access: Only select repositories → ${REPO.repo}.`),
-        h("li", {}, "Permissions → Repository permissions → Contents: Read and write. (Metadata staat automatisch op Read.)"),
+        h("li", {}, "Permissions → Repository permissions: Contents op Read and write, en Actions op Read-only. (Metadata staat automatisch op Read.)"),
         h("li", {}, "Generate token, kopieer de code en geef ze hier in op Shany's toestel.")))
     );
     app.append(h("div", { class: "aanmelden" }, form));
