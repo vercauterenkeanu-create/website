@@ -1,5 +1,5 @@
 # Beheerscherm (Pages CMS) voor de website van Vai Avanti.
-# Pagina's en instellingen bewerk je het makkelijkst via /beheer op de site zelf (met voorbeeld).
+# Alles bewerk je het makkelijkst via /beheer op de site zelf (met voorbeeld); dit is de reserve.
 # Dit bestand wordt deels gemaakt door _bron/tools/cms-config.js.
 
 media:
@@ -16,8 +16,8 @@ content:
     label: Wedstrijdverslagen
     type: collection
     path: inhoud/nieuws
-    format: yaml-frontmatter
-    filename: '{year}-{month}-{day}-{primary}.md'
+    format: json
+    filename: '{year}-{month}-{day}-{primary}.json'
     view:
       primary: titel
       fields:
@@ -49,7 +49,7 @@ content:
         options:
           multiple:
             max: 40
-      - name: body
+      - name: tekst
         label: Verslag
         type: rich-text
         description: De namen van de honden worden vanzelf herkend en gelinkt.
@@ -75,8 +75,8 @@ content:
     label: Onze honden
     type: collection
     path: inhoud/honden
-    format: yaml-frontmatter
-    filename: '{primary}.md'
+    format: json
+    filename: '{primary}.json'
     view:
       primary: roepnaam
       fields:
@@ -171,7 +171,7 @@ content:
       - name: fotoFocus
         type: string
         hidden: true
-      - name: body
+      - name: tekst
         label: Over deze hond
         type: rich-text
         options:
@@ -181,8 +181,8 @@ content:
     label: Nesten
     type: collection
     path: inhoud/nesten
-    format: yaml-frontmatter
-    filename: '{primary}-nest.md'
+    format: json
+    filename: '{primary}-nest.json'
     view:
       primary: letter
       fields:
@@ -260,7 +260,7 @@ content:
             label: Andere namen in verslagen (mag leeg blijven)
             type: string
             list: true
-      - name: body
+      - name: tekst
         label: Over dit nest
         type: rich-text
         options:

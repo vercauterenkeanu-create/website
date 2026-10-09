@@ -32,6 +32,16 @@
   }
   const plain = src => String(src || "").replace(/\r/g, "").replace(/^#{1,6}\s+/gm, "").replace(/\\(.)/g, "$1").replace(/[*_]/g, "");
 
+  /* ---------- Kleine hulpjes ---------- */
+  const arr = v => Array.isArray(v) ? v.filter(x => x !== null && x !== undefined && x !== "") : (v ? [v] : []);
+  const iso = v => (v && typeof v === "object" && typeof v.toISOString === "function") ? v.toISOString().slice(0, 10) : String(v ?? "").slice(0, 10);
+  const MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
+  const fmtDate = s => { const [y, m, d] = iso(s).split("-").map(Number); return y && m && d ? `${d} ${MAANDEN[m - 1]} ${y}` : ""; };
+  const same = (a, b) => !!a && String(a).trim().toLowerCase() === String(b || "").trim().toLowerCase();
+  const yearOf = s => parseInt((String(s).match(/\d{4}/) || ["0"])[0], 10);
+  const clip = (s, n) => s.length > n ? s.slice(0, s.lastIndexOf(" ", n)) + "…" : s;
+  const pageFile = id => id === "start" ? "index.html" : `${id}.html`;
+
   /* ---------- Iconen ---------- */
   const ICON = {
     arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
@@ -79,10 +89,138 @@
     contact: { label: "Contactformulier", omschrijving: "Contactgegevens en het formulier. De gegevens pas je aan bij Instellingen.", velden: [], nieuw: {} }
   };
 
+  /* ---------- Velden van verslagen, honden en nesten (beheerpagina en Pages CMS) ---------- */
+  const lijstVan = (naam, label, hulp) => ({ naam, label, type: "woorden", hulp });
+  const VELDEN = {
+    nieuws: [
+      { naam: "titel", label: "Titel", type: "regel", hulp: "Bijvoorbeeld de naam van de wedstrijd of de renbaan." },
+      { naam: "datum", label: "Datum", type: "datum" },
+      { naam: "fotos", label: "Foto's", type: "fotos", hulp: "De eerste foto wordt de grote foto." },
+      { naam: "tekst", label: "Verslag", type: "opmaak", hulp: "De namen van de honden worden vanzelf herkend en gelinkt." },
+      { naam: "overzicht", label: "Dit is een seizoensoverzicht", type: "aanuit" },
+      { naam: "kop", label: "Kop op de startpagina (mag leeg blijven)", type: "regel" },
+      { naam: "samenvatting", label: "Korte samenvatting op de startpagina (mag leeg blijven)", type: "tekst" }
+    ],
+    honden: [
+      { naam: "roepnaam", label: "Roepnaam", type: "regel" },
+      { naam: "naam", label: "Officiële naam", type: "regel", hulp: "Zoals in de stamboom, bijvoorbeeld Vai Avanti Tiamo." },
+      { naam: "geslacht", label: "Geslacht", type: "keuze", opties: ["Teef", "Reu"] },
+      { naam: "status", label: "Label op de foto (mag leeg blijven)", type: "regel", hulp: "Bijvoorbeeld Veteraan, Op rust of Jong talent." },
+      { naam: "geboren", label: "Geboren op", type: "datum" },
+      { naam: "kleur", label: "Kleur", type: "regel" },
+      { naam: "vader", label: "Vader", type: "regel" },
+      { naam: "moeder", label: "Moeder", type: "regel", hulp: "Gebruik exact de officiële naam, dan wordt ze automatisch gelinkt." },
+      { naam: "hoogtepunt", label: "Grootste prestatie (kort)", type: "regel" },
+      { naam: "omslagfoto", label: "Hoofdfoto", type: "foto" },
+      { naam: "fotos", label: "Meer foto's", type: "fotos" },
+      lijstVan("gezondheid", "Gezondheidsresultaten", "Eén resultaat per regel, bijvoorbeeld Heupen Excellent / A1."),
+      { naam: "palmares", label: "Palmares", type: "lijst", hulp: "De volgorde maakt niet uit; de site sorteert op jaar.", velden: [{ naam: "jaar", label: "Jaar", type: "regel" }, { naam: "titel", label: "Titel", type: "regel" }, { naam: "plaats", label: "Plaats", type: "regel" }] },
+      { naam: "stamboom", label: "Link naar de stamboom (Breed Archive)", type: "regel" },
+      lijstVan("andereNamen", "Andere namen in verslagen (mag leeg blijven)", "Roepnaam en officiële naam worden al herkend."),
+      { naam: "tekst", label: "Over deze hond", type: "opmaak" }
+    ],
+    nesten: [
+      { naam: "letter", label: "Letter van het nest", type: "regel" },
+      { naam: "geboren", label: "Geboren op", type: "datum" },
+      { naam: "vader", label: "Vader", type: "regel" },
+      { naam: "moeder", label: "Moeder", type: "regel", hulp: "Gebruik exact de officiële naam, dan wordt ze automatisch gelinkt." },
+      { naam: "foto", label: "Foto of affiche van het nest", type: "foto" },
+      { naam: "tekst", label: "Over dit nest", type: "opmaak" },
+      { naam: "pups", label: "Pups", type: "lijst", velden: [
+        { naam: "naam", label: "Officiële naam", type: "regel" }, { naam: "roepnaam", label: "Roepnaam", type: "regel" },
+        { naam: "geslacht", label: "Geslacht", type: "keuze", opties: ["Teef", "Reu"] }, { naam: "kleur", label: "Kleur", type: "regel" },
+        { naam: "woontIn", label: "Woont in (land, leeg = bij ons)", type: "regel" }, { naam: "fotos", label: "Foto's", type: "fotos" },
+        lijstVan("gezondheid", "Gezondheidsresultaten"), lijstVan("uitslagen", "Uitslagen"),
+        { naam: "stamboom", label: "Link naar de stamboom", type: "regel" }, lijstVan("andereNamen", "Andere namen in verslagen (mag leeg blijven)")] }
+    ]
+  };
+
+  /* ---------- Van ruwe bestanden naar alles wat de pagina's nodig hebben ----------
+     raw = { site, paginas: {id: data}, honden: {id: data}, nesten: {id: data}, nieuws: {id: data} } */
+  function bouwModel(raw) {
+    const site = raw.site || {};
+    site.paginafotos = site.paginafotos || {};
+    const paginas = Object.entries(raw.paginas || {}).map(([id, p]) => ({ id: slug(id), ...p, blokken: arr(p.blokken) }));
+
+    const honden = Object.entries(raw.honden || {}).map(([id, d]) => {
+      const photos = arr(d.fotos);
+      const cover = d.omslagfoto || photos[0];
+      return {
+        id: slug(id), call: d.roepnaam || id, name: d.naam || "", sex: d.geslacht || "", status: d.status || "",
+        born: fmtDate(d.geboren), color: d.kleur || "", sire: d.vader || "", dam: d.moeder || "",
+        highlight: d.hoogtepunt || "", pedigree: d.stamboom || "", health: arr(d.gezondheid).map(String),
+        titles: arr(d.palmares).map(t => [String(t.jaar ?? ""), t.titel || "", t.plaats || ""]).filter(t => t[1]).sort((a, b) => yearOf(b[0]) - yearOf(a[0])),
+        cover, pos: d.fotoFocus || "", photos: [cover, ...photos.filter(p => p !== cover)].filter(Boolean),
+        noteMd: String(d.tekst || "").trim(), extraNames: arr(d.andereNamen).map(String), order: Number(d.volgorde ?? 999)
+      };
+    }).filter(d => d.call).sort((a, b) => a.order - b.order || a.call.localeCompare(b.call));
+
+    const nesten = Object.entries(raw.nesten || {}).map(([id, l]) => ({
+      id: slug(l.letter || id), letter: String(l.letter || id).toUpperCase(), bornIso: iso(l.geboren), born: fmtDate(l.geboren),
+      sire: l.vader || "", dam: l.moeder || "", introMd: String(l.tekst || "").trim(), photos: arr(l.foto),
+      pups: arr(l.pups).map(p => ({
+        name: p.naam || "", call: p.roepnaam || p.naam || "", sex: p.geslacht || "", color: p.kleur || "",
+        country: p.woontIn || "", health: arr(p.gezondheid).map(String), results: arr(p.uitslagen).map(String),
+        photos: arr(p.fotos), pedigree: p.stamboom || "", extraNames: arr(p.andereNamen).map(String)
+      })).filter(p => p.call)
+    })).sort((a, b) => a.bornIso.localeCompare(b.bornIso));
+
+    const dogByName = name => honden.find(d => same(d.name, name));
+    for (const l of nesten) { l.damId = (dogByName(l.dam) || {}).id; for (const p of l.pups) p.dog = (dogByName(p.name) || {}).id; }
+    for (const d of honden) { d.damId = (dogByName(d.dam) || {}).id; d.sireId = (dogByName(d.sire) || {}).id; d.litter = (nesten.find(l => l.pups.some(p => same(p.name, d.name))) || {}).id; }
+
+    const nieuws = Object.entries(raw.nieuws || {}).map(([id, p]) => {
+      const dateIso = iso(p.datum) || `${String(id).slice(0, 4)}-01-01`;
+      return {
+        id, title: p.titel || id, dateIso, dateKnown: !!p.datum && (!p.datumOnbekend || !/-01-01$/.test(dateIso)), year: yearOf(dateIso) || yearOf(id),
+        order: Number(p.volgorde || 0), kop: p.kop || "", summary: p.samenvatting || "", recap: !!p.overzicht, photos: arr(p.fotos), body: p.tekst || ""
+      };
+    }).sort((a, b) => b.dateIso.localeCompare(a.dateIso) || b.order - a.order || String(a.id).localeCompare(String(b.id)));
+
+    // Honden herkennen in verslagen: roepnaam (min. 4 letters, ook met -je), officiële naam,
+    // naam zonder "Vai Avanti" en eventuele andere namen.
+    const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const entities = [];
+    const addEntity = (key, call, name, extra, href) => {
+      const words = [], phrases = [];
+      if (call && call.length >= 4) words.push(call);
+      const short = name.replace(/^Vai Avanti\s+/i, "");
+      if (short && !/\s/.test(short) && short.length >= 4) words.push(short); else if (short) phrases.push(short);
+      if (name && /\s/.test(name)) phrases.push(name);
+      for (const x of extra) (/\s/.test(x) ? phrases : words).push(x);
+      const tests = [
+        ...words.map(w => new RegExp(`\\b(${reEsc(w)}|${reEsc(w.toUpperCase())})(je)?\\b`)),
+        ...phrases.map(ph => new RegExp(`\\b${reEsc(ph)}\\b`, "i"))
+      ];
+      entities.push({ key, call, href, test: t => tests.some(r => r.test(t)) });
+    };
+    for (const d of honden) addEntity(d.id, d.call, d.name, d.extraNames, `hond-${d.id}.html`);
+    for (const l of nesten) for (const p of l.pups) if (!p.dog) addEntity("pup-" + slug(p.call), p.call, p.name, p.extraNames, `nesten.html#pup-${slug(p.call)}`);
+    for (const p of nieuws) { const t = p.title + "\n" + plain(p.body); p.dogs = entities.filter(e => e.test(t)).map(e => e.key); }
+    const DOG_INFO = {};
+    for (const e of entities) DOG_INFO[e.key] = { call: e.call, href: e.href };
+    const titleCount = honden.reduce((n, d) => n + d.titles.length, 0) + nesten.reduce((n, l) => n + l.pups.reduce((m, p) => m + p.results.length, 0), 0);
+
+    const menu = [
+      { key: "honden", label: "Onze honden", href: "honden.html", order: 10, fixed: true },
+      { key: "nesten", label: "Nesten", href: "nesten.html", order: 20, fixed: true },
+      { key: "nieuws", label: "Nieuws", href: "nieuws.html", order: 30, fixed: true },
+      ...paginas.filter(p => p.inMenu && p.id !== "start" && p.id !== "contact").map(p => ({ key: p.id, label: p.titel || p.id, href: pageFile(p.id), order: Number(p.menuVolgorde ?? 50) }))
+    ].sort((a, b) => a.order - b.order);
+
+    const reportDate = p => p.dateKnown ? fmtDate(p.dateIso) : String(p.year);
+    const firstText = p => plain(p.body).split(/\n{2,}/).map(s => s.trim()).find(s => s.length > 60) || plain(p.body).trim();
+    const nieuwsKaarten = nieuws.slice(0, 3).map(p => ({
+      id: p.id, titel: p.title, datum: reportDate(p), foto: p.photos[0] || "",
+      kop: p.kop || p.title, tekst: p.summary || clip(firstText(p).replace(/\s+/g, " "), 200)
+    }));
+    return { site, paginas, honden, nesten, nieuws, DOG_INFO, titleCount, menu, nieuwsKaarten, nieuwsAantal: nieuws.length, reportDate, dogByName };
+  }
+
   /* ---------- Site-opbouw ---------- */
   function createSite(ctx) {
     const { img, shot, imgUrl } = ctx;
-    const D = ctx.data;
+    const D = ctx.model;
     const site = D.site || {};
     const C = site.contact || {};
     const V = site.verwacht || {};
@@ -457,8 +595,246 @@ ${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel
       }).join("\n\n");
     };
 
-    return { header, footer, pageHero, dogCard, healthChips, contactBlock, expectedBand, renderBlock, renderBlocks, mailParts };
+    /* ---------- Vaste pagina's: honden, hond, nesten, nieuws ---------- */
+    const reportDate = D.reportDate || (p => String(p.year));
+    const pupAnchor = p => "pup-" + slug(p.call);
+    const heeftFoto = p => !!(p && imgUrl(p));
+
+    const hondenBody = () => {
+      const elsewhere = (D.nesten || []).flatMap(l => l.pups.filter(p => !p.dog).map(p => ({ ...p, litter: l })));
+      return `${pageHero({ eyebrow: "Onze honden", title: "Het team achter <em>de naam</em>", lead: "Klik op een hond voor afstamming, gezondheidsresultaten, palmares en foto's.", bg: site.paginafotos && site.paginafotos.honden, pos: "center 35%" })}
+<section class="section-tight">
+  <div class="wrap">
+    <div class="dogs-grid">
+${(D.honden || []).map(dogCard).join("\n")}
+    </div>
+  </div>
+</section>
+${elsewhere.length ? `<section class="band section-tight">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <span class="eyebrow">Uit onze nesten</span>
+        <h2>Ook <em>Vai Avanti</em></h2>
+        <p class="lead">Deze honden komen uit onze nesten en wonen bij hun eigen baasjes.</p>
+      </div>
+      <a class="link-arrow" href="nesten.html">Alle nesten ${ICON.arrow}</a>
+    </div>
+    <div class="mini-grid">
+${elsewhere.map(p => `      <a class="mini reveal" href="nesten.html#${pupAnchor(p)}">${img(p.photos[0], { alt: p.call, sizes: "200px" })}<b>${esc(p.call)}</b><small>${esc(p.name)}<br>${esc(p.litter.letter)}-nest · ${esc(p.sex)}${p.country ? " · " + esc(p.country) : ""}</small></a>`).join("\n")}
+    </div>
+  </div>
+</section>` : ""}`;
+    };
+
+    const mention = p => `<a class="mention" href="nieuws.html#${p.id}">
+  ${heeftFoto(p.photos[0]) ? img(p.photos[0], { alt: "", sizes: "96px" }) : '<span class="ph"></span>'}
+  <span><small>${esc(reportDate(p))}${p.recap ? " · Seizoensoverzicht" : ""}</small><b>${esc(p.title)}</b></span>
+  ${ICON.arrow}
+</a>`;
+
+    const hondBody = d => {
+      const honden = D.honden || [], nesten = D.nesten || [];
+      const i = Math.max(0, honden.findIndex(x => x.id === d.id));
+      const posts = (D.nieuws || []).filter(p => p.dogs.includes(d.id));
+      const litter = d.litter && nesten.find(l => l.id === d.litter);
+      const asDam = nesten.filter(l => same(l.dam, d.name)), asSire = nesten.filter(l => same(l.sire, d.name));
+      const prev = honden[(i - 1 + honden.length) % honden.length] || d, next = honden[(i + 1) % honden.length] || d;
+      const gal = `dog-${d.id}`;
+      const famRow = (label, value, href) => !value ? "" : href
+        ? `<a href="${href}"><span><small>${label}</small><span>${esc(value)}</span></span>${ICON.arrow}</a>`
+        : `<div class="fam"><span><small>${label}</small><span>${esc(value)}</span></span></div>`;
+      const gallery = d.photos.filter(p => p !== d.cover);
+      return `<section class="dog-hero">
+  <div class="wrap dog-hero-grid">
+    <div>
+      <div class="crumbs"><a href="honden.html">Onze honden</a><span>/</span><span>${esc(d.call)}</span></div>
+      <span class="eyebrow">${esc(d.sex)}${d.status ? " · " + esc(d.status) : ""}</span>
+      <h1>${esc(d.call)}</h1>
+      <div class="dog-official">${esc(d.name)}</div>
+      ${d.highlight ? `<div class="highlight">${ICON.trophy}<span>${esc(d.highlight)}</span></div>` : ""}
+      ${d.noteMd ? `<div class="note-dark">${md(d.noteMd)}</div>` : ""}
+    </div>
+    ${shot(d.cover, { group: gal, caption: `${d.call} (${d.name})`, cls: "shot dog-hero-photo", pos: d.pos, sizes: "(max-width: 980px) 100vw, 55vw" })}
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="wrap dog-cols">
+    <div>
+      <div class="reveal">
+        <h2 class="sub-label">Gegevens</h2>
+        <dl class="facts">
+          <div><dt>Geboren</dt><dd>${esc(d.born || "–")}</dd></div>
+          <div><dt>Kleur</dt><dd>${esc(d.color || "–")}</dd></div>
+          <div><dt>Geslacht</dt><dd>${esc(d.sex || "–")}</dd></div>
+          <div><dt>Stamboom</dt><dd>${d.pedigree ? `<a href="${esc(d.pedigree)}" target="_blank" rel="noopener">Breed Archive</a>` : "–"}</dd></div>
+        </dl>
+      </div>
+      ${d.health.length ? `<div class="reveal">
+        <h2 class="sub-label">Gezondheid</h2>
+        ${healthChips(d.health)}
+      </div>` : ""}
+      <div class="reveal">
+        <h2 class="sub-label">Familie</h2>
+        <div class="family">
+          ${famRow("Vader", d.sire, d.sireId ? `hond-${d.sireId}.html` : "")}
+          ${famRow("Moeder", d.dam, d.damId ? `hond-${d.damId}.html` : "")}
+          ${litter ? famRow("Geboren in", `${litter.letter}-nest${litter.born ? ` (${litter.born})` : ""}`, `nesten.html#${litter.id}`) : ""}
+          ${asDam.map(l => famRow("Moeder van", `${l.letter}-nest${l.born ? ` (${l.born})` : ""}`, `nesten.html#${l.id}`)).join("\n          ")}
+          ${asSire.map(l => famRow("Vader van", `${l.letter}-nest${l.born ? ` (${l.born})` : ""}`, `nesten.html#${l.id}`)).join("\n          ")}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="reveal">
+        <h2 class="sub-label">${d.titles.length ? `Palmares · ${d.titles.length} ${d.titles.length === 1 ? "titel" : "titels"}` : "Palmares"}</h2>
+        ${d.titles.length
+          ? `<ul class="palmares">${d.titles.map(([y, t, p]) => `<li><b>${esc(y)}</b><span>${esc(t)}${p ? ` <small>· ${esc(p)}</small>` : ""}</span></li>`).join("")}</ul>`
+          : `<p class="note">${asDam.length || asSire.length ? `${esc(d.call)} kreeg een ereplaats als ouder van onze nesten.` : `${esc(d.call)} staat nog aan het begin van ${d.sex === "Reu" ? "zijn" : "haar"} carrière.`}</p>`}
+      </div>
+    </div>
+  </div>
+</section>
+
+${gallery.length ? `<section class="band section-tight">
+  <div class="wrap">
+    <div class="section-head reveal"><div><span class="eyebrow">Foto's</span><h2>${esc(d.call)} in <em>beeld</em></h2></div></div>
+    <div class="gallery">
+${gallery.map(p => "      " + shot(p, { group: gal, caption: `${d.call} (${d.name})`, sizes: "(max-width: 640px) 50vw, 25vw" })).join("\n")}
+    </div>
+  </div>
+</section>` : ""}
+
+${posts.length ? `<section class="section-tight">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div><span class="eyebrow">In het nieuws</span><h2>${posts.length} ${posts.length === 1 ? "verslag" : "verslagen"} met <em>${esc(d.call)}</em></h2></div>
+      <a class="link-arrow" href="nieuws.html#hond-${d.id}">Toon ze allemaal in het archief ${ICON.arrow}</a>
+    </div>
+    <div class="mention-list">
+${posts.slice(0, 8).map(mention).join("\n")}
+    </div>
+  </div>
+</section>` : ""}
+
+<section class="section-tight" style="padding-top:0">
+  <div class="wrap dog-nav">
+    <a class="link-arrow" href="hond-${prev.id}.html">${ICON.back} ${esc(prev.call)}</a>
+    <a class="link-arrow" href="honden.html">Alle honden</a>
+    <a class="link-arrow" href="hond-${next.id}.html">${esc(next.call)} ${ICON.arrow}</a>
+  </div>
+</section>`;
+    };
+
+    const pupCard = p => {
+      const d = p.dog && (D.honden || []).find(x => x.id === p.dog);
+      const health = p.health.length ? p.health : (d ? d.health : []);
+      const pedigree = p.pedigree || (d ? d.pedigree : "");
+      const g = pupAnchor(p);
+      return `<article class="pup reveal" id="${g}">
+      ${shot(p.photos[0], { group: g, caption: `${p.call} (${p.name})`, sizes: "(max-width: 640px) 100vw, 33vw", extra: p.photos.length > 1 ? `<span class="count">${p.photos.length} foto's</span>` : "" })}
+      ${p.photos.slice(1).map(ph => shot(ph, { group: g, caption: `${p.call} (${p.name})`, hidden: true })).join("")}
+      <div class="pup-body">
+        <h3>${esc(p.call)}</h3>
+        <div class="dog-official">${esc(p.name)}</div>
+        <div class="pup-meta">${[p.sex, p.color].filter(Boolean).map(esc).join(" · ")}${p.country ? ` · woont in ${esc(p.country)}` : (d ? " · bij ons" : "")}</div>
+        ${health.length ? healthChips(health) : ""}
+        ${p.results.length ? `<ul class="pup-results">${p.results.map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : ""}
+        <div class="pup-links">
+          ${d ? `<a class="link-arrow" href="hond-${d.id}.html">Bekijk profiel ${ICON.arrow}</a>` : ""}
+          ${pedigree ? `<a class="link-arrow" href="${esc(pedigree)}" target="_blank" rel="noopener">Stamboom ${ICON.arrow}</a>` : ""}
+        </div>
+      </div>
+    </article>`;
+    };
+    const nestBlok = l => `<section class="litter-block" id="${l.id}">
+  <div class="wrap">
+    <div class="litter-head reveal">
+      <div class="litter-letter">${esc(l.letter)}</div>
+      <div>
+        <h2>${esc(l.letter)}-nest</h2>
+        <div class="meta">${l.born ? `Geboren ${esc(l.born)} · ` : ""}${l.pups.length} ${l.pups.length === 1 ? "pup" : "pups"} op deze site<br>
+          ${esc(l.sire)} × ${l.damId ? `<a href="hond-${l.damId}.html">${esc(l.dam)}</a>` : esc(l.dam)}</div>
+        ${l.introMd ? `<div class="litter-intro">${md(l.introMd)}</div>` : ""}
+      </div>
+      ${heeftFoto(l.photos[0]) ? shot(l.photos[0], { group: "nest-" + l.id, caption: `${l.letter}-nest`, sizes: "300px" }) : ""}
+    </div>
+    <div class="pups">
+${l.pups.map(pupCard).join("\n")}
+    </div>
+  </div>
+</section>`;
+    const nestenKop = () => pageHero({ eyebrow: "Pups &amp; nesten", title: "Onze <em>nesten</em>", lead: "Elk nest krijgt zijn eigen letter. Hier vindt u alle pups uit onze nesten, met hun foto's, gezondheidsresultaten en stamboom.", bg: site.paginafotos && site.paginafotos.nesten, pos: "center 40%" });
+    const nestenBody = () => `${nestenKop()}
+${V.tonen ? `<section class="section-tight" style="padding-bottom:0">
+  <div class="wrap">${expectedBand()}</div>
+</section>` : ""}
+${[...(D.nesten || [])].reverse().map(nestBlok).join("\n")}`;
+
+    const verslag = (p, open) => {
+      const text = plain(p.body);
+      const long = !open && (text.length > 520 || text.split(/\n{2,}/).length > 4);
+      const photos = p.photos.filter(heeftFoto);
+      const extra = photos.length - 4;
+      const info = D.DOG_INFO || {};
+      return `<article class="report reveal${p.recap ? " recap" : ""}${photos.length ? "" : " no-photo"}" id="${esc(p.id)}" data-dogs="${p.dogs.join(" ")}">
+      ${photos.length ? `<div class="report-media">
+        ${shot(photos[0], { group: p.id, caption: p.title, sizes: "(max-width: 980px) 100vw, 340px" })}
+        ${photos.length > 1 ? `<div class="thumbs">${photos.slice(1, 4).map((ph, i) => shot(ph, { group: p.id, caption: p.title, sizes: "110px", extra: i === 2 && extra > 0 ? `<span class="count">+${extra}</span>` : "" })).join("")}</div>` : ""}
+        ${photos.slice(4).map(ph => shot(ph, { group: p.id, caption: p.title, hidden: true })).join("")}
+      </div>` : ""}
+      <div class="report-body">
+        <span class="report-tag">${p.recap ? "Seizoensoverzicht · " : ""}${esc(reportDate(p))}${photos.length ? ` · ${photos.length} ${photos.length === 1 ? "foto" : "foto's"}` : ""}</span>
+        <h3>${esc(p.title)}</h3>
+        ${p.dogs.some(k => info[k]) ? `<div class="chips">${p.dogs.filter(k => info[k]).map(k => `<a class="chip" href="${info[k].href}">${esc(info[k].call)}</a>`).join("")}</div>` : ""}
+        ${text.trim() ? `<div class="report-text${long ? " clamped" : ""}">${md(p.body)}</div>
+        ${long ? `<button class="more-btn" type="button" aria-expanded="false">Lees het volledige verslag ${ICON.down}</button>` : ""}` : ""}
+      </div>
+    </article>`;
+    };
+    const nieuwsKop = () => {
+      const n = (D.nieuws || []).length, eerste = Math.min(...(D.nieuws || []).map(p => p.year).filter(Boolean)) || "";
+      return pageHero({ eyebrow: "Nieuws", title: "Van de <em>renbaan</em>", lead: `Alle ${n} wedstrijdverslagen sinds ${eerste}, met foto's. Filter op een hond om enkel zijn of haar verslagen te zien.`, bg: site.paginafotos && site.paginafotos.nieuws, pos: "center 40%" });
+    };
+    const nieuwsBody = () => {
+      const nieuws = D.nieuws || [], info = D.DOG_INFO || {};
+      const years = [...new Set(nieuws.map(p => p.year))].sort((a, b) => b - a);
+      const counts = {};
+      for (const p of nieuws) for (const k of p.dogs) if (info[k]) counts[k] = (counts[k] || 0) + 1;
+      const filterDogs = Object.keys(counts).filter(k => counts[k] >= 3).sort((a, b) => counts[b] - counts[a]);
+      return `${nieuwsKop()}
+<div class="news-toolbar" id="archief">
+  <div class="wrap">
+    <div class="filter-chips" role="group" aria-label="Filter op hond">
+      <button type="button" data-filter="alle" aria-pressed="true">Alle <small>${nieuws.length}</small></button>
+${filterDogs.map(k => `      <button type="button" data-filter="${k}" aria-pressed="false">${esc(info[k].call)} <small>${counts[k]}</small></button>`).join("\n")}
+    </div>
+    <nav class="year-links" aria-label="Spring naar jaar"><span>Jaar</span>${years.map(y => `<a href="#jaar-${y}">${y}</a>`).join("")}</nav>
+  </div>
+</div>
+<div class="wrap" id="archive" style="padding-bottom:100px">
+${years.map(y => {
+        const ps = nieuws.filter(p => p.year === y);
+        return `<section class="year-block" id="jaar-${y}">
+  <div class="year-head"><h2>${y}</h2><span>${ps.length} ${ps.length === 1 ? "verslag" : "verslagen"}</span></div>
+  <div class="reports">
+${ps.map(p => verslag(p)).join("\n")}
+  </div>
+</section>`;
+      }).join("\n")}
+  <p class="empty-state" id="archive-empty" hidden>Geen verslagen gevonden voor deze hond.</p>
+</div>`;
+    };
+    const nietGevondenBody = heroFoto => `${pageHero({ eyebrow: "404", title: "Deze pagina is <em>weggerend</em>", lead: "De pagina die u zoekt bestaat niet (meer). Misschien vindt u het via een van deze pagina's.", bg: heroFoto })}
+<section class="section-tight"><div class="wrap cta-band">
+  <a class="btn btn-dark" href="index.html">Naar de startpagina ${ICON.arrow}</a>
+  <a class="link-arrow" href="nieuws.html">Wedstrijdverslagen ${ICON.arrow}</a>
+</div></section>`;
+
+    return { header, footer, pageHero, dogCard, healthChips, contactBlock, expectedBand, renderBlock, renderBlocks, mailParts,
+      hondenBody, hondBody, nestenKop, nestBlok, nestenBody, nieuwsKop, verslag, nieuwsBody, nietGevondenBody, blokNieuws: b => R.nieuws(b || {}) };
   }
 
-  return { esc, slug, inline, md, plain, ICON, BLOKKEN, createSite };
+  return { esc, slug, inline, md, plain, ICON, BLOKKEN, VELDEN, bouwModel, createSite, fmtDate, pageFile, arr };
 });

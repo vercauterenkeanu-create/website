@@ -57,10 +57,17 @@ const instellingen = {
   ]
 };
 
+// Verslagen, honden en nesten staan als JSON met de lopende tekst in het veld "tekst"
+for (const c of cfg.content.filter(c => ["nieuws", "honden", "nesten"].includes(c.name))) {
+  c.format = "json";
+  c.filename = c.filename.replace(/\.md$/, ".json");
+  for (const f of c.fields) if (f.name === "body") f.name = "tekst";
+}
+
 cfg.content = cfg.content.filter(c => c.name !== "site" && c.name !== "paginas");
 cfg.content.push(paginas, instellingen);
 const header = "# Beheerscherm (Pages CMS) voor de website van Vai Avanti.\n" +
-  "# Pagina's en instellingen bewerk je het makkelijkst via /beheer op de site zelf (met voorbeeld).\n" +
+  "# Alles bewerk je het makkelijkst via /beheer op de site zelf (met voorbeeld); dit is de reserve.\n" +
   "# Dit bestand wordt deels gemaakt door _bron/tools/cms-config.js.\n\n";
 fs.writeFileSync(FILE, header + yaml.dump(cfg, { lineWidth: -1, noRefs: true }));
 console.log(".pages.yml bijgewerkt:", cfg.content.map(c => c.label).join(", "));

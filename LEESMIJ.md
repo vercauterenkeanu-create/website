@@ -1,26 +1,36 @@
 # Website Vai Avanti
 
-## Twee manieren om de site aan te passen
+## De site aanpassen
 
-- **Beheerpagina** (`/beheer/` op de site). Hier pas je pagina's en instellingen aan, met een live voorbeeld.
-  - Blokken toevoegen, verslepen en bewerken.
-  - Nieuwe pagina's maken en in het menu zetten.
-  - Foto's uploaden.
-  - Opslaan gebeurt met een koppelcode: een GitHub "fine-grained token" voor enkel deze repository, met Contents: Read and write. De uitleg staat op de aanmeldpagina zelf.
-- **Pages CMS** (app.pagescms.org). Hier staan wedstrijdverslagen, honden en nesten als formulieren. De pagina's en instellingen kunnen hier ook.
+**Beheerpagina** (`/beheer/` op de site). Hier pas je alles aan, met een live voorbeeld:
+
+- **Pagina's**: blokken toevoegen, verslepen en bewerken; nieuwe pagina's maken en in het menu zetten.
+- **Verslagen**: nieuwe wedstrijdverslagen schrijven, zoeken, aanpassen of verwijderen. Herkende honden staan onder de tekst.
+- **Honden**: alle gegevens, foto's, palmares en gezondheid; volgorde met de pijltjes.
+- **Nesten**: nesten met hun pups.
+- **Instellingen**: verwachte nesten, contactgegevens, foto's bovenaan de vaste pagina's.
+
+Aanmelden gaat met een **wachtwoord**. Achter dat wachtwoord zit een koppelcode (een GitHub "fine-grained token" voor enkel deze repository). De koppelcode staat versleuteld in `_bron/beheer/sleutel.json` (PBKDF2 met 600.000 rondes + AES-GCM). Zonder het wachtwoord is ze onbruikbaar.
+
+- Wachtwoord instellen of veranderen (Keanu): open /beheer, klik "Wachtwoord instellen (voor Keanu)", plak een nieuwe koppelcode en kies een wachtwoord van minstens 12 tekens.
+- Rechten van de koppelcode: Contents (Read and write) en Actions (Read-only).
+- Verloopt de koppelcode, dan meldt het beheer dat bij het aanmelden. Maak dan een nieuwe en stel het wachtwoord opnieuw in.
+- "Onthoud mij op dit toestel" bewaart de koppelcode in die browser. Afmelden staat bij Instellingen.
+
+**Pages CMS** (app.pagescms.org) blijft werken als reserve. Alles staat er ook in als formulieren.
 
 ## Hoe het werkt
 
 - **inhoud/**: alle inhoud.
-  - `nieuws/`: één bestand per wedstrijdverslag.
+  - `nieuws/`: één JSON-bestand per wedstrijdverslag (de lopende tekst staat in het veld `tekst`).
   - `honden/`: één bestand per hond.
   - `nesten/`: één bestand per nest, met de pups erin.
   - `paginas/`: startpagina, Over ons, Contact en eigen pagina's, opgebouwd uit blokken.
   - `site.json`: instellingen (verwachte nesten, contactgegevens, foto's bovenaan de vaste pagina's).
 - **_bron/assets/blokken.js**: de bloktypes en hun opmaak. De site én de beheerpagina gebruiken dit bestand, zodat het voorbeeld klopt.
 - **_bron/beheer/**: de beheerpagina.
-- **_bron/tools/cms-config.js**: zet de bloktypes ook in `.pages.yml`. Draai dit na een wijziging aan de bloktypes.
-- **media/**: alle foto's. Nieuwe foto's uit Pages CMS komen hier terecht.
+- **_bron/tools/cms-config.js**: zet de bloktypes en bestandsformaten ook in `.pages.yml`. Draai dit na een wijziging aan de bloktypes.
+- **media/**: alle foto's. Nieuwe foto's uit het beheer of Pages CMS komen hier terecht.
 - **.pages.yml**: hoe het beheerscherm eruitziet (velden en labels).
 - **.github/workflows/website.yml**: na elke wijziging bouwt GitHub de site en zet ze online.
 - **_bron/**: opmaak (`assets/`) en scripts (`tools/`). Shany hoeft hier nooit iets aan te doen.
@@ -51,7 +61,7 @@ Open daarna http://localhost:8790.
 1. Maak een gratis sleutel aan op https://web3forms.com.
 2. Zet de sleutel in `_bron/config.json`: `{ "web3formsKey": "jouw-sleutel" }`.
 
-Zonder sleutel opent het formulier het e-mailprogramma van de bezoeker.
+Zonder sleutel toont het formulier het e-mailadres en telefoonnummer; het opent nooit een e-mailprogramma.
 
 ## Deelbare link (claude.ai)
 
