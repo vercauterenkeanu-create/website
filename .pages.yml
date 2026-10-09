@@ -356,6 +356,17 @@ content:
               - name: fotoRechts
                 label: Foto rechts zetten
                 type: boolean
+              - name: fotoGrootte
+                label: Grootte van de foto
+                type: select
+                options:
+                  values:
+                    - Normaal
+                    - Klein
+                    - Groot
+              - name: volledig
+                label: Hele foto tonen (niet bijsnijden)
+                type: boolean
               - name: knoptekst
                 label: Tekst op de knop (mag leeg)
                 type: string
@@ -395,6 +406,23 @@ content:
                 options:
                   multiple:
                     max: 40
+              - name: grootte
+                label: Grootte van de foto's
+                type: select
+                options:
+                  values:
+                    - Normaal
+                    - Klein
+                    - Groot
+              - name: vorm
+                label: Vorm
+                description: Volledig = de foto's worden niet bijgesneden.
+                type: select
+                options:
+                  values:
+                    - Liggend
+                    - Vierkant
+                    - Volledig
               - name: achtergrond
                 label: Achtergrond
                 type: select

@@ -178,7 +178,7 @@ button { cursor: pointer; }
 .schakel input:checked + .spoor { background: var(--gold); }
 .schakel input:checked + .spoor::after { translate: 18px 0; }
 .schakel input:focus-visible + .spoor { outline: 2px solid var(--gold); outline-offset: 2px; }
-.keuzes { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+.keuzes { display: inline-flex; justify-self: start; max-width: 100%; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
 .keuzes button { border: 0; background: none; padding: 8px 14px; font-weight: 600; font-size: 14px; }
 .keuzes button + button { border-left: 1px solid var(--line); }
 .keuzes button[aria-pressed="true"] { background: var(--ink); color: #fff; }
@@ -226,10 +226,16 @@ dialog.kiezer::backdrop { background: rgba(15, 13, 10, .55); }
 .kiezer-kaart:hover { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201, 160, 82, .15); }
 .kiezer-kaart b { font-size: 15px; }
 .kiezer-kaart span { color: var(--muted); font-size: 13px; }
-.foto-kiezer-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; max-height: 60dvh; overflow-y: auto; }
-.foto-kiezer-raster button { padding: 0; border: 2px solid transparent; border-radius: 10px; overflow: hidden; background: none; }
-.foto-kiezer-raster button:hover { border-color: var(--gold); }
-.foto-kiezer-raster img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+dialog.kiezer.foto-kiezer { width: min(1180px, calc(100vw - 32px)); }
+.foto-kiezer .kiezer-in { max-height: calc(100dvh - 48px); grid-template-rows: auto auto minmax(0, 1fr); }
+.foto-kiezer-zoek { display: flex; align-items: center; gap: 14px; }
+.foto-kiezer-zoek .zoek-wrap { flex: 1; }
+.foto-aantal { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.foto-kiezer-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); grid-auto-rows: max-content; align-content: start; gap: 14px; min-height: 0; max-height: 68dvh; overflow-y: auto; padding: 2px; }
+.foto-kiezer-raster button { display: grid; gap: 6px; padding: 6px; border: 2px solid transparent; border-radius: 12px; background: #fff; text-align: left; transition: border-color .15s, box-shadow .15s; }
+.foto-kiezer-raster button:hover, .foto-kiezer-raster button:focus-visible { border-color: var(--gold); box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .35); }
+.foto-kiezer-raster img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: var(--ivory); }
+.foto-label { font-size: 12.5px; font-weight: 600; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- Aanmelden ---------- */
 .aanmelden { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: var(--ink); }

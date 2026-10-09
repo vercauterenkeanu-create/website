@@ -174,8 +174,15 @@
   };
   const BLOKKEN = {
     tekst: { label: "Tekst", omschrijving: "Een titel met een stuk tekst.", velden: [F.bovenschrift, F.titel, { naam: "tekst", label: "Tekst", type: "opmaak" }, F.achtergrond], nieuw: { titel: "Nieuwe titel", tekst: "Schrijf hier je tekst.", achtergrond: "Wit" } },
-    tekstfoto: { label: "Tekst met foto", omschrijving: "Tekst naast een grote foto, eventueel met een knop.", velden: [F.bovenschrift, F.titel, { naam: "tekst", label: "Tekst", type: "opmaak" }, { naam: "foto", label: "Foto", type: "foto" }, { naam: "fotoRechts", label: "Foto rechts zetten", type: "aanuit" }, { naam: "knoptekst", label: "Tekst op de knop (mag leeg)", type: "regel" }, { naam: "knoplink", label: "Knop gaat naar", type: "link" }, F.achtergrond], nieuw: { titel: "Nieuwe titel", tekst: "Schrijf hier je tekst.", achtergrond: "Wit" } },
-    fotos: { label: "Foto's", omschrijving: "Een fotogalerij. Bezoekers kunnen de foto's groot bekijken.", velden: [F.bovenschrift, F.titel, { naam: "fotos", label: "Foto's", type: "fotos" }, F.achtergrond], nieuw: { titel: "Foto's", fotos: [], achtergrond: "Beige" } },
+    tekstfoto: { label: "Tekst met foto", omschrijving: "Tekst naast een grote foto, eventueel met een knop.", velden: [F.bovenschrift, F.titel, { naam: "tekst", label: "Tekst", type: "opmaak" }, { naam: "foto", label: "Foto", type: "foto" }, { naam: "fotoRechts", label: "Foto rechts zetten", type: "aanuit" },
+      { naam: "fotoGrootte", label: "Grootte van de foto", type: "keuze", opties: ["Normaal", "Klein", "Groot"] }, { naam: "volledig", label: "Hele foto tonen (niet bijsnijden)", type: "aanuit" }, { naam: "knoptekst", label: "Tekst op de knop (mag leeg)", type: "regel" }, { naam: "knoplink", label: "Knop gaat naar", type: "link" }, F.achtergrond], nieuw: { titel: "Nieuwe titel", tekst: "Schrijf hier je tekst.", achtergrond: "Wit" } },
+    fotos: {
+      label: "Foto's", omschrijving: "Een fotogalerij. Bezoekers kunnen de foto's groot bekijken.",
+      velden: [F.bovenschrift, F.titel, { naam: "fotos", label: "Foto's", type: "fotos" },
+        { naam: "grootte", label: "Grootte van de foto's", type: "keuze", opties: ["Normaal", "Klein", "Groot"] },
+        { naam: "vorm", label: "Vorm", type: "keuze", opties: ["Liggend", "Vierkant", "Volledig"], hulp: "Volledig = de foto's worden niet bijgesneden." }, F.achtergrond],
+      nieuw: { titel: "Foto's", fotos: [], achtergrond: "Beige" }
+    },
     citaat: { label: "Citaat", omschrijving: "Een opvallende uitspraak in grote letters.", velden: [{ naam: "tekst", label: "Citaat", type: "tekst" }, { naam: "van", label: "Van wie", type: "regel" }, F.achtergrond], nieuw: { tekst: "Een mooie uitspraak.", van: "", achtergrond: "Beige" } },
     aankondiging: { label: "Aankondiging met knop", omschrijving: "Een opvallende balk met titel, tekst en knop.", velden: [{ naam: "label", label: "Klein opschrift", type: "regel" }, F.titel, { naam: "tekst", label: "Tekst", type: "tekst" }, { naam: "knoptekst", label: "Tekst op de knop", type: "regel" }, { naam: "knoplink", label: "Knop gaat naar", type: "link" }, { naam: "stijl", label: "Stijl", type: "keuze", opties: ["Donker", "Licht"] }], nieuw: { label: "Nieuw", titel: "Iets om aan te kondigen", tekst: "", knoptekst: "Neem contact op", knoplink: "contact.html", stijl: "Donker" } },
     paginakop: { label: "Paginakop met foto", omschrijving: "De donkere kop bovenaan een pagina, met één of meer foto's.", velden: [F.bovenschrift, F.titel, { ...F.intro, hulp: TOKENS_HULP }, F.fotos, F.knoptekst, F.knoplink, ...KOP], nieuw: { bovenschrift: "Vai Avanti", titel: "Nieuwe *pagina*", intro: "", fotos: [] } },
@@ -230,6 +237,8 @@
       { naam: "titel", label: "Titel", type: "regel", hulp: "Bijvoorbeeld de naam van de wedstrijd of de renbaan." },
       { naam: "datum", label: "Datum", type: "datum" },
       { naam: "fotos", label: "Foto's", type: "fotos", hulp: "De eerste foto wordt de grote foto." },
+      { naam: "fotoGrootte", label: "Grootte van de foto's", type: "keuze", opties: ["Normaal", "Klein", "Groot"], hulp: "Groot = de foto's staan breed boven de tekst." },
+      { naam: "alleFotos", label: "Alle foto's tonen (niet enkel de eerste vier)", type: "aanuit" },
       { naam: "tekst", label: "Verslag", type: "opmaak", hulp: "De namen van de honden worden vanzelf herkend en gelinkt." },
       { naam: "overzicht", label: "Dit is een seizoensoverzicht", type: "aanuit" },
       { naam: "kop", label: "Kop op de startpagina (mag leeg blijven)", type: "regel" },
@@ -247,6 +256,7 @@
       { naam: "hoogtepunt", label: "Grootste prestatie (kort)", type: "regel" },
       { naam: "omslagfoto", label: "Hoofdfoto", type: "foto" },
       { naam: "fotos", label: "Meer foto's", type: "fotos" },
+      { naam: "fotoGrootte", label: "Grootte van de foto's onderaan de pagina", type: "keuze", opties: ["Normaal", "Klein", "Groot"] },
       lijstVan("gezondheid", "Gezondheidsresultaten", "Eén resultaat per regel, bijvoorbeeld Heupen Excellent / A1."),
       { naam: "palmares", label: "Palmares", type: "lijst", hulp: "De volgorde maakt niet uit; de site sorteert op jaar.", velden: [{ naam: "jaar", label: "Jaar", type: "regel" }, { naam: "titel", label: "Titel", type: "regel" }, { naam: "plaats", label: "Plaats", type: "regel" }] },
       { naam: "stamboom", label: "Link naar de stamboom (Breed Archive)", type: "regel" },
@@ -259,6 +269,7 @@
       { naam: "vader", label: "Vader", type: "regel" },
       { naam: "moeder", label: "Moeder", type: "regel", hulp: "Gebruik exact de officiële naam, dan wordt ze automatisch gelinkt." },
       { naam: "foto", label: "Foto of affiche van het nest", type: "foto" },
+      { naam: "fotoGrootte", label: "Grootte van die foto", type: "keuze", opties: ["Normaal", "Klein", "Groot"], hulp: "Groot = de hele affiche, breed onder de titel." },
       { naam: "tekst", label: "Over dit nest", type: "opmaak" },
       { naam: "pups", label: "Pups", type: "lijst", velden: [
         { naam: "naam", label: "Officiële naam", type: "regel" }, { naam: "roepnaam", label: "Roepnaam", type: "regel" },
@@ -285,13 +296,13 @@
         highlight: d.hoogtepunt || "", pedigree: d.stamboom || "", health: arr(d.gezondheid).map(String),
         titles: arr(d.palmares).map(t => [String(t.jaar ?? ""), t.titel || "", t.plaats || ""]).filter(t => t[1]).sort((a, b) => yearOf(b[0]) - yearOf(a[0])),
         cover, pos: d.fotoFocus || "", photos: [cover, ...photos.filter(p => p !== cover)].filter(Boolean),
-        noteMd: String(d.tekst || "").trim(), extraNames: arr(d.andereNamen).map(String), order: Number(d.volgorde ?? 999)
+        noteMd: String(d.tekst || "").trim(), extraNames: arr(d.andereNamen).map(String), order: Number(d.volgorde ?? 999), fotoGrootte: d.fotoGrootte || ""
       };
     }).filter(d => d.call).sort((a, b) => a.order - b.order || a.call.localeCompare(b.call));
 
     const nesten = Object.entries(raw.nesten || {}).map(([id, l]) => ({
       id: slug(l.letter || id), letter: String(l.letter || id).toUpperCase(), bornIso: iso(l.geboren), born: fmtDate(l.geboren, taal),
-      sire: l.vader || "", dam: l.moeder || "", introMd: String(l.tekst || "").trim(), photos: arr(l.foto),
+      sire: l.vader || "", dam: l.moeder || "", introMd: String(l.tekst || "").trim(), photos: arr(l.foto), fotoGrootte: l.fotoGrootte || "",
       pups: arr(l.pups).map(p => ({
         name: p.naam || "", call: p.roepnaam || p.naam || "", sex: p.geslacht || "", color: p.kleur || "",
         country: p.woontIn || "", health: arr(p.gezondheid).map(String), results: arr(p.uitslagen).map(String),
@@ -307,7 +318,7 @@
       const dateIso = iso(p.datum) || `${String(id).slice(0, 4)}-01-01`;
       return {
         id, title: p.titel || id, dateIso, dateKnown: !!p.datum && (!p.datumOnbekend || !/-01-01$/.test(dateIso)), year: yearOf(dateIso) || yearOf(id),
-        order: Number(p.volgorde || 0), kop: p.kop || "", summary: p.samenvatting || "", recap: !!p.overzicht, photos: arr(p.fotos), body: p.tekst || ""
+        order: Number(p.volgorde || 0), kop: p.kop || "", summary: p.samenvatting || "", recap: !!p.overzicht, photos: arr(p.fotos), fotoGrootte: p.fotoGrootte || "", alleFotos: !!p.alleFotos, body: p.tekst || ""
       };
     }).sort((a, b) => b.dateIso.localeCompare(a.dateIso) || b.order - a.order || String(a.id).localeCompare(String(b.id)));
 
@@ -537,6 +548,7 @@ ${onderwerpen.map(o => `        <option>${esc(o)}</option>`).join("\n")}
       ${extra}
     </div>`;
     const bgClass = b => ({ Beige: " band", Donker: " dark" }[b.achtergrond] || "");
+    const grootteKlas = g => ({ Klein: " foto-klein", Groot: " foto-groot" }[g] || "");
     const button = (text, link, cls = "btn btn-gold") => text ? `<a class="${cls}" href="${esc(link || "contact.html")}">${esc(text)} ${ICON.arrow}</a>` : "";
     // Knop met standaardtekst: leeg gemaakt = geen knop
     const knop = (b, tekst, link, cls) => button(heeft(b, "knoptekst") ? b.knoptekst : tekst, b.knoplink || link, cls);
@@ -737,7 +749,7 @@ ${(b.leden || []).map((t, i) => `    <div class="person${i % 2 ? " flip" : ""} r
       },
       tekstfoto(b) {
         return `<section class="section-tight blok-tekstfoto${bgClass(b)}">
-  <div class="wrap tekstfoto${b.fotoRechts ? " rechts" : ""}">
+  <div class="wrap tekstfoto${b.fotoRechts ? " rechts" : ""}${grootteKlas(b.fotoGrootte)}${b.volledig ? " volledig" : ""}">
     <div class="tf-foto reveal">${b.foto ? shot(b.foto, { caption: plain(b.titel || ""), sizes: "(max-width: 980px) 100vw, 50vw" }) : ""}</div>
     <div class="tf-tekst reveal">
       ${b.bovenschrift ? `<span class="eyebrow">${esc(b.bovenschrift)}</span>` : ""}
@@ -753,8 +765,8 @@ ${(b.leden || []).map((t, i) => `    <div class="person${i % 2 ? " flip" : ""} r
         return `<section class="section-tight blok-fotos${bgClass(b)}">
   <div class="wrap">
     ${b.titel || b.bovenschrift ? head({ bovenschrift: b.bovenschrift, titel: b.titel }, "") : ""}
-    <div class="gallery">
-${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel || ""), sizes: "(max-width: 640px) 50vw, 25vw" })).join("\n")}
+    <div class="gallery${grootteKlas(b.grootte)}${{ Vierkant: " vorm-vierkant", Volledig: " vorm-volledig" }[b.vorm] || ""}">
+${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel || ""), sizes: b.grootte === "Groot" ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw" })).join("\n")}
     </div>
   </div>
 </section>`;
@@ -883,7 +895,7 @@ ${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel
 ${gallery.length ? `<section class="band section-tight">
   <div class="wrap">
     <div class="section-head reveal"><div><span class="eyebrow">${esc(t("Foto's"))}</span><h2>${inline(t("{naam} in *beeld*", { naam: d.call }))}</h2></div></div>
-    <div class="gallery">
+    <div class="gallery${grootteKlas(d.fotoGrootte)}">
 ${gallery.map(p => "      " + shot(p, { group: gal, caption: `${d.call} (${d.name})`, sizes: "(max-width: 640px) 50vw, 25vw" })).join("\n")}
     </div>
   </div>
@@ -933,7 +945,7 @@ ${posts.slice(0, 8).map(mention).join("\n")}
     };
     const nestBlok = l => `<section class="litter-block" id="${l.id}">
   <div class="wrap">
-    <div class="litter-head reveal">
+    <div class="litter-head reveal${grootteKlas(l.fotoGrootte)}">
       <div class="litter-letter">${esc(l.letter)}</div>
       <div>
         <h2>${esc(t("{letter}-nest", { letter: l.letter }))}</h2>
@@ -941,7 +953,7 @@ ${posts.slice(0, 8).map(mention).join("\n")}
           ${esc(l.sire)} × ${l.damId ? `<a href="hond-${l.damId}.html">${esc(l.dam)}</a>` : esc(l.dam)}</div>
         ${l.introMd ? `<div class="litter-intro">${md(l.introMd)}</div>` : ""}
       </div>
-      ${heeftFoto(l.photos[0]) ? shot(l.photos[0], { group: "nest-" + l.id, caption: t("{letter}-nest", { letter: l.letter }), sizes: "300px" }) : ""}
+      ${heeftFoto(l.photos[0]) ? shot(l.photos[0], { group: "nest-" + l.id, caption: t("{letter}-nest", { letter: l.letter }), sizes: l.fotoGrootte === "Groot" ? "(max-width: 800px) 100vw, 760px" : "300px" }) : ""}
     </div>
     <div class="pups">
 ${l.pups.map(pupCard).join("\n")}
@@ -963,13 +975,16 @@ ${l.pups.map(pupCard).join("\n")}
       const text = plain(p.body);
       const long = !open && (text.length > 520 || text.split(/\n{2,}/).length > 4);
       const photos = p.photos.filter(heeftFoto);
-      const extra = photos.length - 4;
+      const groot = p.fotoGrootte === "Groot";
+      // Hoeveel foto's zichtbaar zijn (de grote foto meegeteld); de rest zit enkel in de grote weergave
+      const zichtbaar = p.alleFotos ? photos.length : (groot ? 6 : 4);
+      const extra = photos.length - zichtbaar;
       const info = D.DOG_INFO || {};
-      return `<article class="report reveal${p.recap ? " recap" : ""}${photos.length ? "" : " no-photo"}" id="${esc(p.id)}" data-dogs="${p.dogs.join(" ")}">
+      return `<article class="report reveal${grootteKlas(p.fotoGrootte)}${p.recap ? " recap" : ""}${photos.length ? "" : " no-photo"}" id="${esc(p.id)}" data-dogs="${p.dogs.join(" ")}">
       ${photos.length ? `<div class="report-media">
-        ${shot(photos[0], { group: p.id, caption: p.title, sizes: "(max-width: 980px) 100vw, 340px" })}
-        ${photos.length > 1 ? `<div class="thumbs">${photos.slice(1, 4).map((ph, i) => shot(ph, { group: p.id, caption: p.title, sizes: "110px", extra: i === 2 && extra > 0 ? `<span class="count">+${extra}</span>` : "" })).join("")}</div>` : ""}
-        ${photos.slice(4).map(ph => shot(ph, { group: p.id, caption: p.title, hidden: true })).join("")}
+        ${shot(photos[0], { group: p.id, caption: p.title, sizes: groot ? "(max-width: 980px) 100vw, 1100px" : "(max-width: 980px) 100vw, 340px" })}
+        ${photos.length > 1 ? `<div class="thumbs">${photos.slice(1, zichtbaar).map((ph, i) => shot(ph, { group: p.id, caption: p.title, sizes: groot ? "220px" : "110px", extra: i === zichtbaar - 2 && extra > 0 ? `<span class="count">+${extra}</span>` : "" })).join("")}</div>` : ""}
+        ${photos.slice(zichtbaar).map(ph => shot(ph, { group: p.id, caption: p.title, hidden: true })).join("")}
       </div>` : ""}
       <div class="report-body">
         <span class="report-tag">${p.recap ? esc(t("Seizoensoverzicht")) + " · " : ""}${esc(reportDate(p))}${photos.length ? ` · ${esc(t(photos.length === 1 ? "{n} foto" : "{n} foto's", { n: photos.length }))}` : ""}</span>

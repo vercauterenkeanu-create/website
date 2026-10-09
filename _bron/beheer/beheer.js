@@ -317,17 +317,51 @@
       input.click();
     });
   }
+  // Waar staat elke foto? -> Map pad -> ["Flappie", "WM Revanche", ...], in de volgorde van de site (nieuwste verslagen eerst)
+  function fotoGebruik() {
+    const gebruik = new Map();
+    const voeg = (p, naam) => { if (typeof p !== "string" || !p.startsWith("/media/")) return; if (!gebruik.has(p)) gebruik.set(p, []); if (naam && !gebruik.get(p).includes(naam)) gebruik.get(p).push(naam); };
+    const zoekIn = (o, naam) => { if (typeof o === "string") voeg(o, naam); else if (Array.isArray(o)) o.forEach(x => zoekIn(x, naam)); else if (o && typeof o === "object") Object.values(o).forEach(x => zoekIn(x, naam)); };
+    const data = map => bestandenIn(map).map(p => S.bestanden[p].data);
+    data("nieuws").sort((a, b) => String(b.datum).localeCompare(String(a.datum))).forEach(d => zoekIn(d, d.titel));
+    data("honden").forEach(d => zoekIn(d, d.roepnaam));
+    data("nesten").forEach(d => { zoekIn(d.foto, `${d.letter}-nest`); (d.pups || []).forEach(p => zoekIn(p, p.roepnaam || p.naam)); });
+    bestandenIn("paginas").forEach(p => zoekIn(S.bestanden[p].data, paginaNaam(p)));
+    return gebruik;
+  }
   function kiesBestaandeFoto() {
     return new Promise(resolve => {
-      const paden = [...Object.keys(S.uploads), ...Object.keys(S.data.mediaInfo)];
-      const dlg = h("dialog", { class: "kiezer" });
+      const gebruik = fotoGebruik();
+      const paden = [...new Set([...Object.keys(S.uploads).reverse(), ...gebruik.keys(), ...Object.keys(S.data.mediaInfo)])];
+      const dlg = h("dialog", { class: "kiezer foto-kiezer" });
       const sluit = v => { dlg.close(); dlg.remove(); resolve(v); };
+      const zoek = h("input", { type: "search", class: "zoek", placeholder: "Zoek op hond, verslag of nest…", "aria-label": "Foto's zoeken" });
+      const aantal = h("span", { class: "foto-aantal" });
+      const raster = h("div", { class: "foto-kiezer-raster" });
+      const vul = () => {
+        const q = zoek.value.trim().toLowerCase();
+        raster.innerHTML = "";
+        let n = 0;
+        for (const p of paden) {
+          const namen = gebruik.get(p) || [];
+          const label = S.uploads[p] && !S.uploads[p].opgeslagen ? "Nieuw" : namen.join(" · ") || "Niet gebruikt";
+          if (q && !label.toLowerCase().includes(q) && !p.toLowerCase().includes(q)) continue;
+          n++;
+          raster.append(h("button", { type: "button", title: label, onclick: () => sluit(p) },
+            h("img", { src: fotoUrl(p), alt: "", loading: "lazy" }), h("span", { class: "foto-label" }, label)));
+        }
+        aantal.textContent = `${n} ${n === 1 ? "foto" : "foto's"}`;
+      };
+      zoek.addEventListener("input", vul);
+      vul();
       dlg.append(h("div", { class: "kiezer-in" },
         h("header", {}, h("h2", { class: "dlg-titel" }, "Kies een foto"), h("button", { class: "icoonknop", "aria-label": "Sluiten", html: I.weg, onclick: () => sluit(null) })),
-        h("div", { class: "foto-kiezer-raster" }, paden.map(p => h("button", { type: "button", title: p.split("/").pop(), onclick: () => sluit(p) }, h("img", { src: fotoUrl(p), alt: "", loading: "lazy" }))))));
+        h("div", { class: "foto-kiezer-zoek" }, h("div", { class: "zoek-wrap", html: I.zoek }, zoek), aantal),
+        raster));
       dlg.addEventListener("cancel", () => resolve(null));
       document.body.append(dlg);
       dlg.showModal();
+      zoek.focus();
     });
   }
 
