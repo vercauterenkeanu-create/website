@@ -1,0 +1,11 @@
+---
+titel: Nationale ren Rotterdam
+datum: "2024-01-01"
+datumOnbekend: true
+volgorde: 1
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos: []
+---
+Eerste wedstrijd van het seizoen met alleen Tiamo aan de start (beide loopse meiden en Tahiti natuurlijk geblesseerd) Tiamo had een geweldige start in de eerste ronde en liep een prachtige tijd van 22.12. De tweede ronde had hij een moeilijkere race met enkele botsingen in de start en in de eerste bocht, maar hij ging waar en eindigde als eerste zonder tijd. En dan de finale met een matige start hij liep een prachtige race en finishte als eerste in 22.46!

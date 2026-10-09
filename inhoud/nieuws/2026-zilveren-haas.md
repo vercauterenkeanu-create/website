@@ -1,0 +1,20 @@
+---
+titel: Zilveren Haas
+datum: "2026-01-01"
+datumOnbekend: true
+volgorde: 11
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000554.webp
+---
+Vandaag aan de start: Vai Avanti Xamali & Vai Avanti Tiamo
+
+Mayzie's vierde wedstrijd vandaag. Dit meisje moet nog veel leren. In de eerste ronde eindigde ze als tweede met een (voor haar) geweldige tijd van 22,46. Omdat er geen tijd van de andere race in haar gewichtsklasse bekend was, ging ze in de finale onder het blauwe jasje van start.
+
+Met een matige start moest ze nog haar weg vinden in het peloton, maar ze wist toch een prachtige 4e plaats te behalen!💜
+
+Zonder erbij na te denken schreef ik Flappie in voor de veteranenklasse. Daarbij vergat ik dat er in België een ONGELOOFLIJKE regel geldt dat je pas een veteraan bent als je 6,5 jaar oud bent 🙄 Dus besloten we hem in de 'normale' competitie te laten meedoen. Op naar de weegschaal en opnieuw de lichtste reu van de dag 😅 We wisten dat het een zware wedstrijd zou worden met veel jonge en snelle reuen in zijn gewichtsklasse. In de eerste ronde een slechte start en een klein opstootje met Fenrir bij de start, maar daarna ging hij achter Fenrir aan op jacht naar die eerste plaats. Een prachtige ronde en een geweldige tijd van 21,92 (we hebben dit jaar geen 350 m gelopen 😅) – hij behaalde de vierde tijd en plaatste zich daarmee voor de A-finale. Toen kwam de finale met een (SCHOKKENDE!) slechte start 😂 Hij eindigde als derde achter twee ongelooflijk jonge en snelle honden ❤️
+
+Maar het hoogtepunt van vandaag was dat we eindelijk onze kleine meid SeeYa (Vai Avanti Ylva) weer zagen 💕 Bedankt Klaudia en Adrian dat jullie zo goed voor haar hebben gezorgd! Ze ziet er geweldig uit!🤩

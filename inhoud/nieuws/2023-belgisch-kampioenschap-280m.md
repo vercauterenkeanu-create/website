@@ -1,0 +1,24 @@
+---
+titel: Belgisch Kampioenschap 280m
+datum: "2023-01-01"
+datumOnbekend: true
+volgorde: 10
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000285.webp
+  - /media/200000281.webp
+  - /media/200000290.webp
+---
+Door het slechte weer en de renbaan van Beringen was volledig overstroomd werd op het laatste moment besloten om de race naar Awans te verplaatsen.
+
+Vorig jaar wonnen in Awans zowel Tahiti als Tiamo de titel. Iets waarvan ik dacht dat het nooit meer zou gebeuren. Maar mijn honden hebben mijn ongelijk weer eens bewezen 😅
+
+Tiamo lichtste reu van de dag liep in klasse 1 waar 5 honden aan de start stonden. Eerste ronde had hij weer een Flappie start 😅 maar won zijn ronde in 17.54 toch goed voor de snelste tijd. Dan door naar de finale onder het rode rendek! Zowel Tiamo als Black Bullet hadden een geweldige start en liepen naast elkaar tot aan de laatste bocht waar Flappie besloot zijn turbo in te zetten en zijn race te winnen!
+
+Vai Avanti Tiamo Belgisch Kampioen recing 280m 2023
+
+Tahiti liep vandaag in klasse 2. Het was een beetje een gok hoe ze het vandaag zou doen want ze is 21 dagen na haar loopsheid. Eerste ronde won ze in een mooie tijd van 17.31. De tweede ronde had ze meer moeite nodig om op gang te komen maar won toch in 17.68. Met een heel klein hartje ging ik met haar de finale in. In de finale had ze een slechte start maar vond toch haar weg naar de eerste plaats in 17.68. Nu krijgt ze echt welverdiende rust!
+
+Vai Avanti Tahiti Belgisch kampioen racing 280m 2023

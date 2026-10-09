@@ -1,0 +1,32 @@
+---
+titel: Champ of the Sand
+datum: "2024-01-01"
+datumOnbekend: true
+volgorde: 8
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000371.webp
+---
+Wat een dag!
+
+Ik weet niet waar ik moet beginnen!
+
+#### Champ of Sand 2024 Rotterdam
+
+Het was alle hens aan dek voor ons vandaag. Tiamo liep, Ryleigh liep voor het eerst weer mee in de veterenklasse na haar pups en Tahiti liep voor het eerst weer mee na haar blessure van februari. Ook een paar van Tiamo's kinderen liepen hier vandaag.
+
+Winsome Yankees Ollyster ( WY Doolin X VA Tiamo) won de B-finale in een prachtige race! Goed gedaan Oslo! Gefeliciteerd Thierry!
+
+Forest Laws Velvet (Iowa GG X VA Tiamo) liep haar tweede wedstrijd ooit en hoe ze dat voor elkaar kreeg! Ze won alle 3 haar races vandaag en haar finale bezorgde me zelfs kippenvel!!❤️
+
+Old Road's Ryleigh won haar eerste race in een tijd van 18.25 en werd 4e achter de reuen in de finale! Goed gedaan Lylo, nu gaan we plezier maken!
+
+Vai Avanti Tiamo heeft vandaag 3 geweldige races gelopen! Ik ben zo ongelooflijk trots op je Flappie!
+
+Vai Avanti Tiamo wint de Champ of Sand in 22.28 ❤️
+
+Vai Avanti Tahiti wat een meid ben jij! Ik voelde me de hele week ziek van het stressen over deze dag. Zal ze 3 runs halen, zal haar teen goed blijven?,... Ik kon vandaag niet eten van de stress🙈🤣
+
+Maar zoals ze altijd doet, bewijst Vienna graag het tegendeel! De eerste run had ze een slechte start, maar ze kwam snel los en won in 21.85. De tweede run ging ze als een kanonskogel van start en won in een nog betere tijd van 21.65! En met een heel klein hartje gingen we de finale in. Ze had een slechte start in de finale, maar we hadden het geluk dat ze de buitenbak had gekregen en iedereen aan de buitenkant kon passeren. Vai Avanti Tahiti wint de Champ of Sand 2024 in 21,92!❤️ We hebben een lange weg afgelegd met maanden van revalidatie en veel zweet en vooral tranen. Ik zou niet trotser kunnen zijn op waar ze nu staat! Je bent mijn unieke Vienna! ❤️

@@ -1,0 +1,16 @@
+---
+titel: Sandbahnmeister 2022
+datum: "2022-01-01"
+datumOnbekend: true
+volgorde: 2
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000122.webp
+---
+Wat een dag! Onze eerste reis met onze nieuwe camper, Flappie die voor het eerst met de A-klasse moest rennen en Vienna die nog steeds terugkomt van haar loopsheid.
+
+Flappie won zijn eerste ronde in een mooie tijd van 22.55, verbeterde zelfs de tweede ronde met 22.45 en liep een geweldige finale en werd 4e. Ik ben zo ongelooflijk trots op hem!
+
+Vienna wat een hond 🙈 Ze begon de eerste ronde behoorlijk slecht en werd toen in de eerste bocht geraakt en viel toen bijna maar ging er toch door en werd tweede. Na haar te hebben bekeken leek alles in orde dus op naar de tweede ronde en daar was ze weer mijn Vienna ze vloog weg in een geweldige tijd van 22.11 en ging naar de finale in het rode rendek. In de finale openden ze het starthok en daar vloog ze als eerste over de finish en mag zich "Sandbahnmeisterin 2022" noemen!

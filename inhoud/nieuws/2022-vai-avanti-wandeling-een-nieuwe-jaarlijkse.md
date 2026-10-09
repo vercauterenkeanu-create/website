@@ -1,0 +1,12 @@
+---
+titel: "Vai Avanti-wandeling: een nieuwe jaarlijkse traditie"
+datum: "2022-01-01"
+datumOnbekend: true
+volgorde: 16
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000157.webp
+---
+Van links naar rechts: Vai Avanti Unexpected, Old Road's Ryleigh, Vai Avanti Tahiti, Vai Avanti Tiamo, Vai Avanti Thor en Vai Avanti Thiago

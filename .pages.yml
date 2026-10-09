@@ -1,0 +1,358 @@
+# Beheerscherm (Pages CMS) voor de website van Vai Avanti.
+# Na elke wijziging bouwt GitHub de site opnieuw en staat ze binnen enkele minuten online.
+
+media:
+  input: media
+  output: /media
+  extensions: [jpg, jpeg, png, webp]
+  rename: safe
+
+content:
+  - name: nieuws
+    label: Wedstrijdverslagen
+    type: collection
+    path: inhoud/nieuws
+    format: yaml-frontmatter
+    filename: "{year}-{month}-{day}-{primary}.md"
+    view:
+      primary: titel
+      sort: datum
+      order: desc
+    fields:
+      - name: titel
+        label: Titel
+        type: string
+        required: true
+        description: "Bijvoorbeeld de naam van de wedstrijd of de renbaan."
+      - name: datum
+        label: Datum
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+        description: "Dag van de wedstrijd. Nieuwste verslagen staan bovenaan."
+      - name: fotos
+        label: Foto's
+        type: image
+        description: "Voeg foto's toe van je gsm of computer. De eerste foto wordt de grote foto."
+        options:
+          multiple:
+            max: 40
+      - name: body
+        label: Verslag
+        type: rich-text
+        description: "De namen van de honden worden vanzelf herkend en gelinkt."
+        options:
+          format: markdown
+          media: false
+      - name: kop
+        label: Kop voor de startpagina (mag leeg blijven)
+        type: string
+      - name: samenvatting
+        label: Korte samenvatting voor de startpagina (mag leeg blijven)
+        type: text
+      - name: overzicht
+        label: Dit is een seizoensoverzicht
+        type: boolean
+      - name: datumOnbekend
+        type: boolean
+        hidden: true
+      - name: volgorde
+        type: number
+        hidden: true
+
+  - name: honden
+    label: Onze honden
+    type: collection
+    path: inhoud/honden
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      primary: roepnaam
+      sort: volgorde
+      order: asc
+    fields:
+      - name: roepnaam
+        label: Roepnaam
+        type: string
+        required: true
+      - name: naam
+        label: Officiële naam
+        type: string
+        required: true
+        description: "Zoals in de stamboom, bijvoorbeeld Vai Avanti Tiamo."
+      - name: geslacht
+        label: Geslacht
+        type: select
+        options:
+          values: [Teef, Reu]
+      - name: status
+        label: Label op de foto (mag leeg blijven)
+        type: string
+        description: "Bijvoorbeeld Veteraan, Op rust of Jong talent."
+      - name: geboren
+        label: Geboren op
+        type: date
+        options:
+          format: yyyy-MM-dd
+      - name: kleur
+        label: Kleur
+        type: string
+      - name: vader
+        label: Vader
+        type: string
+      - name: moeder
+        label: Moeder
+        type: string
+        description: "Gebruik exact dezelfde officiële naam als op de site, dan wordt ze automatisch gelinkt."
+      - name: hoogtepunt
+        label: Grootste prestatie (kort)
+        type: string
+      - name: omslagfoto
+        label: Hoofdfoto
+        type: image
+      - name: fotos
+        label: Meer foto's
+        type: image
+        options:
+          multiple:
+            max: 30
+      - name: gezondheid
+        label: Gezondheidsresultaten
+        type: string
+        list: true
+        description: "Eén resultaat per regel, bijvoorbeeld Heupen Excellent / A1."
+      - name: palmares
+        label: Palmares
+        type: object
+        list: true
+        description: "De volgorde maakt niet uit; de site sorteert op jaar."
+        fields:
+          - name: jaar
+            label: Jaar
+            type: string
+          - name: titel
+            label: Titel
+            type: string
+          - name: plaats
+            label: Plaats
+            type: string
+      - name: stamboom
+        label: Link naar de stamboom (Breed Archive)
+        type: string
+      - name: andereNamen
+        label: Andere namen in verslagen (mag leeg blijven)
+        type: string
+        list: true
+        description: "Roepnaam en officiële naam worden al herkend. Voeg hier enkel extra namen toe."
+      - name: volgorde
+        label: Plaats in de lijst
+        type: number
+        description: "1 staat eerst."
+      - name: fotoFocus
+        type: string
+        hidden: true
+      - name: body
+        label: Over deze hond
+        type: rich-text
+        options:
+          format: markdown
+          media: false
+
+  - name: nesten
+    label: Nesten
+    type: collection
+    path: inhoud/nesten
+    format: yaml-frontmatter
+    filename: "{primary}-nest.md"
+    view:
+      primary: letter
+      sort: geboren
+      order: desc
+    fields:
+      - name: letter
+        label: Letter van het nest
+        type: string
+        required: true
+      - name: geboren
+        label: Geboren op
+        type: date
+        options:
+          format: yyyy-MM-dd
+      - name: vader
+        label: Vader
+        type: string
+      - name: moeder
+        label: Moeder
+        type: string
+        description: "Gebruik exact dezelfde officiële naam als op de site, dan wordt ze automatisch gelinkt."
+      - name: foto
+        label: Foto of affiche van het nest
+        type: image
+      - name: pups
+        label: Pups
+        type: object
+        list: true
+        fields:
+          - name: naam
+            label: Officiële naam
+            type: string
+          - name: roepnaam
+            label: Roepnaam
+            type: string
+          - name: geslacht
+            label: Geslacht
+            type: select
+            options:
+              values: [Teef, Reu]
+          - name: kleur
+            label: Kleur
+            type: string
+          - name: woontIn
+            label: Woont in (land, leeg = bij ons)
+            type: string
+          - name: fotos
+            label: Foto's
+            type: image
+            options:
+              multiple:
+                max: 20
+          - name: gezondheid
+            label: Gezondheidsresultaten
+            type: string
+            list: true
+          - name: uitslagen
+            label: Uitslagen
+            type: string
+            list: true
+          - name: stamboom
+            label: Link naar de stamboom
+            type: string
+          - name: andereNamen
+            label: Andere namen in verslagen (mag leeg blijven)
+            type: string
+            list: true
+      - name: body
+        label: Over dit nest
+        type: rich-text
+        options:
+          format: markdown
+          media: false
+
+  - name: site
+    label: Algemene teksten
+    type: file
+    path: inhoud/site.json
+    format: json
+    fields:
+      - name: verwacht
+        label: Verwachte nesten
+        type: object
+        fields:
+          - name: tonen
+            label: Tonen op de site
+            type: boolean
+          - name: label
+            label: Klein opschrift (bijvoorbeeld Verwacht in 2027)
+            type: string
+          - name: titel
+            label: Titel
+            type: string
+          - name: tekst
+            label: Tekst
+            type: text
+      - name: hero
+        label: Startpagina bovenaan
+        type: object
+        fields:
+          - name: bovenschrift
+            label: Klein opschrift
+            type: string
+          - name: titel
+            label: Grote titel
+            type: string
+            description: "Zet *sterretjes* rond een woord om het goud en schuin te maken."
+          - name: intro
+            label: Introtekst
+            type: text
+          - name: foto
+            label: Grote foto
+            type: image
+      - name: overOns
+        label: Over ons
+        type: object
+        fields:
+          - name: titel
+            label: Titel
+            type: string
+            description: "Zet *sterretjes* rond een woord om het goud en schuin te maken."
+          - name: intro
+            label: Introtekst bovenaan de pagina
+            type: text
+          - name: startpagina
+            label: Korte tekst op de startpagina
+            type: text
+          - name: citaat
+            label: Citaat
+            type: text
+          - name: citaatVan
+            label: Citaat van
+            type: string
+      - name: team
+        label: Team
+        type: object
+        list: true
+        fields:
+          - name: naam
+            label: Naam
+            type: string
+          - name: rol
+            label: Rol
+            type: string
+          - name: foto
+            label: Foto
+            type: image
+          - name: tekst
+            label: Tekst
+            type: rich-text
+            options:
+              format: markdown
+              media: false
+      - name: contact
+        label: Contactgegevens
+        type: object
+        fields:
+          - name: telefoon
+            label: Telefoon
+            type: string
+          - name: email
+            label: E-mailadres
+            type: string
+          - name: plaats
+            label: Postcode en gemeente
+            type: string
+          - name: instagram
+            label: Link naar Instagram
+            type: string
+          - name: facebook
+            label: Link naar Facebook
+            type: string
+      - name: paginafotos
+        label: Foto's bovenaan de pagina's
+        type: object
+        fields:
+          - name: honden
+            label: Onze honden
+            type: image
+          - name: nesten
+            label: Nesten
+            type: image
+          - name: nieuws
+            label: Nieuws
+            type: image
+          - name: overOns
+            label: Over ons
+            type: image
+          - name: contact
+            label: Contact
+            type: image

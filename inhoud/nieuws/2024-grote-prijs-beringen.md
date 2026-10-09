@@ -1,0 +1,16 @@
+---
+titel: Grote Prijs Beringen
+datum: "2024-01-01"
+datumOnbekend: true
+volgorde: 11
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000375.webp
+---
+Aan de start stond vandaag onze 'oldie' Old Road's Ryleigh. Uiteindelijk waren er genoeg veteranen (😎) om een geldige race te houden.
+
+De eerste ronde miste ze haar start en liep terug naar een prachtige tweede plaats achter Prima. Ze behaalde de 4e tijd. Dus op naar de finale in het zwarte jasje.
+
+En dan in de finale doet ze waar we alleen maar van durfden te dromen. Ze had een geweldige start en leidde van de start tot de finish! Old Road's Ryleigh wint (haar eerste jasje 🥹) de Grote Prijs van Beringen 2024 in 17.65!💛

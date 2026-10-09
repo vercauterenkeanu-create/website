@@ -1,0 +1,15 @@
+---
+titel: Champ of Sand Münster
+datum: "2023-01-01"
+datumOnbekend: true
+volgorde: 11
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000312.webp
+  - /media/200000314.webp
+---
+Vai Avanti Thiago ging met de 3e tijd de A-finale in en werd 6e.
+
+Vai Avanti Tiamo won zijn eerste ronde in 22.24 en had de tweede tijd. In de finale was het gewoon niet zijn dag en dat was prima! Dat soort dingen kunnen gebeuren. Tiamo eindigde als 4e

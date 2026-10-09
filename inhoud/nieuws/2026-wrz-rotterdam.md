@@ -1,0 +1,24 @@
+---
+titel: WRZ Rotterdam
+datum: "2026-01-01"
+datumOnbekend: true
+volgorde: 4
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000532.webp
+---
+Vandaag was de eerste wedstrijd voor onze eigen honden.
+
+Aan de start stonden Vai Avanti Tiamo en Vai Avanti Xamali.
+
+Vai Avanti Xamali was de lichtste hond van de dag 🤪, precies zoals Sandra tegen me zei: "Dit meisje geeft altijd 200%", en zo is Mayzie nu eenmaal 💜. Hoewel het haar eerste run was, eindigde ze als derde, wat haar de zevende tijd in haar categorie opleverde.
+
+Het was de eerste keer dat Vai Avanti Tiamo in de Veteranenklasse meedeed, aangezien hij vorige week 6 jaar is geworden. Voor hem was het alsof hij weer in de A-klasse liep, omdat hij weer samen met WarPony liep 😁 Verrassend genoeg had hij een geweldige start en bleef hij dicht bij WarPony tot aan de eerste bocht, waarna hij wat terrein moest prijsgeven. WarPony eindigde als eerste in 17,79 en Flappie behaalde een prachtige tweede plaats in 18,00.
+
+Vanwege het weer en de te natte en gevaarlijke baan werd besloten de rest van de ronde af te gelasten, waardoor de honden werden geklasseerd op basis van de tijd die ze in de eerste ronde hadden gelopen.
+
+Dit resulteerde in een eerste plaats in de B-finale voor Mayzie en een tweede plaats bij de veteranen voor Flappie!
+
+Op naar de volgende race, hopelijk met wat beter weer

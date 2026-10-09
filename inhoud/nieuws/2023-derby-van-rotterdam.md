@@ -1,0 +1,14 @@
+---
+titel: Derby van Rotterdam
+datum: "2023-01-01"
+datumOnbekend: true
+volgorde: 8
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000273.webp
+---
+Alleen Vai Avanti Tiamo vandaag aan de start en eindelijk kreeg hij de kans om te laten zien wat hij in huis had. Hij won zijn races in 22.07, 22.12 en de finale won hij in 22.52.
+
+Goed bezig Flappie

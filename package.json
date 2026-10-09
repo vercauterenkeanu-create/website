@@ -1,0 +1,14 @@
+{
+  "name": "vai-avanti-website",
+  "private": true,
+  "description": "Website van whippetkennel Vai Avanti (Opwijk)",
+  "scripts": {
+    "build": "node _bron/tools/build.js",
+    "serve": "node _bron/tools/serve.js",
+    "share": "node _bron/tools/share.js"
+  },
+  "dependencies": {
+    "js-yaml": "4.1.0",
+    "sharp": "0.33.5"
+  }
+}

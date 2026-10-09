@@ -1,0 +1,69 @@
+[
+ {
+  "id": "t", "letter": "T", "born": "6 mei 2020", "sire": "Moves Like Jagger Of Gasbyfirst", "dam": "Samba Supersonic", "damId": "bayah",
+  "intro": "Ons allereerste nest, met dank aan oma en haar partner die ons Bayah lieten gebruiken. Vier kleine dropjes: één teef en drie reuen. Vienna en Flappie bleven bij ons.",
+  "photos": ["200000203"],
+  "pups": [
+   { "name": "Vai Avanti Tahiti", "call": "Vienna", "sex": "Teef", "color": "Zwart", "dog": "vienna", "photos": ["200000216", "200000202"] },
+   { "name": "Vai Avanti Tiamo", "call": "Flappie", "sex": "Reu", "color": "Zwart / wit", "dog": "flappie", "photos": ["200000204", "200000217"] },
+   { "name": "Vai Avanti Thor", "call": "Thor", "sex": "Reu", "color": "Zwart / wit", "photos": ["200000205", "200000208"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-thor-d1c61272-6183-4ace-af68-1de3f4f287f6" },
+   { "name": "Vai Avanti Thiago", "call": "Sergio", "sex": "Reu", "color": "Blauw (grijs)", "photos": ["200000361", "200000206"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-thiago-338eaad5-735e-4e4a-a4a9-2dee3462c76a" }
+  ]
+ },
+ {
+  "id": "u", "letter": "U", "born": "16 februari 2021", "sire": "Like It Bohemia Snap Dog", "dam": "Old Road's Ryleigh", "damId": "lylo",
+  "intro": "Het eerste nest van Lylo.",
+  "photos": ["200000222"],
+  "pups": [
+   { "name": "Vai Avanti Unexpected", "call": "Mila", "sex": "Teef", "color": "Zwart", "country": "België",
+     "health": ["Myostatin N/N (via ouders)"], "photos": ["200000224"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-unexpected-f563ee58-731a-4d1e-9b7f-7777b34154ab" }
+  ]
+ },
+ {
+  "id": "x", "letter": "X", "born": "22 mei 2024", "sire": "Yes Supersonic", "dam": "Old Road's Ryleigh", "damId": "lylo",
+  "intro": "Het tweede nest van Lylo: 2 teven en 3 reuen.",
+  "photos": ["200000343"],
+  "pups": [
+   { "name": "Vai Avanti Xamali", "call": "Mayzie", "sex": "Teef", "color": "Gestroomd", "country": "België", "dog": "mayzie", "photos": ["200000472", "200000416"] },
+   { "name": "Vai Avanti Xtreme", "call": "Moos", "sex": "Reu", "color": "Gestroomd", "country": "Nederland",
+     "health": ["Myostatin N/N (via ouders)"], "results": ["3 Hartenren Geldrop 2025", "Vice-Nederlands kampioen 350 m 2026", "European Champ of the Sand 2026"],
+     "photos": ["200000601", "200000430"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-xtreme-053a66af-fc00-45c7-9c31-4cacf4ee1a18" },
+   { "name": "Vai Avanti Xander", "call": "Sky", "sex": "Reu", "color": "Zwart / wit", "country": "Nederland",
+     "health": ["Myostatin N/N (via ouders)"], "photos": ["200000418", "200000428"] },
+   { "name": "Vai Avanti Xena", "call": "Xena", "sex": "Teef", "color": "Zwart / wit", "country": "België",
+     "health": ["Myostatin N/N (via ouders)"], "photos": ["200000420"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-xena-0e7f6731-c19f-4ab3-94d6-1cf212e8b7da" },
+   { "name": "Vai Avanti Xoi", "call": "Viny", "sex": "Reu", "color": "Zwart / wit", "country": "België",
+     "health": ["Myostatin N/N (via ouders)"], "photos": ["200000432"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-xoi-988955e9-81f5-47e7-9029-4c5b793004b8" }
+  ]
+ },
+ {
+  "id": "y", "letter": "Y", "born": "13 juni 2025", "sire": "Black Bullet Lj Grace Dog", "dam": "Vai Avanti Tahiti", "damId": "vienna",
+  "intro": "Vienna schonk ons een prachtig nest van 6 pups. De Y-pups wonen nu in België, Finland en Polen.",
+  "photos": ["200000406"],
+  "pups": [
+   { "name": "Vai Avanti Yiruma", "call": "Nixy", "sex": "Teef", "color": "Zwart", "country": "België", "dog": "nixy", "photos": ["200000546", "200000396"] },
+   { "name": "Vai Avanti Ylva", "call": "SeeYa", "sex": "Teef", "color": "Zwart / wit", "country": "Polen",
+     "health": ["Myostatin N/N", "Factor VII N/N", "Hart OK (2026)", "Rug LTV 0 · SP 0", "Heupen Excellent / A1", "Ellebogen Excellent / A1", "Patella OK", "MyDogDNA: 272/272 clear"],
+     "photos": ["200000599", "200000436", "200000397"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-ylva-37a503e7-c9a8-4111-83e1-990a05fe2c01" },
+   { "name": "Vai Avanti Yulia", "call": "Tara", "sex": "Teef", "color": "Zwart / wit", "country": "België",
+     "health": ["Myostatin N/N", "Factor VII N/N"], "photos": ["200000594", "200000438", "200000398"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-yulia-10b8c054-a47c-4bca-ba00-7fdf3bed67c4" },
+   { "name": "Vai Avanti You Got The Moves Like Jagger", "call": "Leroy", "sex": "Reu", "color": "Zwart / wit", "country": "België",
+     "health": ["Myostatin N/N", "Factor VII N/N"], "photos": ["200000597", "200000490", "200000388"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-you-got-the-moves-like-jagger-1a5ea405-3a0c-4657-b73f-50342f0552d2" },
+   { "name": "Vai Avanti You Are On Fire", "call": "Unto", "sex": "Reu", "color": "Zwart", "country": "Finland",
+     "health": ["Myostatin N/N"], "photos": ["200000590", "200000492", "200000387"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-you-are-on-fire-38ec9c20-12ea-4ff0-a217-313e896af381" },
+   { "name": "Vai Avanti Yoshi", "call": "Ytte", "sex": "Reu", "color": "Zwart", "country": "Finland",
+     "health": ["Myostatin N/N"], "photos": ["200000591", "200000434", "200000402"],
+     "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-yoshi-eb393a9e-bbb0-46dd-ba43-79ba2da9b719" }
+  ]
+ }
+]

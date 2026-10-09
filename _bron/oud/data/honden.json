@@ -1,0 +1,94 @@
+[
+ {
+  "id": "vienna", "call": "Vienna", "name": "Vai Avanti Tahiti", "sex": "Teef", "status": "Op rust",
+  "born": "6 mei 2020", "color": "Zwart", "sire": "Moves Like Jagger Of Gasbyfirst", "dam": "Samba Supersonic", "damId": "bayah",
+  "litter": "t", "cover": "200000339", "pos": "center 55%",
+  "photos": ["200000339", "200000138", "200000480", "200000216", "200000202"],
+  "highlight": "CGRC Europees kampioen 2022",
+  "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-tahiti-0861a00a-ebc2-4f15-94a0-adb217eba005",
+  "health": ["Myostatin N/N", "Factor VII N/N", "Hart OK (2023)", "Rug LTV 0 · SP 0", "Heupen Excellent / A1", "MyDogDNA: 272/272 clear"],
+  "note": "Na een gescheurde gracilis in 2026 nam Vienna afscheid van de renbaan. Ze is de moeder van ons Y-nest.",
+  "titles": [
+   ["2024", "3 Hartenren", "Geldrop"], ["2024", "Champ of the Sand", "Rotterdam"],
+   ["2023", "Bjerringbro Cup", "Bjerringbro (DK)"], ["2023", "Clubkampioen", "Awans"],
+   ["2023", "Belgisch kampioen 280 m", "Awans"], ["2023", "Landesrennsieger Baden-Württemberg", "Freiburg"],
+   ["2023", "Grote Prijs van Nederland", "Rotterdam"], ["2023", "Challenger Trophy", "Rotterdam"],
+   ["2023", "Derby d'Awans", "Awans"], ["2022", "Grote Prijs", "Beringen"], ["2022", "Clubkampioen", "Awans"],
+   ["2022", "3 Hartenren", "Geldrop"], ["2022", "Champ of the Sand", ""], ["2022", "Belgisch kampioen 280 m", "Awans"],
+   ["2022", "Gouden Haas", "Beringen"], ["2022", "CGRC Europees kampioen", "Kallerup (DK)"],
+   ["2022", "Großer Preis von Gelsenkirchen", "Gelsenkirchen"], ["2022", "Hansa Union", "Hamburg"],
+   ["2022", "Sandbahnmeister", "Münster"], ["2021", "Grote Prijs", "Beringen"],
+   ["2021", "Grand Prix SACL", "Liverdy-en-Brie (FR)"], ["2021", "Clubkampioen", "Awans"],
+   ["2021", "Landesrennsieger", "Oberhausen"], ["2021", "EM Revanche", "Gelsenkirchen"],
+   ["2021", "Derby", "Châtillon-la-Palud (FR)"]
+  ]
+ },
+ {
+  "id": "flappie", "call": "Flappie", "name": "Vai Avanti Tiamo", "sex": "Reu", "status": "Veteraan",
+  "born": "6 mei 2020", "color": "Zwart / wit", "sire": "Moves Like Jagger Of Gasbyfirst", "dam": "Samba Supersonic", "damId": "bayah",
+  "litter": "t", "cover": "200000198", "pos": "center 60%",
+  "photos": ["200000198", "200000204", "200000572", "200000217"],
+  "highlight": "2× European Champ of the Sand",
+  "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-tiamo-fed5ede8-7801-41da-8734-d87b841aa54f",
+  "health": ["Myostatin N/N", "Hart OK (2023)", "Rug LTV 0 · SP 0", "Heupen Excellent / A1", "MyDogDNA: 271/271 clear"],
+  "note": "Flappie en Keanu zijn twee handen op één buik. Sinds zijn zesde verjaardag loopt hij bij de veteranen.",
+  "titles": [
+   ["2026", "WM Revanche (veteranen)", "Gelsenkirchen"], ["2026", "Europacup (veteranen)", "Geldrop"],
+   ["2026", "Juhannus-race (veteranen)", "Virpiniemi (FI)"], ["2025", "European Champ of the Sand", "Münster"],
+   ["2024", "European Champ of the Sand", "Rotterdam"], ["2024", "Zilveren Haas", "Beringen"],
+   ["2024", "Derby", "Rotterdam"], ["2023", "Belgisch kampioen 280 m", "Awans"], ["2023", "Zilveren Haas", "Beringen"],
+   ["2023", "Derby van Rotterdam", "Rotterdam"], ["2022", "Belgisch kampioen 280 m", "Awans"],
+   ["2022", "Vice-Europees kampioen CGRC", "Kallerup (DK)"], ["2021", "Clubkampioen", "Awans"],
+   ["2021", "Landesrennsieger", "Oberhausen"]
+  ]
+ },
+ {
+  "id": "mayzie", "call": "Mayzie", "name": "Vai Avanti Xamali", "sex": "Teef", "status": "",
+  "born": "22 mei 2024", "color": "Gestroomd", "sire": "Yes Supersonic", "dam": "Old Road's Ryleigh", "damId": "lylo",
+  "litter": "x", "cover": "200000472", "pos": "45% center",
+  "photos": ["200000472", "200000544", "200000562", "200000416", "200000484"],
+  "highlight": "Belgisch kampioen 280 m 2026",
+  "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-xamali-d6278ed3-7b31-4cf7-a5c3-581cb1d90e64",
+  "health": ["Myostatin N/N", "MyDogDNA: 272/272 clear", "Sociale gedragstest: geslaagd"],
+  "note": "Naast de renbaan zet Mayzie haar eerste stappen in de flyball.",
+  "titles": [["2026", "Belgisch kampioen 280 m", "Beringen"]]
+ },
+ {
+  "id": "lylo", "call": "Lylo", "name": "Old Road's Ryleigh", "sex": "Teef", "status": "Op rust",
+  "born": "6 maart 2018", "color": "Zwart", "sire": "Moves Like Jagger Of Gasbyfirst", "dam": "Old Road's Isterya",
+  "cover": "200000178", "pos": "40% center",
+  "photos": ["200000178", "200000196", "200000173", "200000375"],
+  "highlight": "Moeder van ons U- en X-nest",
+  "pedigree": "https://whippet.breedarchive.com/animal/view/old-roads-ryleigh-fa577d05-0169-4e59-9117-ff6ddfaa768b",
+  "health": ["Myostatin N/N", "Hart OK (2023)", "Rug LTV 1 · SP 0"],
+  "note": "Lylo was in 2018 onze allereerste eigen hond, de droom waarmee alles begon. Na een spierscheur in 2025 sloot ze haar carrière af; ze geniet nu zonder pijn van haar rust.",
+  "titles": [
+   ["2024", "Grote Prijs (veteranen)", "Beringen"], ["2021", "Grote Prijs Yoko Ono", ""],
+   ["2020", "Tulpenren", "Lelystad"], ["2020", "Silveren Oak", "Geldrop"],
+   ["2019", "Zilveren Champignon", "Venlo"], ["2019", "Grote Prijs van België (B-klasse)", ""],
+   ["2019–20", "Clubkampioen", "Awans"]
+  ]
+ },
+ {
+  "id": "nixy", "call": "Nixy", "name": "Vai Avanti Yiruma", "sex": "Teef", "status": "Jong talent",
+  "born": "13 juni 2025", "color": "Zwart", "sire": "Black Bullet Lj Grace Dog", "dam": "Vai Avanti Tahiti", "damId": "vienna",
+  "litter": "y", "cover": "200000546", "pos": "center 45%",
+  "photos": ["200000546", "200000596", "200000520", "200000486", "200000396"],
+  "highlight": "Proefloop Geldrop in 22,63",
+  "pedigree": "https://whippet.breedarchive.com/animal/view/vai-avanti-yiruma-31c689e5-f916-4729-9eeb-defb97e630a4",
+  "health": ["Myostatin N/N", "Factor VII N/N"],
+  "note": "Dochter van Vienna uit ons Y-nest. Liep haar eerste proefloop in Geldrop in 22,63 en traint ook voor flyball.",
+  "titles": []
+ },
+ {
+  "id": "bayah", "call": "Bayah", "name": "Samba Supersonic", "sex": "Teef", "status": "Stammoeder",
+  "born": "31 mei 2012", "color": "Zwart", "sire": "Orlando Supersonic", "dam": "Royal Melody",
+  "cover": "200000516", "pos": "58% center",
+  "photos": ["200000516", "200000518", "200000502", "200000510", "200000514", "200000512"],
+  "highlight": "Moeder van ons eerste nest",
+  "pedigree": "https://whippet.breedarchive.com/animal/view/samba-supersonic-9556ce1f-e944-4d2c-b251-8766f8fdcdcd",
+  "health": ["Myostatin N/N"],
+  "note": "Bayah is eigendom van Michel Valvekens. Als moeder van ons T-nest, en als de allereerste pup in Shany's leven, verdient ze een ereplaats op deze site.",
+  "titles": []
+ }
+]

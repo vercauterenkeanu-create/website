@@ -1,0 +1,94 @@
+---
+letter: "Y"
+geboren: "2025-06-13"
+vader: Black Bullet Lj Grace Dog
+moeder: Vai Avanti Tahiti
+foto: /media/200000406.webp
+pups:
+  - naam: Vai Avanti Yiruma
+    roepnaam: Nixy
+    geslacht: Teef
+    kleur: Zwart
+    woontIn: België
+    gezondheid: []
+    uitslagen: []
+    fotos:
+      - /media/200000546.webp
+      - /media/200000396.webp
+    stamboom: ""
+  - naam: Vai Avanti Ylva
+    roepnaam: SeeYa
+    geslacht: Teef
+    kleur: Zwart / wit
+    woontIn: Polen
+    gezondheid:
+      - Myostatin N/N
+      - Factor VII N/N
+      - Hart OK (2026)
+      - Rug LTV 0 · SP 0
+      - Heupen Excellent / A1
+      - Ellebogen Excellent / A1
+      - Patella OK
+      - "MyDogDNA: 272/272 clear"
+    uitslagen: []
+    fotos:
+      - /media/200000599.webp
+      - /media/200000436.webp
+      - /media/200000397.webp
+    stamboom: https://whippet.breedarchive.com/animal/view/vai-avanti-ylva-37a503e7-c9a8-4111-83e1-990a05fe2c01
+  - naam: Vai Avanti Yulia
+    roepnaam: Tara
+    geslacht: Teef
+    kleur: Zwart / wit
+    woontIn: België
+    gezondheid:
+      - Myostatin N/N
+      - Factor VII N/N
+    uitslagen: []
+    fotos:
+      - /media/200000594.webp
+      - /media/200000438.webp
+      - /media/200000398.webp
+    stamboom: https://whippet.breedarchive.com/animal/view/vai-avanti-yulia-10b8c054-a47c-4bca-ba00-7fdf3bed67c4
+  - naam: Vai Avanti You Got The Moves Like Jagger
+    roepnaam: Leroy
+    geslacht: Reu
+    kleur: Zwart / wit
+    woontIn: België
+    gezondheid:
+      - Myostatin N/N
+      - Factor VII N/N
+    uitslagen: []
+    fotos:
+      - /media/200000597.webp
+      - /media/200000490.webp
+      - /media/200000388.webp
+    stamboom: https://whippet.breedarchive.com/animal/view/vai-avanti-you-got-the-moves-like-jagger-1a5ea405-3a0c-4657-b73f-50342f0552d2
+  - naam: Vai Avanti You Are On Fire
+    roepnaam: Unto
+    geslacht: Reu
+    kleur: Zwart
+    woontIn: Finland
+    gezondheid:
+      - Myostatin N/N
+    uitslagen: []
+    fotos:
+      - /media/200000590.webp
+      - /media/200000492.webp
+      - /media/200000387.webp
+    stamboom: https://whippet.breedarchive.com/animal/view/vai-avanti-you-are-on-fire-38ec9c20-12ea-4ff0-a217-313e896af381
+  - naam: Vai Avanti Yoshi
+    roepnaam: Ytte
+    geslacht: Reu
+    kleur: Zwart
+    woontIn: Finland
+    gezondheid:
+      - Myostatin N/N
+    uitslagen: []
+    fotos:
+      - /media/200000591.webp
+      - /media/200000434.webp
+      - /media/200000402.webp
+    stamboom: https://whippet.breedarchive.com/animal/view/vai-avanti-yoshi-eb393a9e-bbb0-46dd-ba43-79ba2da9b719
+---
+Vienna schonk ons een prachtig nest van 6 pups. De Y-pups wonen nu in België, Finland en Polen.

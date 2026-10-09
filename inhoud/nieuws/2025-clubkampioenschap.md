@@ -1,0 +1,12 @@
+---
+titel: Clubkampioenschap
+datum: "2025-01-01"
+datumOnbekend: true
+volgorde: 3
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000496.webp
+---
+Vandaag stond het clubkampioenschap op de planning.Bijna letterlijk in het water gelopen. Helaas weinig opkomst maar dat mocht het plezier niet onderdrukken. Flappie nog helemaal niet in zijn ritme maar klokte toch een mooie 21.61 op een heel zware natte baan. Mayzie op 60 dagen na de loopsheid zonder verwachtingen enkel om te zien hoe ze er op reageert en we hebben geleerd dat we dat dus niet meer gaan doen .Bedankt aan onze club voor het mooie dek en prijzen!

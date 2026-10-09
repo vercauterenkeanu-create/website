@@ -1,0 +1,12 @@
+---
+titel: European Champ of the Sand
+datum: "2025-01-01"
+datumOnbekend: true
+volgorde: 2
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000410.webp
+---
+Eindelijk thuis na een lang weekend. Moeilijk om te geloven maar dit was onze eerste wedstrijd van het jaar. Debut voor Mayzie (Vai Avanti Xamali) en een comeback van Flappie (Vai Avanti Tiamo).Kleine Mayzie kwam net uit loopsheid maar we gingen voor de ervaring . In de eerste rit werd ze 3e in 23.45 , de tweede rit gaf ze zelfs nog een tandje bij en werd 3e in 23.37 dit was goed voor een 5e tijd in de A finale waar we op zich al heel trots op waren! In de finale voor de eerste keer met 6 honden en dit zo kort na haar loopsheid zorgde er voor dat haar vatje leeg was en finishte 6e. Nog steeds zeer trots op jou kleine draak! Dan onze pechvogel van dit jaar Flappie. Met een heel klein hartje stonden we met jou aan de start. Maar Flappie dacht ik laat jullie wel zien dat het onnodig is. De eerste ronde een goeie start (iets wat we van hem al helemaal niet gewoon zijn) finishte hij eerste in 22.68. In de finale verraste hij ons nog meer door als een kogel het starthok uit te vliegen hij leidde van start tot finish en wint net zoals vorig jaar de European Champ Of Sand! We zijn er nog niet maar met alle ondersteuning die we krijgen komen we er wel!Bedankt aan iedereen die in ons is blijven geloven!

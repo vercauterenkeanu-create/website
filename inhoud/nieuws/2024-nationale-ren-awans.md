@@ -1,0 +1,14 @@
+---
+titel: Nationale ren Awans
+datum: "2024-01-01"
+datumOnbekend: true
+volgorde: 2
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000361.webp
+---
+Vai Avanti Thiago aan de start vandaag in Awans.
+
+Hij eindigde als tweede in de eerste ronde, won zijn tweede ronde en eindigde als 6e in de finale

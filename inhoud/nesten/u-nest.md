@@ -1,0 +1,20 @@
+---
+letter: U
+geboren: "2021-02-16"
+vader: Like It Bohemia Snap Dog
+moeder: Old Road's Ryleigh
+foto: /media/200000222.webp
+pups:
+  - naam: Vai Avanti Unexpected
+    roepnaam: Mila
+    geslacht: Teef
+    kleur: Zwart
+    woontIn: België
+    gezondheid:
+      - Myostatin N/N (via ouders)
+    uitslagen: []
+    fotos:
+      - /media/200000224.webp
+    stamboom: https://whippet.breedarchive.com/animal/view/vai-avanti-unexpected-f563ee58-731a-4d1e-9b7f-7777b34154ab
+---
+Het eerste nest van Lylo.

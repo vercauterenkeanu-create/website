@@ -1,0 +1,9 @@
+# Wordt automatisch gebouwd
+site/
+_deelbaar/
+node_modules/
+
+# Werkbestanden van de eerste overzetting vanaf Webnode
+_bron/raw/
+_bron/raw-img/
+_bron/content.json

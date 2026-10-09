@@ -1,0 +1,18 @@
+---
+titel: 3 Hartenren Geldrop
+datum: "2022-01-01"
+datumOnbekend: true
+volgorde: 13
+kop: ""
+samenvatting: ""
+overzicht: false
+fotos:
+  - /media/200000151.webp
+---
+Vandaag stonden Tahiti en Ryleigh aan de start. De eerste keer dat mijn beide meiden samen liepen in dezelfde klas waar er vandaag 13 honden waren😅 Eerste ronde zowel Tahiti als Ryleigh wonnen hun heat Tahiti in een tijd van 21.80 en Ryleigh 22.46 😍
+
+Tweede ronde moesten ze samen racen Tahiti werd eerste in 21.85 en Ryleigh werd net verslagen op de finishlijn en werd derde in 22.63 (tweede hond 22.62). Daarna hadden in de finale zowel Ryleigh als Tahiti een goede start en werden eerste en derde (Ryleigh weer verslagen net voor de finish 😂) Ik had nooit verwacht wat er vandaag gebeurde. Ryleigh deed het zo geweldig dat ik denk dat ze alle frustraties van het afgelopen jaar op was 😅
+
+Op de foto Tahiti (rood) en Ryleigh (wit)
+
+Zo trots op mijn beide meiden!!❤️
