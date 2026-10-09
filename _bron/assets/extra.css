@@ -253,3 +253,27 @@ dialog.lightbox::backdrop { background: rgba(12, 10, 7, .9); }
   .litter-head .litter-letter { width: 64px; height: 64px; font-size: 32px; }
   .mini-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ---------- Vrije blokken (via de beheerpagina) ---------- */
+.kop-ruimte { height: calc(84px + env(safe-area-inset-top, 0px)); background: var(--ink); }
+.prose { max-width: 720px; font-size: 17px; line-height: 1.75; color: var(--muted); }
+.prose p { margin: 0 0 14px; }
+.prose h4 { margin: 22px 0 8px; font: 700 13px/1.3 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--text); }
+.prose ul { margin: 0 0 14px; padding-left: 20px; }
+.prose a { color: var(--gold-3); }
+.blok-tekst h2, .tf-tekst h2 { margin-bottom: 18px; }
+.dark .prose { color: var(--muted-light); }
+.dark .prose h4 { color: #fff; }
+.dark .prose a { color: var(--gold-2); }
+.tekstfoto { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.tekstfoto.rechts .tf-foto { order: 2; }
+.tf-foto .shot, .tf-foto .no-photo { aspect-ratio: 4 / 3; border-radius: var(--radius); }
+.tf-knop { margin: 24px 0 0; }
+.groot-citaat { margin: 0 auto; max-width: 900px; text-align: center; border: 0; padding: 0; font: italic 500 clamp(28px, 3.6vw, 44px)/1.3 var(--serif); color: var(--text); }
+.groot-citaat cite { display: block; margin-top: 18px; font: 700 12px/1 var(--sans); font-style: normal; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-3); }
+.dark .groot-citaat { color: #f3ecdd; }
+.dark .groot-citaat cite { color: var(--gold-2); }
+@media (max-width: 980px) {
+  .tekstfoto { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .tekstfoto.rechts .tf-foto { order: 0; }
+}

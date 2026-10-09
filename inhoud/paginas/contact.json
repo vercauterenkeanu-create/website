@@ -1,0 +1,18 @@
+{
+  "titel": "Contact",
+  "inMenu": false,
+  "menuVolgorde": 0,
+  "omschrijving": "Neem contact op met whippetkennel Vai Avanti: vragen over onze honden of onze nesten.",
+  "blokken": [
+    {
+      "type": "paginakop",
+      "bovenschrift": "Contact",
+      "titel": "Kom *kennismaken*",
+      "intro": "Vragen over onze honden of over onze nesten? Stuur ons een bericht of bel ons gerust.",
+      "foto": "/media/200000200.webp"
+    },
+    {
+      "type": "contact"
+    }
+  ]
+}

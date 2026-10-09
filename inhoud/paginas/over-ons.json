@@ -1,0 +1,41 @@
+{
+  "titel": "Over ons",
+  "inMenu": true,
+  "menuVolgorde": 40,
+  "omschrijving": "Het verhaal achter whippetkennel Vai Avanti: Shany Van der Meulen en Keanu Vercauteren.",
+  "blokken": [
+    {
+      "type": "paginakop",
+      "bovenschrift": "Ons verhaal",
+      "titel": "Doorgaan. *Altijd vooruit.*",
+      "intro": "Vai Avanti is Italiaans voor ‘ga door’. Een naam die past bij alles wat we met onze honden willen bereiken.",
+      "foto": "/media/200000470.webp"
+    },
+    {
+      "type": "team",
+      "leden": [
+        {
+          "naam": "Shany Van der Meulen",
+          "rol": "Oprichter & fokker",
+          "foto": "/media/200000141.webp",
+          "tekst": "In 2020 mocht ik met veel trots mijn eigen kennelnaam aanvragen. In mei verwachtte ik toen mijn eerste eigen nest en het was redelijk krap om de kennelnaam op tijd goedgekeurd te hebben door de KMSH. Wonder boven wonder kon ik met veel trots mijn eerste nest aankondigen onder mijn nieuwe kennelnaam ‘Vai Avanti’. Een naam die op mijn lijf geschreven was, maar ook zo hard past bij wat ik wil bereiken met mijn honden: doorgaan!\n\nWie mij al langer kent, weet dat ik van kleins af aan terug te vinden ben op de windhondenrenbanen, zowel in binnen- als in buitenland. In 2018 was het dan eindelijk zover en had ik mijn eerste echte eigen hond: Lylo. Lylo was voor mij een grote droom die werkelijkheid werd en samen hebben wij ongelofelijk veel avonturen beleefd.\n\nIn 2020 was het dan ook de beurt aan mijn eerste nest. Dankzij mijn oma en haar partner mocht ik Bayah (Samba Supersonic) gebruiken om mijn eerste nest te fokken. Uit dat nest kwamen 4 kleine dropjes: 1 teef (waar ik zo op gehoopt had) en 3 reuen. Het plan was om een teef te houden en nooit om ook nog een reu te houden, maar ondertussen is ook dat geschiedenis en vervoegden Vienna en Flappie ons team.\n\nMijn eerste nest fokken was al een droom op zich, maar daar hield het niet op. Zonder verwachtingen presteerden zij meer dan waar ik ooit op had durven hopen. Vienna is een ongelofelijke hond die al zoveel bewezen heeft op jonge leeftijd, en ook haar broer Flappie moest niet onderdoen en heeft enkele mooie titels op zijn palmares kunnen schrijven.\n\nOndertussen zijn we enkele jaren verder en bestaat ons team uit 5 vaste waarden. Een dochter van Lylo en een dochter van Vienna hebben ons team nog versterkt, en we zijn heel nieuwsgierig naar wat zij ons nog allemaal gaan laten zien."
+        },
+        {
+          "naam": "Keanu Vercauteren",
+          "rol": "Teamlid sinds 2022",
+          "foto": "/media/200000410.webp",
+          "tekst": "Sinds 2022 is Keanu lid van team Vai Avanti. Vanaf dag 1 had Keanu een ongelofelijke klik met de honden, maar vooral met Flappie. Die twee zijn twee handen op één buik en altijd in elkaars buurt terug te vinden. Samen hebben ze ook al enkele mooie wedstrijden gewonnen.\n\nKeanu bracht ons ook terug in contact met de flyballsport, waar we sinds kort mee aan de slag zijn met Mayzie en Nixy.\n\nOp naar nog meer avonturen samen!"
+        }
+      ]
+    },
+    {
+      "type": "aankondiging",
+      "stijl": "Licht",
+      "label": "Kennismaken?",
+      "titel": "Benieuwd naar onze *nesten*?",
+      "tekst": "",
+      "knoptekst": "Neem contact op",
+      "knoplink": "contact.html#nesten"
+    }
+  ]
+}

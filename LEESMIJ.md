@@ -1,12 +1,25 @@
 # Website Vai Avanti
 
+## Twee manieren om de site aan te passen
+
+- **Beheerpagina** (`/beheer/` op de site). Hier pas je pagina's en instellingen aan, met een live voorbeeld.
+  - Blokken toevoegen, verslepen en bewerken.
+  - Nieuwe pagina's maken en in het menu zetten.
+  - Foto's uploaden.
+  - Opslaan gebeurt met een koppelcode: een GitHub "fine-grained token" voor enkel deze repository, met Contents: Read and write. De uitleg staat op de aanmeldpagina zelf.
+- **Pages CMS** (app.pagescms.org). Hier staan wedstrijdverslagen, honden en nesten als formulieren. De pagina's en instellingen kunnen hier ook.
+
 ## Hoe het werkt
 
-- **inhoud/**: alle teksten, bewerkbaar via Pages CMS (app.pagescms.org).
+- **inhoud/**: alle inhoud.
   - `nieuws/`: één bestand per wedstrijdverslag.
   - `honden/`: één bestand per hond.
   - `nesten/`: één bestand per nest, met de pups erin.
-  - `site.json`: de algemene teksten (startpagina, verwachte nesten, over ons, contact, foto's bovenaan de pagina's).
+  - `paginas/`: startpagina, Over ons, Contact en eigen pagina's, opgebouwd uit blokken.
+  - `site.json`: instellingen (verwachte nesten, contactgegevens, foto's bovenaan de vaste pagina's).
+- **_bron/assets/blokken.js**: de bloktypes en hun opmaak. De site én de beheerpagina gebruiken dit bestand, zodat het voorbeeld klopt.
+- **_bron/beheer/**: de beheerpagina.
+- **_bron/tools/cms-config.js**: zet de bloktypes ook in `.pages.yml`. Draai dit na een wijziging aan de bloktypes.
 - **media/**: alle foto's. Nieuwe foto's uit Pages CMS komen hier terecht.
 - **.pages.yml**: hoe het beheerscherm eruitziet (velden en labels).
 - **.github/workflows/website.yml**: na elke wijziging bouwt GitHub de site en zet ze online.

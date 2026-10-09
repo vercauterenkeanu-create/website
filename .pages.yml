@@ -1,23 +1,31 @@
 # Beheerscherm (Pages CMS) voor de website van Vai Avanti.
-# Na elke wijziging bouwt GitHub de site opnieuw en staat ze binnen enkele minuten online.
+# Pagina's en instellingen bewerk je het makkelijkst via /beheer op de site zelf (met voorbeeld).
+# Dit bestand wordt deels gemaakt door _bron/tools/cms-config.js.
 
 media:
   input: media
   output: /media
-  extensions: [jpg, jpeg, png, webp]
+  extensions:
+    - jpg
+    - jpeg
+    - png
+    - webp
   rename: safe
-
 content:
   - name: nieuws
     label: Wedstrijdverslagen
     type: collection
     path: inhoud/nieuws
     format: yaml-frontmatter
-    filename: "{year}-{month}-{day}-{primary}.md"
+    filename: '{year}-{month}-{day}-{primary}.md'
     view:
       primary: titel
-      fields: [titel, datum]
-      sort: [datum, titel]
+      fields:
+        - titel
+        - datum
+      sort:
+        - datum
+        - titel
       default:
         sort: datum
         order: desc
@@ -26,25 +34,25 @@ content:
         label: Titel
         type: string
         required: true
-        description: "Bijvoorbeeld de naam van de wedstrijd of de renbaan."
+        description: Bijvoorbeeld de naam van de wedstrijd of de renbaan.
       - name: datum
         label: Datum
         type: date
         required: true
         options:
           format: yyyy-MM-dd
-        description: "Dag van de wedstrijd. Nieuwste verslagen staan bovenaan."
+        description: Dag van de wedstrijd. Nieuwste verslagen staan bovenaan.
       - name: fotos
         label: Foto's
         type: image
-        description: "Voeg foto's toe van je gsm of computer. De eerste foto wordt de grote foto."
+        description: Voeg foto's toe van je gsm of computer. De eerste foto wordt de grote foto.
         options:
           multiple:
             max: 40
       - name: body
         label: Verslag
         type: rich-text
-        description: "De namen van de honden worden vanzelf herkend en gelinkt."
+        description: De namen van de honden worden vanzelf herkend en gelinkt.
         options:
           format: markdown
           media: false
@@ -63,17 +71,20 @@ content:
       - name: volgorde
         type: number
         hidden: true
-
   - name: honden
     label: Onze honden
     type: collection
     path: inhoud/honden
     format: yaml-frontmatter
-    filename: "{primary}.md"
+    filename: '{primary}.md'
     view:
       primary: roepnaam
-      fields: [roepnaam, naam]
-      sort: [volgorde, roepnaam]
+      fields:
+        - roepnaam
+        - naam
+      sort:
+        - volgorde
+        - roepnaam
       default:
         sort: volgorde
         order: asc
@@ -86,16 +97,18 @@ content:
         label: Officiële naam
         type: string
         required: true
-        description: "Zoals in de stamboom, bijvoorbeeld Vai Avanti Tiamo."
+        description: Zoals in de stamboom, bijvoorbeeld Vai Avanti Tiamo.
       - name: geslacht
         label: Geslacht
         type: select
         options:
-          values: [Teef, Reu]
+          values:
+            - Teef
+            - Reu
       - name: status
         label: Label op de foto (mag leeg blijven)
         type: string
-        description: "Bijvoorbeeld Veteraan, Op rust of Jong talent."
+        description: Bijvoorbeeld Veteraan, Op rust of Jong talent.
       - name: geboren
         label: Geboren op
         type: date
@@ -110,7 +123,7 @@ content:
       - name: moeder
         label: Moeder
         type: string
-        description: "Gebruik exact dezelfde officiële naam als op de site, dan wordt ze automatisch gelinkt."
+        description: Gebruik exact dezelfde officiële naam als op de site, dan wordt ze automatisch gelinkt.
       - name: hoogtepunt
         label: Grootste prestatie (kort)
         type: string
@@ -127,12 +140,12 @@ content:
         label: Gezondheidsresultaten
         type: string
         list: true
-        description: "Eén resultaat per regel, bijvoorbeeld Heupen Excellent / A1."
+        description: Eén resultaat per regel, bijvoorbeeld Heupen Excellent / A1.
       - name: palmares
         label: Palmares
         type: object
         list: true
-        description: "De volgorde maakt niet uit; de site sorteert op jaar."
+        description: De volgorde maakt niet uit; de site sorteert op jaar.
         fields:
           - name: jaar
             label: Jaar
@@ -150,11 +163,11 @@ content:
         label: Andere namen in verslagen (mag leeg blijven)
         type: string
         list: true
-        description: "Roepnaam en officiële naam worden al herkend. Voeg hier enkel extra namen toe."
+        description: Roepnaam en officiële naam worden al herkend. Voeg hier enkel extra namen toe.
       - name: volgorde
         label: Plaats in de lijst
         type: number
-        description: "1 staat eerst."
+        description: 1 staat eerst.
       - name: fotoFocus
         type: string
         hidden: true
@@ -164,17 +177,21 @@ content:
         options:
           format: markdown
           media: false
-
   - name: nesten
     label: Nesten
     type: collection
     path: inhoud/nesten
     format: yaml-frontmatter
-    filename: "{primary}-nest.md"
+    filename: '{primary}-nest.md'
     view:
       primary: letter
-      fields: [letter, geboren, moeder]
-      sort: [geboren, letter]
+      fields:
+        - letter
+        - geboren
+        - moeder
+      sort:
+        - geboren
+        - letter
       default:
         sort: geboren
         order: desc
@@ -194,7 +211,7 @@ content:
       - name: moeder
         label: Moeder
         type: string
-        description: "Gebruik exact dezelfde officiële naam als op de site, dan wordt ze automatisch gelinkt."
+        description: Gebruik exact dezelfde officiële naam als op de site, dan wordt ze automatisch gelinkt.
       - name: foto
         label: Foto of affiche van het nest
         type: image
@@ -213,7 +230,9 @@ content:
             label: Geslacht
             type: select
             options:
-              values: [Teef, Reu]
+              values:
+                - Teef
+                - Reu
           - name: kleur
             label: Kleur
             type: string
@@ -247,9 +266,320 @@ content:
         options:
           format: markdown
           media: false
-
+  - name: paginas
+    label: Pagina's
+    type: collection
+    path: inhoud/paginas
+    format: json
+    filename: '{primary}.json'
+    view:
+      primary: titel
+      fields:
+        - titel
+        - inMenu
+    fields:
+      - name: titel
+        label: Naam van de pagina
+        type: string
+        required: true
+      - name: inMenu
+        label: Toon in het menu
+        type: boolean
+      - name: menuVolgorde
+        label: Plaats in het menu
+        type: number
+        description: Onze honden = 10, Nesten = 20, Nieuws = 30, Over ons = 40.
+      - name: omschrijving
+        label: Korte omschrijving voor Google
+        type: text
+      - name: blokken
+        label: Blokken
+        type: block
+        list: true
+        blockKey: type
+        blocks:
+          - name: tekst
+            label: Tekst
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: tekst
+                label: Tekst
+                type: rich-text
+                options:
+                  format: markdown
+                  media: false
+              - name: achtergrond
+                label: Achtergrond
+                type: select
+                options:
+                  values:
+                    - Wit
+                    - Beige
+                    - Donker
+          - name: tekstfoto
+            label: Tekst met foto
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: tekst
+                label: Tekst
+                type: rich-text
+                options:
+                  format: markdown
+                  media: false
+              - name: foto
+                label: Foto
+                type: image
+              - name: fotoRechts
+                label: Foto rechts zetten
+                type: boolean
+              - name: knoptekst
+                label: Tekst op de knop (mag leeg)
+                type: string
+              - name: knoplink
+                label: Knop gaat naar
+                type: string
+              - name: achtergrond
+                label: Achtergrond
+                type: select
+                options:
+                  values:
+                    - Wit
+                    - Beige
+                    - Donker
+          - name: fotos
+            label: Foto's
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: fotos
+                label: Foto's
+                type: image
+                options:
+                  multiple:
+                    max: 40
+              - name: achtergrond
+                label: Achtergrond
+                type: select
+                options:
+                  values:
+                    - Wit
+                    - Beige
+                    - Donker
+          - name: citaat
+            label: Citaat
+            fields:
+              - name: tekst
+                label: Citaat
+                type: text
+              - name: van
+                label: Van wie
+                type: string
+              - name: achtergrond
+                label: Achtergrond
+                type: select
+                options:
+                  values:
+                    - Wit
+                    - Beige
+                    - Donker
+          - name: aankondiging
+            label: Aankondiging met knop
+            fields:
+              - name: label
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: tekst
+                label: Tekst
+                type: text
+              - name: knoptekst
+                label: Tekst op de knop
+                type: string
+              - name: knoplink
+                label: Knop gaat naar
+                type: string
+              - name: stijl
+                label: Stijl
+                type: select
+                options:
+                  values:
+                    - Donker
+                    - Licht
+          - name: paginakop
+            label: Paginakop met foto
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: intro
+                label: Introtekst
+                type: text
+              - name: foto
+                label: Achtergrondfoto
+                type: image
+          - name: hero
+            label: Grote foto met titel
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Grote titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: intro
+                label: Introtekst
+                type: text
+              - name: foto
+                label: Grote foto
+                type: image
+              - name: nieuwsTonen
+                label: Laatste nieuws tonen in de foto
+                type: boolean
+          - name: cijfers
+            label: Kerncijfers
+            fields:
+              - name: uitleg
+                label: Uitleg
+                type: string
+                hidden: true
+          - name: honden
+            label: Onze honden (overzicht)
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: intro
+                label: Introtekst
+                type: text
+          - name: nieuws
+            label: Laatste nieuws
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+          - name: gezondheid
+            label: Gezondheid
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: intro
+                label: Introtekst
+                type: text
+          - name: nesten
+            label: Onze nesten (overzicht)
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: intro
+                label: Introtekst
+                type: text
+          - name: verwacht
+            label: Verwachte nesten
+            fields:
+              - name: uitleg
+                label: Uitleg
+                type: string
+                hidden: true
+          - name: overons
+            label: Over ons (kort)
+            fields:
+              - name: bovenschrift
+                label: Klein opschrift
+                type: string
+              - name: titel
+                label: Titel
+                description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
+                type: string
+              - name: tekst
+                label: Tekst
+                type: text
+              - name: foto1
+                label: Grote foto
+                type: image
+              - name: foto2
+                label: Kleine foto
+                type: image
+              - name: citaat
+                label: Citaat
+                type: text
+              - name: citaatVan
+                label: Citaat van
+                type: string
+          - name: team
+            label: Teamleden
+            fields:
+              - name: leden
+                label: Teamleden
+                type: object
+                list: true
+                fields:
+                  - name: naam
+                    label: Naam
+                    type: string
+                  - name: rol
+                    label: Rol
+                    type: string
+                  - name: foto
+                    label: Foto
+                    type: image
+                  - name: tekst
+                    label: Verhaal
+                    type: rich-text
+                    options:
+                      format: markdown
+                      media: false
+          - name: contact
+            label: Contactformulier
+            fields:
+              - name: uitleg
+                label: Uitleg
+                type: string
+                hidden: true
   - name: site
-    label: Algemene teksten
+    label: Instellingen
     type: file
     path: inhoud/site.json
     format: json
@@ -267,66 +597,10 @@ content:
           - name: titel
             label: Titel
             type: string
+            description: Zet *sterretjes* rond een woord om het goud en schuin te maken.
           - name: tekst
             label: Tekst
             type: text
-      - name: hero
-        label: Startpagina bovenaan
-        type: object
-        fields:
-          - name: bovenschrift
-            label: Klein opschrift
-            type: string
-          - name: titel
-            label: Grote titel
-            type: string
-            description: "Zet *sterretjes* rond een woord om het goud en schuin te maken."
-          - name: intro
-            label: Introtekst
-            type: text
-          - name: foto
-            label: Grote foto
-            type: image
-      - name: overOns
-        label: Over ons
-        type: object
-        fields:
-          - name: titel
-            label: Titel
-            type: string
-            description: "Zet *sterretjes* rond een woord om het goud en schuin te maken."
-          - name: intro
-            label: Introtekst bovenaan de pagina
-            type: text
-          - name: startpagina
-            label: Korte tekst op de startpagina
-            type: text
-          - name: citaat
-            label: Citaat
-            type: text
-          - name: citaatVan
-            label: Citaat van
-            type: string
-      - name: team
-        label: Team
-        type: object
-        list: true
-        fields:
-          - name: naam
-            label: Naam
-            type: string
-          - name: rol
-            label: Rol
-            type: string
-          - name: foto
-            label: Foto
-            type: image
-          - name: tekst
-            label: Tekst
-            type: rich-text
-            options:
-              format: markdown
-              media: false
       - name: contact
         label: Contactgegevens
         type: object
@@ -347,7 +621,7 @@ content:
             label: Link naar Facebook
             type: string
       - name: paginafotos
-        label: Foto's bovenaan de pagina's
+        label: Foto bovenaan de vaste pagina's
         type: object
         fields:
           - name: honden
@@ -358,10 +632,4 @@ content:
             type: image
           - name: nieuws
             label: Nieuws
-            type: image
-          - name: overOns
-            label: Over ons
-            type: image
-          - name: contact
-            label: Contact
             type: image

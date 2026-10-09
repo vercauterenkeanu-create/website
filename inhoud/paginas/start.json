@@ -1,0 +1,55 @@
+{
+  "titel": "Startpagina",
+  "inMenu": false,
+  "menuVolgorde": 0,
+  "omschrijving": "Vai Avanti is een whippetkennel uit Opwijk (België). Gezonde, geteste racewhippets, onze nesten en verslagen van de renbaan.",
+  "blokken": [
+    {
+      "type": "hero",
+      "bovenschrift": "Whippetkennel · Opwijk · sinds 2020",
+      "titel": "Gefokt voor snelheid, grootgebracht met *hart.*",
+      "intro": "Vai Avanti – Italiaans voor ‘ga door’ – is een kleine, toegewijde whippetkennel. Wij fokken gezonde, sociale whippets en racen met trots op de renbanen van België, Nederland, Duitsland en ver daarbuiten.",
+      "foto": "/media/200000179.webp",
+      "nieuwsTonen": true
+    },
+    {
+      "type": "cijfers"
+    },
+    {
+      "type": "honden",
+      "bovenschrift": "Onze honden",
+      "titel": "Het team achter *de naam*",
+      "intro": "Elke hond heeft een eigen pagina met afstamming, gezondheid, palmares en foto's."
+    },
+    {
+      "type": "nieuws",
+      "bovenschrift": "Van de renbaan",
+      "titel": "Laatste *nieuws*"
+    },
+    {
+      "type": "gezondheid",
+      "bovenschrift": "Gezondheid voorop",
+      "titel": "Getest, gedocumenteerd en *transparant*",
+      "intro": "Een snelle whippet is pas een goede whippet als hij ook gezond is. Daarom laten wij onze fokhonden uitgebreid onderzoeken en tonen we de resultaten per hond."
+    },
+    {
+      "type": "nesten",
+      "bovenschrift": "Pups & nesten",
+      "titel": "Onze *nesten*",
+      "intro": "Elk nest krijgt zijn eigen letter. Klik op een nest voor alle pups, hun foto's en gezondheidsresultaten."
+    },
+    {
+      "type": "overons",
+      "bovenschrift": "Over ons",
+      "titel": "Doorgaan. *Altijd vooruit.*",
+      "tekst": "Al van kinds af aan ben ik te vinden op de windhondenrenbanen, in binnen- en buitenland. In 2018 werd een droom werkelijkheid met Lylo, mijn eerste eigen hond. Twee jaar later keurde de KMSH, nét op tijd, mijn kennelnaam goed en kwam ons eerste nest ter wereld.",
+      "foto1": "/media/200000141.webp",
+      "foto2": "/media/200000410.webp",
+      "citaat": "Vai Avanti: een naam die past bij alles wat ik met mijn honden wil bereiken, namelijk doorgaan.",
+      "citaatVan": "Shany Van der Meulen"
+    },
+    {
+      "type": "contact"
+    }
+  ]
+}
