@@ -8,6 +8,7 @@
     "share": "node _bron/tools/share.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.132.1",
     "js-yaml": "4.1.0",
     "sharp": "0.33.5"
   }

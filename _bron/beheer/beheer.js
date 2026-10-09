@@ -10,7 +10,7 @@
   const SITE_ROOT = new URL("../", location.href).href;
   const CODE_OP_TOESTEL = "va-beheer-koppelcode";
   const SLEUTEL_PAD = "_bron/beheer/sleutel.json";
-  const { esc, slug, BLOKKEN, VELDEN, KLEUR_VELDEN, LETTERS, bouwModel, createSite, fmtDate, pageFile, themaCss, fontsHref, isKleur } = window.VA;
+  const { esc, slug, BLOKKEN, VELDEN, KLEUR_VELDEN, LETTERS, TALEN: VA_TALEN, bouwModel, createSite, fmtDate, pageFile, themaCss, fontsHref, isKleur } = window.VA;
   const LIVE = REPO.branch, CONCEPT = "concept";
 
   const VASTE_PAGINAS = ["start", "honden", "nesten", "nieuws", "over-ons", "contact"];
@@ -980,6 +980,27 @@
       { naam: "onderschrift", label: "Helemaal onderaan, na © Vai Avanti", type: "regel" }
     ], s.voettekst, pad);
     groep(paneel, "Voettekst", "inst-voettekst", voetVak);
+
+    // Talen: elke aangevinkte taal krijgt een eigen versie van de site, automatisch vertaald bij het publiceren
+    const ALLE_TALEN = ["en", "de", "it", "fi", "da"];
+    const talenVak = h("div", { class: "groep-velden" });
+    for (const code of ALLE_TALEN) {
+      const vink = h("input", { type: "checkbox", id: "taal-" + code });
+      vink.checked = (s.talen || ALLE_TALEN).includes(code);
+      vink.addEventListener("change", () => {
+        voorWijziging([pad]);
+        const nu = new Set(s.talen || ALLE_TALEN);
+        if (vink.checked) nu.add(code); else nu.delete(code);
+        s.talen = ALLE_TALEN.filter(c => nu.has(c));
+        gewijzigd();
+      });
+      const online = (S.data.talen || []).includes(code);
+      talenVak.append(h("div", { class: "taal-rij" }, h("label", { class: "schakel", for: "taal-" + code }, vink, h("span", { class: "spoor" }), VA_TALEN[code].naam),
+        online ? h("a", { href: `${SITE_ROOT}${code}/`, target: "_blank", rel: "noopener", class: "taal-bekijk" }, "Bekijk") : null));
+    }
+    groep(paneel, "Talen", "inst-talen",
+      h("p", { class: "uitleg", style: "margin:0" }, "Je schrijft alles in het Nederlands. Bij Publiceren worden nieuwe of gewijzigde teksten automatisch vertaald naar de aangevinkte talen. Bezoekers kiezen hun taal rechtsboven in het menu."),
+      talenVak);
 
     groep(paneel, "Verwachte nesten", "inst-verwacht",
       veld({ naam: "tonen", label: "Aankondiging tonen op de site", type: "aanuit" }, s.verwacht, pad, vol),

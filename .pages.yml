@@ -1076,6 +1076,11 @@ content:
                 - Lato
                 - Open Sans
                 - Raleway
+      - name: talen
+        label: Talen (automatisch vertaald)
+        type: string
+        list: true
+        description: 'Codes: en, de, it, fi, da.'
       - name: menu
         label: Knop rechts in het menu
         type: object

@@ -36,7 +36,25 @@
   const arr = v => Array.isArray(v) ? v.filter(x => x !== null && x !== undefined && x !== "") : (v ? [v] : []);
   const iso = v => (v && typeof v === "object" && typeof v.toISOString === "function") ? v.toISOString().slice(0, 10) : String(v ?? "").slice(0, 10);
   const MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
-  const fmtDate = s => { const [y, m, d] = iso(s).split("-").map(Number); return y && m && d ? `${d} ${MAANDEN[m - 1]} ${y}` : ""; };
+  // Talen van de site. Nederlands is de brontaal; de andere worden automatisch vertaald.
+  const TALEN = {
+    nl: { naam: "Nederlands", locale: "nl-BE", en: "en" },
+    en: { naam: "English", locale: "en-GB", en: "and" },
+    de: { naam: "Deutsch", locale: "de-DE", en: "und" },
+    it: { naam: "Italiano", locale: "it-IT", en: "e" },
+    fi: { naam: "Suomi", locale: "fi-FI", en: "ja" },
+    da: { naam: "Dansk", locale: "da-DK", en: "og" }
+  };
+  const fmtDate = (s, taal = "nl") => {
+    const [y, m, d] = iso(s).split("-").map(Number);
+    if (!(y && m && d)) return "";
+    if (taal === "nl" || !TALEN[taal]) return `${d} ${MAANDEN[m - 1]} ${y}`;
+    return new Intl.DateTimeFormat(TALEN[taal].locale, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(Date.UTC(y, m - 1, d));
+  };
+  // Tekst met {plaatshouders} invullen
+  const vulIn = (s, v) => v ? String(s).replace(/\{([a-z]+)\}/gi, (m, k) => k in v ? v[k] : m) : String(s);
+  // Vaste woorden die niet letterlijk als t-tekst in de code staan maar wel vertaald moeten worden
+  const UI_EXTRA = ["Teef", "Reu"];
   const same = (a, b) => !!a && String(a).trim().toLowerCase() === String(b || "").trim().toLowerCase();
   const yearOf = s => parseInt((String(s).match(/\d{4}/) || ["0"])[0], 10);
   const clip = (s, n) => s.length > n ? s.slice(0, s.lastIndexOf(" ", n)) + "…" : s;
@@ -108,7 +126,8 @@
     dna: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3c0 5 10 6 10 11s-4 4-5 7M17 3c0 3-2 4.5-4.5 6M7 21c0-2 1.2-3.3 3-4.6"/><path d="M8.5 6h7M8 18h7M7.6 12h8.8"/></svg>',
     heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20Z"/><path d="M7 12h3l1.5-2.5 2 4 1.5-1.5h2"/></svg>',
     clip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg>',
-    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.4 3.2 8.1 7.5 9 4.3-.9 7.5-4.6 7.5-9V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg>'
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.4 3.2 8.1 7.5 9 4.3-.9 7.5-4.6 7.5-9V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg>',
+    globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></svg>'
   };
 
   /* ---------- Bloktypes: wat Shany kan toevoegen en welke velden ze heeft ----------
@@ -252,7 +271,7 @@
 
   /* ---------- Van ruwe bestanden naar alles wat de pagina's nodig hebben ----------
      raw = { site, paginas: {id: data}, honden: {id: data}, nesten: {id: data}, nieuws: {id: data} } */
-  function bouwModel(raw) {
+  function bouwModel(raw, taal = "nl") {
     const site = raw.site || {};
     site.paginafotos = site.paginafotos || {};
     const paginas = Object.entries(raw.paginas || {}).map(([id, p]) => ({ id: slug(id), ...p, blokken: arr(p.blokken) }));
@@ -262,7 +281,7 @@
       const cover = d.omslagfoto || photos[0];
       return {
         id: slug(id), call: d.roepnaam || id, name: d.naam || "", sex: d.geslacht || "", status: d.status || "",
-        born: fmtDate(d.geboren), color: d.kleur || "", sire: d.vader || "", dam: d.moeder || "",
+        born: fmtDate(d.geboren, taal), color: d.kleur || "", sire: d.vader || "", dam: d.moeder || "",
         highlight: d.hoogtepunt || "", pedigree: d.stamboom || "", health: arr(d.gezondheid).map(String),
         titles: arr(d.palmares).map(t => [String(t.jaar ?? ""), t.titel || "", t.plaats || ""]).filter(t => t[1]).sort((a, b) => yearOf(b[0]) - yearOf(a[0])),
         cover, pos: d.fotoFocus || "", photos: [cover, ...photos.filter(p => p !== cover)].filter(Boolean),
@@ -271,7 +290,7 @@
     }).filter(d => d.call).sort((a, b) => a.order - b.order || a.call.localeCompare(b.call));
 
     const nesten = Object.entries(raw.nesten || {}).map(([id, l]) => ({
-      id: slug(l.letter || id), letter: String(l.letter || id).toUpperCase(), bornIso: iso(l.geboren), born: fmtDate(l.geboren),
+      id: slug(l.letter || id), letter: String(l.letter || id).toUpperCase(), bornIso: iso(l.geboren), born: fmtDate(l.geboren, taal),
       sire: l.vader || "", dam: l.moeder || "", introMd: String(l.tekst || "").trim(), photos: arr(l.foto),
       pups: arr(l.pups).map(p => ({
         name: p.naam || "", call: p.roepnaam || p.naam || "", sex: p.geslacht || "", color: p.kleur || "",
@@ -325,20 +344,22 @@
     const TOKENS = {
       verslagen: String(nieuws.length), sinds: String(Math.min(...nieuws.map(p => p.year).filter(Boolean)) || ""),
       honden: String(honden.length), nesten: String(nesten.length),
-      nestletters: letters.length > 1 ? letters.slice(0, -1).join("-, ") + "- en " + letters.slice(-1) : letters.join(""),
+      nestletters: letters.length > 1 ? letters.slice(0, -1).join("-, ") + `- ${(TALEN[taal] || TALEN.nl).en} ` + letters.slice(-1) : letters.join(""),
+      // Zelfde letters zonder streepjes (T, U, X en Y), voor talen die geen "het T-nest" kennen
+      nestlijst: letters.length > 1 ? letters.slice(0, -1).join(", ") + ` ${(TALEN[taal] || TALEN.nl).en} ` + letters.slice(-1) : letters.join(""),
       titels: String(titleCount), plaats: String((site.contact || {}).plaats || "").replace(/^\d+\s*/, "").replace(/,.*$/, ""),
       jaar: String(new Date().getFullYear())
     };
     const vul = v => typeof v === "string" ? v.replace(/\{([a-z]+)\}/g, (m, k) => k in TOKENS ? TOKENS[k] : m)
       : Array.isArray(v) ? v.map(vul) : (v && typeof v === "object") ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, vul(x)])) : v;
 
-    const reportDate = p => p.dateKnown ? fmtDate(p.dateIso) : String(p.year);
+    const reportDate = p => p.dateKnown ? fmtDate(p.dateIso, taal) : String(p.year);
     const firstText = p => plain(p.body).split(/\n{2,}/).map(s => s.trim()).find(s => s.length > 60) || plain(p.body).trim();
     const nieuwsKaarten = nieuws.slice(0, 3).map(p => ({
       id: p.id, titel: p.title, datum: reportDate(p), foto: p.photos[0] || "",
       kop: p.kop || p.title, tekst: p.summary || clip(firstText(p).replace(/\s+/g, " "), 200)
     }));
-    return { site, paginas, honden, nesten, nieuws, DOG_INFO, titleCount, menu, nieuwsKaarten, nieuwsAantal: nieuws.length, reportDate, dogByName, TOKENS, vul };
+    return { site, paginas, honden, nesten, nieuws, DOG_INFO, titleCount, menu, nieuwsKaarten, nieuwsAantal: nieuws.length, reportDate, dogByName, TOKENS, vul, taal };
   }
 
   /* ---------- Site-opbouw ---------- */
@@ -355,16 +376,31 @@
     const menu = D.menu || [];
     const vul = D.vul || (v => v);
     const MK = site.menu || {};
+    // Vaste tekst van de site in de taal van deze pagina, met plaatshouders zoals {n}
+    const taal = D.taal || "nl";
+    const t = (s, v) => vulIn(ctx.vertaal ? ctx.vertaal(s) : s, v);
+    // Taalkeuze: ctx.taalLinks(bestand) geeft [{ code, href }] voor alle talen van de site
+    const taalKeuze = bestand => {
+      const links = ctx.taalLinks ? ctx.taalLinks(bestand) : [];
+      if (links.length < 2) return "";
+      return `<details class="taalkeuze">
+      <summary aria-label="${esc(t("Taal kiezen"))}">${ICON.globe}<span>${esc(taal.toUpperCase())}</span></summary>
+      <ul>
+${links.map(l => `        <li><a href="${esc(l.href)}" hreflang="${l.code}" lang="${l.code}" data-taal="${l.code}"${l.code === taal ? ' aria-current="true"' : ""}>${esc(TALEN[l.code].naam)}</a></li>`).join("\n")}
+      </ul>
+    </details>`;
+    };
     const VT = vul(site.voettekst || {});
 
-    const header = active => `<header class="site-header">
-  <nav class="wrap nav" aria-label="Hoofdmenu">
-    <a class="brand" href="index.html" aria-label="Vai Avanti – startpagina"><span class="brand-logo" role="img" aria-label="Vai Avanti"></span></a>
+    const header = (active, bestand) => `<header class="site-header">
+  <nav class="wrap nav" aria-label="${esc(t("Hoofdmenu"))}">
+    <a class="brand" href="index.html" aria-label="${esc(t("Vai Avanti – startpagina"))}"><span class="brand-logo" role="img" aria-label="Vai Avanti"></span></a>
     <ul class="nav-links">
 ${menu.map(m => `      <li><a href="${esc(m.href)}"${m.key === active ? ' class="active" aria-current="page"' : ""}>${esc(m.label)}</a></li>`).join("\n")}
     </ul>
+    ${taalKeuze(bestand || pageFile(active || "start"))}
     ${heeft(MK, "knoptekst") && !MK.knoptekst ? "" : `<a class="btn nav-cta" href="${esc(MK.knoplink || "contact.html")}"${pageFile(active || "start") === (MK.knoplink || "contact.html") ? ' aria-current="page"' : ""}>${esc(MK.knoptekst || "Contact")}</a>`}
-    <button class="menu-toggle" aria-label="Menu openen" aria-expanded="false">${ICON.menu}</button>
+    <button class="menu-toggle" aria-label="${esc(t("Menu openen"))}" aria-expanded="false">${ICON.menu}</button>
   </nav>
 </header>`;
 
@@ -398,7 +434,7 @@ ${arr(k.links).filter(l => l.label).map(l => `          <li><a href="${esc(l.lin
     </div>
     <div class="footer-bottom">
       <span>© ${new Date().getFullYear()} Vai Avanti${VT.onderschrift ? ` · ${esc(VT.onderschrift)}` : ""}</span>
-      <a href="#top" style="color:inherit;text-decoration:none">Terug naar boven ↑</a>
+      <a href="#top" style="color:inherit;text-decoration:none">${esc(t("Terug naar boven"))} ↑</a>
     </div>
   </div>
 </footer>`;
@@ -430,14 +466,14 @@ ${arr(k.links).filter(l => l.label).map(l => `          <li><a href="${esc(l.lin
     const dogCard = d => `<a class="dog-card reveal" href="hond-${d.id}.html">
   <div class="dog-media">
     ${img(d.cover, { alt: `${d.call} (${d.name})`, pos: d.pos, sizes: "(max-width: 640px) 100vw, 33vw" })}
-    <div class="badges">${d.sex ? `<span class="badge">${esc(d.sex)}</span>` : ""}${d.status ? `<span class="badge gold">${esc(d.status)}</span>` : ""}</div>
+    <div class="badges">${d.sex ? `<span class="badge">${esc(t(d.sex))}</span>` : ""}${d.status ? `<span class="badge gold">${esc(d.status)}</span>` : ""}</div>
   </div>
   <div class="dog-body">
     <h3>${esc(d.call)}</h3>
     <div class="dog-official">${esc(d.name)}</div>
-    <div class="dog-meta">${[d.born && "Geboren " + d.born, d.color].filter(Boolean).map(esc).join(" · ")}</div>
+    <div class="dog-meta">${[d.born && t("Geboren {datum}", { datum: d.born }), d.color].filter(Boolean).map(esc).join(" · ")}</div>
     ${d.highlight ? `<div class="dog-highlight">${ICON.trophy}<span>${esc(d.highlight)}</span></div>` : ""}
-    <div class="dog-more"><span class="link-arrow">Bekijk profiel ${ICON.arrow}</span></div>
+    <div class="dog-more"><span class="link-arrow">${esc(t("Bekijk profiel"))} ${ICON.arrow}</span></div>
   </div>
 </a>`;
 
@@ -453,43 +489,43 @@ ${arr(k.links).filter(l => l.label).map(l => `          <li><a href="${esc(l.lin
     <h2>${inline(w("titel"))}</h2>
     ${w("intro") ? `<p class="lead">${esc(w("intro"))}</p>` : ""}
     <ul class="contact-list">
-      <li><a href="${telHref}"><span class="icon">${ICON.phone}</span><div><small>Telefoon</small><span>${esc(C.telefoon)}</span></div></a></li>
-      <li><a href="contact.html" data-mail-link><span class="icon">${ICON.mail}</span><div><small>E-mail</small><span data-mail>${esc(mailShown)}</span></div></a></li>
+      <li><a href="${telHref}"><span class="icon">${ICON.phone}</span><div><small>${esc(t("Telefoon"))}</small><span>${esc(C.telefoon)}</span></div></a></li>
+      <li><a href="contact.html" data-mail-link><span class="icon">${ICON.mail}</span><div><small>${esc(t("E-mail"))}</small><span data-mail>${esc(mailShown)}</span></div></a></li>
       ${C.instagram ? `<li><a href="${esc(C.instagram)}" target="_blank" rel="noopener"><span class="icon">${ICON.insta}</span><div><small>Instagram</small><span>@${esc(String(C.instagram).replace(/\/+$/, "").split("/").pop())}</span></div></a></li>` : ""}
-      <li><div><span class="icon">${ICON.pin}</span><div><small>Locatie</small><span>${esc(C.plaats)}</span></div></div></li>
+      <li><div><span class="icon">${ICON.pin}</span><div><small>${esc(t("Locatie"))}</small><span>${esc(C.plaats)}</span></div></div></li>
     </ul>
   </div>
   <form class="contact-form" id="contact-form">
     ${w("formulierTitel") ? `<h3>${esc(w("formulierTitel"))}</h3>` : ""}
     ${w("formulierTekst") ? `<p>${esc(w("formulierTekst"))}</p>` : ""}
     <div class="row">
-      <label>Naam<input id="naam" name="naam" required autocomplete="name"></label>
-      <label>E-mailadres<input id="email" name="email" type="email" required autocomplete="email"></label>
+      <label>${esc(t("Naam"))}<input id="naam" name="naam" required autocomplete="name"></label>
+      <label>${esc(t("E-mailadres"))}<input id="email" name="email" type="email" required autocomplete="email"></label>
     </div>
-    ${onderwerpen.length ? `<label>Onderwerp
+    ${onderwerpen.length ? `<label>${esc(t("Onderwerp"))}
       <select name="onderwerp" id="onderwerp">
 ${onderwerpen.map(o => `        <option>${esc(o)}</option>`).join("\n")}
       </select>
     </label>` : ""}
-    <label>Bericht<textarea id="bericht" name="bericht" required></textarea></label>
-    <div class="hp" aria-hidden="true"><label>Laat dit leeg<input type="checkbox" id="botcheck" name="botcheck" tabindex="-1" autocomplete="off"></label></div>
+    <label>${esc(t("Bericht"))}<textarea id="bericht" name="bericht" required></textarea></label>
+    <div class="hp" aria-hidden="true"><label>${esc(t("Laat dit leeg"))}<input type="checkbox" id="botcheck" name="botcheck" tabindex="-1" autocomplete="off"></label></div>
     <div id="captcha-slot"></div>
     <div class="form-foot">
       <small id="form-status" aria-live="polite"></small>
-      <button class="btn btn-dark" type="submit" id="form-submit">${esc(w("knoptekst") || "Verstuur")} ${ICON.arrow}</button>
+      <button class="btn btn-dark" type="submit" id="form-submit">${esc(w("knoptekst") || t("Verstuur"))} ${ICON.arrow}</button>
     </div>
   </form>
 </div>`;
     };
 
     const expectedBand = () => V.tonen ? `<div class="expected-band reveal" id="verwacht">
-  <div class="litter-letter">${esc((String(V.label || "").match(/\d{4}/) || ["Nieuw"])[0])}</div>
+  <div class="litter-letter">${esc((String(V.label || "").match(/\d{4}/) || [t("Nieuw")])[0])}</div>
   <div class="txt">
     <div class="litter-date">${esc(V.label || "")}</div>
     <h2>${inline(V.titel || "")}</h2>
     <p>${esc(V.tekst || "")}</p>
   </div>
-  ${heeft(V, "knoptekst") && !V.knoptekst ? "" : `<a class="btn btn-gold" href="${esc(V.knoplink || "contact.html#nesten")}">${esc(V.knoptekst || "Informeer naar de nesten")} ${ICON.arrow}</a>`}
+  ${heeft(V, "knoptekst") && !V.knoptekst ? "" : `<a class="btn btn-gold" href="${esc(V.knoplink || "contact.html#nesten")}">${esc(V.knoptekst || t("Informeer naar de nesten"))} ${ICON.arrow}</a>`}
 </div>` : "";
 
     const head = (b, fallbackTitle, extra = "") => `<div class="section-head reveal">
@@ -510,8 +546,8 @@ ${onderwerpen.map(o => `        <option>${esc(o)}</option>`).join("\n")}
       hero(b) {
         const l0 = D.nieuwsKaarten && D.nieuwsKaarten[0];
         const fotos = arr(b.fotos).length ? arr(b.fotos) : arr(b.foto);
-        const k1 = heeft(b, "knop1tekst") ? b.knop1tekst : "Ontmoet onze honden", k1l = b.knop1link || "honden.html";
-        const k2 = heeft(b, "knop2tekst") ? b.knop2tekst : (V.tonen && V.label ? V.label : "Onze nesten"), k2l = b.knop2link || `nesten.html${V.tonen ? "#verwacht" : ""}`;
+        const k1 = heeft(b, "knop1tekst") ? b.knop1tekst : t("Ontmoet onze honden"), k1l = b.knop1link || "honden.html";
+        const k2 = heeft(b, "knop2tekst") ? b.knop2tekst : (V.tonen && V.label ? V.label : t("Onze nesten")), k2l = b.knop2link || `nesten.html${V.tonen ? "#verwacht" : ""}`;
         return `<section class="hero${kopKlassen(b)}">
   <div class="hero-media">${beelden(fotos, { alt: "", sizes: "100vw", eager: true, pos: b.fotoFocus && b.fotoFocus !== "Midden" ? focus(b, "72% 40%") : "" }, b.wissel)}</div>
   <div class="wrap">
@@ -527,14 +563,14 @@ ${onderwerpen.map(o => `        <option>${esc(o)}</option>`).join("\n")}
   </div>
   ${b.nieuwsTonen !== false && l0 ? `<a class="hero-news" href="nieuws.html#${l0.id}">
     ${img(l0.foto, { alt: "", sizes: "58px" })}
-    <div><small>Laatste nieuws</small><span>${esc(l0.kop)}</span></div>
+    <div><small>${esc(t("Laatste nieuws"))}</small><span>${esc(l0.kop)}</span></div>
   </a>` : ""}
 </section>`;
       },
       cijfers(b) {
         const lijst = arr(heeft(b, "cijfers") ? b.cijfers : vul(STANDAARD.cijfers)).filter(c => c.getal || c.tekst);
         if (!lijst.length) return "";
-        return `<section class="stats" aria-label="Vai Avanti in cijfers">
+        return `<section class="stats" aria-label="${esc(t("Vai Avanti in cijfers"))}">
   <div class="wrap">
     <div class="stats-card reveal"${lijst.length !== 4 ? ` style="--n:${lijst.length}"` : ""}>
 ${lijst.map(c => `      <div class="stat"><strong>${esc(c.getal || "")}</strong><span>${esc(c.tekst || "")}</span></div>`).join("\n")}
@@ -569,7 +605,7 @@ ${(D.honden || []).map(dogCard).join("\n")}
   <div class="wrap">
     ${head(b, "", b.linktekst ? `<a class="link-arrow" href="nesten.html">${esc(b.linktekst)} ${ICON.arrow}</a>` : "")}
     <div class="mini-grid">
-${elsewhere.map(p => `      <a class="mini reveal" href="nesten.html#${pupAnchor(p)}">${img(p.photos[0], { alt: p.call, sizes: "200px" })}<b>${esc(p.call)}</b><small>${esc(p.name)}<br>${esc(p.litter.letter)}-nest · ${esc(p.sex)}${p.country ? " · " + esc(p.country) : ""}</small></a>`).join("\n")}
+${elsewhere.map(p => `      <a class="mini reveal" href="nesten.html#${pupAnchor(p)}">${img(p.photos[0], { alt: p.call, sizes: "200px" })}<b>${esc(p.call)}</b><small>${esc(p.name)}<br>${esc(t("{letter}-nest", { letter: p.litter.letter }))} · ${esc(t(p.sex))}${p.country ? " · " + esc(p.country) : ""}</small></a>`).join("\n")}
     </div>
   </div>
 </section>`;
@@ -625,8 +661,8 @@ ${arr(heeft(b, "punten") ? b.punten : STANDAARD.punten).map(p => `      <div cla
       nesten(b) {
         const cards = (D.nesten || []).map(l => `<a class="litter reveal" href="nesten.html#${l.id}" style="text-decoration:none;color:inherit">
       <div class="litter-letter">${esc(l.letter)}</div>
-      <h3>${esc(l.letter)}-nest</h3>
-      <div class="litter-date">${l.born ? "Geboren " + esc(l.born) : "&nbsp;"}</div>
+      <h3>${esc(t("{letter}-nest", { letter: l.letter }))}</h3>
+      <div class="litter-date">${l.born ? esc(t("Geboren {datum}", { datum: l.born })) : "&nbsp;"}</div>
       <p class="litter-parents">${esc(l.sire)} <span>×</span> ${esc(l.dam)}</p>
       <div class="chips">${(l.pups || []).map(p => `<span class="chip">${esc(String(p.name).replace(/^Vai Avanti /i, ""))} <small>· ${esc(p.call)}</small></span>`).join("")}</div>
     </a>`).join("\n");
@@ -776,7 +812,7 @@ ${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel
 
     const mention = p => `<a class="mention" href="nieuws.html#${p.id}">
   ${heeftFoto(p.photos[0]) ? img(p.photos[0], { alt: "", sizes: "96px" }) : '<span class="ph"></span>'}
-  <span><small>${esc(reportDate(p))}${p.recap ? " · Seizoensoverzicht" : ""}</small><b>${esc(p.title)}</b></span>
+  <span><small>${esc(reportDate(p))}${p.recap ? " · " + esc(t("Seizoensoverzicht")) : ""}</small><b>${esc(p.title)}</b></span>
   ${ICON.arrow}
 </a>`;
 
@@ -787,7 +823,7 @@ ${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel
       const litter = d.litter && nesten.find(l => l.id === d.litter);
       const asDam = nesten.filter(l => same(l.dam, d.name)), asSire = nesten.filter(l => same(l.sire, d.name));
       const prev = honden[(i - 1 + honden.length) % honden.length] || d, next = honden[(i + 1) % honden.length] || d;
-      const gal = `dog-${d.id}`;
+      const gal = `dog-${d.id}`, isReu = d.sex === "Reu";
       const famRow = (label, value, href) => !value ? "" : href
         ? `<a href="${href}"><span><small>${label}</small><span>${esc(value)}</span></span>${ICON.arrow}</a>`
         : `<div class="fam"><span><small>${label}</small><span>${esc(value)}</span></span></div>`;
@@ -795,8 +831,8 @@ ${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel
       return `<section class="dog-hero">
   <div class="wrap dog-hero-grid">
     <div>
-      <div class="crumbs"><a href="honden.html">Onze honden</a><span>/</span><span>${esc(d.call)}</span></div>
-      <span class="eyebrow">${esc(d.sex)}${d.status ? " · " + esc(d.status) : ""}</span>
+      <div class="crumbs"><a href="honden.html">${esc(t("Onze honden"))}</a><span>/</span><span>${esc(d.call)}</span></div>
+      <span class="eyebrow">${esc(t(d.sex))}${d.status ? " · " + esc(d.status) : ""}</span>
       <h1>${esc(d.call)}</h1>
       <div class="dog-official">${esc(d.name)}</div>
       ${d.highlight ? `<div class="highlight">${ICON.trophy}<span>${esc(d.highlight)}</span></div>` : ""}
@@ -810,35 +846,35 @@ ${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel
   <div class="wrap dog-cols">
     <div>
       <div class="reveal">
-        <h2 class="sub-label">Gegevens</h2>
+        <h2 class="sub-label">${esc(t("Gegevens"))}</h2>
         <dl class="facts">
-          <div><dt>Geboren</dt><dd>${esc(d.born || "–")}</dd></div>
-          <div><dt>Kleur</dt><dd>${esc(d.color || "–")}</dd></div>
-          <div><dt>Geslacht</dt><dd>${esc(d.sex || "–")}</dd></div>
-          <div><dt>Stamboom</dt><dd>${d.pedigree ? `<a href="${esc(d.pedigree)}" target="_blank" rel="noopener">Breed Archive</a>` : "–"}</dd></div>
+          <div><dt>${esc(t("Geboren"))}</dt><dd>${esc(d.born || "–")}</dd></div>
+          <div><dt>${esc(t("Kleur"))}</dt><dd>${esc(d.color || "–")}</dd></div>
+          <div><dt>${esc(t("Geslacht"))}</dt><dd>${esc(d.sex ? t(d.sex) : "–")}</dd></div>
+          <div><dt>${esc(t("Stamboom"))}</dt><dd>${d.pedigree ? `<a href="${esc(d.pedigree)}" target="_blank" rel="noopener">Breed Archive</a>` : "–"}</dd></div>
         </dl>
       </div>
       ${d.health.length ? `<div class="reveal">
-        <h2 class="sub-label">Gezondheid</h2>
+        <h2 class="sub-label">${esc(t("Gezondheid"))}</h2>
         ${healthChips(d.health)}
       </div>` : ""}
       <div class="reveal">
-        <h2 class="sub-label">Familie</h2>
+        <h2 class="sub-label">${esc(t("Familie"))}</h2>
         <div class="family">
-          ${famRow("Vader", d.sire, d.sireId ? `hond-${d.sireId}.html` : "")}
-          ${famRow("Moeder", d.dam, d.damId ? `hond-${d.damId}.html` : "")}
-          ${litter ? famRow("Geboren in", `${litter.letter}-nest${litter.born ? ` (${litter.born})` : ""}`, `nesten.html#${litter.id}`) : ""}
-          ${asDam.map(l => famRow("Moeder van", `${l.letter}-nest${l.born ? ` (${l.born})` : ""}`, `nesten.html#${l.id}`)).join("\n          ")}
-          ${asSire.map(l => famRow("Vader van", `${l.letter}-nest${l.born ? ` (${l.born})` : ""}`, `nesten.html#${l.id}`)).join("\n          ")}
+          ${famRow(t("Vader"), d.sire, d.sireId ? `hond-${d.sireId}.html` : "")}
+          ${famRow(t("Moeder"), d.dam, d.damId ? `hond-${d.damId}.html` : "")}
+          ${litter ? famRow(t("Geboren in"), `${t("{letter}-nest", { letter: litter.letter })}${litter.born ? ` (${litter.born})` : ""}`, `nesten.html#${litter.id}`) : ""}
+          ${asDam.map(l => famRow(t("Moeder van"), `${t("{letter}-nest", { letter: l.letter })}${l.born ? ` (${l.born})` : ""}`, `nesten.html#${l.id}`)).join("\n          ")}
+          ${asSire.map(l => famRow(t("Vader van"), `${t("{letter}-nest", { letter: l.letter })}${l.born ? ` (${l.born})` : ""}`, `nesten.html#${l.id}`)).join("\n          ")}
         </div>
       </div>
     </div>
     <div>
       <div class="reveal">
-        <h2 class="sub-label">${d.titles.length ? `Palmares · ${d.titles.length} ${d.titles.length === 1 ? "titel" : "titels"}` : "Palmares"}</h2>
+        <h2 class="sub-label">${esc(d.titles.length ? t(d.titles.length === 1 ? "Palmares · {n} titel" : "Palmares · {n} titels", { n: d.titles.length }) : t("Palmares"))}</h2>
         ${d.titles.length
           ? `<ul class="palmares">${d.titles.map(([y, t, p]) => `<li><b>${esc(y)}</b><span>${esc(t)}${p ? ` <small>· ${esc(p)}</small>` : ""}</span></li>`).join("")}</ul>`
-          : `<p class="note">${asDam.length || asSire.length ? `${esc(d.call)} kreeg een ereplaats als ouder van onze nesten.` : `${esc(d.call)} staat nog aan het begin van ${d.sex === "Reu" ? "zijn" : "haar"} carrière.`}</p>`}
+          : `<p class="note">${esc(asDam.length || asSire.length ? t("{naam} kreeg een ereplaats als ouder van onze nesten.", { naam: d.call }) : t(isReu ? "{naam} staat nog aan het begin van zijn carrière." : "{naam} staat nog aan het begin van haar carrière.", { naam: d.call }))}</p>`}
       </div>
     </div>
   </div>
@@ -846,7 +882,7 @@ ${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel
 
 ${gallery.length ? `<section class="band section-tight">
   <div class="wrap">
-    <div class="section-head reveal"><div><span class="eyebrow">Foto's</span><h2>${esc(d.call)} in <em>beeld</em></h2></div></div>
+    <div class="section-head reveal"><div><span class="eyebrow">${esc(t("Foto's"))}</span><h2>${inline(t("{naam} in *beeld*", { naam: d.call }))}</h2></div></div>
     <div class="gallery">
 ${gallery.map(p => "      " + shot(p, { group: gal, caption: `${d.call} (${d.name})`, sizes: "(max-width: 640px) 50vw, 25vw" })).join("\n")}
     </div>
@@ -856,8 +892,8 @@ ${gallery.map(p => "      " + shot(p, { group: gal, caption: `${d.call} (${d.nam
 ${posts.length ? `<section class="section-tight">
   <div class="wrap">
     <div class="section-head reveal">
-      <div><span class="eyebrow">In het nieuws</span><h2>${posts.length} ${posts.length === 1 ? "verslag" : "verslagen"} met <em>${esc(d.call)}</em></h2></div>
-      <a class="link-arrow" href="nieuws.html#hond-${d.id}">Toon ze allemaal in het archief ${ICON.arrow}</a>
+      <div><span class="eyebrow">${esc(t("In het nieuws"))}</span><h2>${inline(t(posts.length === 1 ? "{n} verslag met *{naam}*" : "{n} verslagen met *{naam}*", { n: posts.length, naam: d.call }))}</h2></div>
+      <a class="link-arrow" href="nieuws.html#hond-${d.id}">${esc(t("Toon ze allemaal in het archief"))} ${ICON.arrow}</a>
     </div>
     <div class="mention-list">
 ${posts.slice(0, 8).map(mention).join("\n")}
@@ -868,7 +904,7 @@ ${posts.slice(0, 8).map(mention).join("\n")}
 <section class="section-tight" style="padding-top:0">
   <div class="wrap dog-nav">
     <a class="link-arrow" href="hond-${prev.id}.html">${ICON.back} ${esc(prev.call)}</a>
-    <a class="link-arrow" href="honden.html">Alle honden</a>
+    <a class="link-arrow" href="honden.html">${esc(t("Alle honden"))}</a>
     <a class="link-arrow" href="hond-${next.id}.html">${esc(next.call)} ${ICON.arrow}</a>
   </div>
 </section>`;
@@ -880,17 +916,17 @@ ${posts.slice(0, 8).map(mention).join("\n")}
       const pedigree = p.pedigree || (d ? d.pedigree : "");
       const g = pupAnchor(p);
       return `<article class="pup reveal" id="${g}">
-      ${shot(p.photos[0], { group: g, caption: `${p.call} (${p.name})`, sizes: "(max-width: 640px) 100vw, 33vw", extra: p.photos.length > 1 ? `<span class="count">${p.photos.length} foto's</span>` : "" })}
+      ${shot(p.photos[0], { group: g, caption: `${p.call} (${p.name})`, sizes: "(max-width: 640px) 100vw, 33vw", extra: p.photos.length > 1 ? `<span class="count">${esc(t("{n} foto's", { n: p.photos.length }))}</span>` : "" })}
       ${p.photos.slice(1).map(ph => shot(ph, { group: g, caption: `${p.call} (${p.name})`, hidden: true })).join("")}
       <div class="pup-body">
         <h3>${esc(p.call)}</h3>
         <div class="dog-official">${esc(p.name)}</div>
-        <div class="pup-meta">${[p.sex, p.color].filter(Boolean).map(esc).join(" · ")}${p.country ? ` · woont in ${esc(p.country)}` : (d ? " · bij ons" : "")}</div>
+        <div class="pup-meta">${[p.sex && t(p.sex), p.color].filter(Boolean).map(esc).join(" · ")}${p.country ? ` · ${esc(t("woont in {land}", { land: p.country }))}` : (d ? ` · ${esc(t("bij ons"))}` : "")}</div>
         ${health.length ? healthChips(health) : ""}
         ${p.results.length ? `<ul class="pup-results">${p.results.map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : ""}
         <div class="pup-links">
-          ${d ? `<a class="link-arrow" href="hond-${d.id}.html">Bekijk profiel ${ICON.arrow}</a>` : ""}
-          ${pedigree ? `<a class="link-arrow" href="${esc(pedigree)}" target="_blank" rel="noopener">Stamboom ${ICON.arrow}</a>` : ""}
+          ${d ? `<a class="link-arrow" href="hond-${d.id}.html">${esc(t("Bekijk profiel"))} ${ICON.arrow}</a>` : ""}
+          ${pedigree ? `<a class="link-arrow" href="${esc(pedigree)}" target="_blank" rel="noopener">${esc(t("Stamboom"))} ${ICON.arrow}</a>` : ""}
         </div>
       </div>
     </article>`;
@@ -900,12 +936,12 @@ ${posts.slice(0, 8).map(mention).join("\n")}
     <div class="litter-head reveal">
       <div class="litter-letter">${esc(l.letter)}</div>
       <div>
-        <h2>${esc(l.letter)}-nest</h2>
-        <div class="meta">${l.born ? `Geboren ${esc(l.born)} · ` : ""}${l.pups.length} ${l.pups.length === 1 ? "pup" : "pups"} op deze site<br>
+        <h2>${esc(t("{letter}-nest", { letter: l.letter }))}</h2>
+        <div class="meta">${l.born ? `${esc(t("Geboren {datum}", { datum: l.born }))} · ` : ""}${esc(t(l.pups.length === 1 ? "{n} pup op deze site" : "{n} pups op deze site", { n: l.pups.length }))}<br>
           ${esc(l.sire)} × ${l.damId ? `<a href="hond-${l.damId}.html">${esc(l.dam)}</a>` : esc(l.dam)}</div>
         ${l.introMd ? `<div class="litter-intro">${md(l.introMd)}</div>` : ""}
       </div>
-      ${heeftFoto(l.photos[0]) ? shot(l.photos[0], { group: "nest-" + l.id, caption: `${l.letter}-nest`, sizes: "300px" }) : ""}
+      ${heeftFoto(l.photos[0]) ? shot(l.photos[0], { group: "nest-" + l.id, caption: t("{letter}-nest", { letter: l.letter }), sizes: "300px" }) : ""}
     </div>
     <div class="pups">
 ${l.pups.map(pupCard).join("\n")}
@@ -936,11 +972,11 @@ ${l.pups.map(pupCard).join("\n")}
         ${photos.slice(4).map(ph => shot(ph, { group: p.id, caption: p.title, hidden: true })).join("")}
       </div>` : ""}
       <div class="report-body">
-        <span class="report-tag">${p.recap ? "Seizoensoverzicht · " : ""}${esc(reportDate(p))}${photos.length ? ` · ${photos.length} ${photos.length === 1 ? "foto" : "foto's"}` : ""}</span>
+        <span class="report-tag">${p.recap ? esc(t("Seizoensoverzicht")) + " · " : ""}${esc(reportDate(p))}${photos.length ? ` · ${esc(t(photos.length === 1 ? "{n} foto" : "{n} foto's", { n: photos.length }))}` : ""}</span>
         <h3>${esc(p.title)}</h3>
         ${p.dogs.some(k => info[k]) ? `<div class="chips">${p.dogs.filter(k => info[k]).map(k => `<a class="chip" href="${info[k].href}">${esc(info[k].call)}</a>`).join("")}</div>` : ""}
         ${text.trim() ? `<div class="report-text${long ? " clamped" : ""}">${md(p.body)}</div>
-        ${long ? `<button class="more-btn" type="button" aria-expanded="false">Lees het volledige verslag ${ICON.down}</button>` : ""}` : ""}
+        ${long ? `<button class="more-btn" type="button" aria-expanded="false">${esc(t("Lees het volledige verslag"))} ${ICON.down}</button>` : ""}` : ""}
       </div>
     </article>`;
     };
@@ -954,35 +990,35 @@ ${l.pups.map(pupCard).join("\n")}
       const filterDogs = Object.keys(counts).filter(k => counts[k] >= 3).sort((a, b) => counts[b] - counts[a]);
       return `<div class="news-toolbar" id="archief">
   <div class="wrap">
-    <div class="filter-chips" role="group" aria-label="Filter op hond">
-      <button type="button" data-filter="alle" aria-pressed="true">Alle <small>${nieuws.length}</small></button>
+    <div class="filter-chips" role="group" aria-label="${esc(t("Filter op hond"))}">
+      <button type="button" data-filter="alle" aria-pressed="true">${esc(t("Alle"))} <small>${nieuws.length}</small></button>
 ${filterDogs.map(k => `      <button type="button" data-filter="${k}" aria-pressed="false">${esc(info[k].call)} <small>${counts[k]}</small></button>`).join("\n")}
     </div>
-    <nav class="year-links" aria-label="Spring naar jaar"><span>Jaar</span>${years.map(y => `<a href="#jaar-${y}">${y}</a>`).join("")}</nav>
+    <nav class="year-links" aria-label="${esc(t("Spring naar jaar"))}"><span>${esc(t("Jaar"))}</span>${years.map(y => `<a href="#jaar-${y}">${y}</a>`).join("")}</nav>
   </div>
 </div>
 <div class="wrap" id="archive" style="padding-bottom:100px">
 ${years.map(y => {
         const ps = nieuws.filter(p => p.year === y);
         return `<section class="year-block" id="jaar-${y}">
-  <div class="year-head"><h2>${y}</h2><span>${ps.length} ${ps.length === 1 ? "verslag" : "verslagen"}</span></div>
+  <div class="year-head"><h2>${y}</h2><span>${esc(t(ps.length === 1 ? "{n} verslag" : "{n} verslagen", { n: ps.length }))}</span></div>
   <div class="reports">
 ${ps.map(p => verslag(p)).join("\n")}
   </div>
 </section>`;
       }).join("\n")}
-  <p class="empty-state" id="archive-empty" hidden>Geen verslagen gevonden voor deze hond.</p>
+  <p class="empty-state" id="archive-empty" hidden>${esc(t("Geen verslagen gevonden voor deze hond."))}</p>
 </div>`;
     };
-    const nietGevondenBody = heroFoto => `${pageHero({ eyebrow: "404", title: "Deze pagina is <em>weggerend</em>", lead: "De pagina die u zoekt bestaat niet (meer). Misschien vindt u het via een van deze pagina's.", bg: heroFoto })}
+    const nietGevondenBody = heroFoto => `${pageHero({ eyebrow: "404", title: inline(t("Deze pagina is *weggerend*")), lead: esc(t("De pagina die u zoekt bestaat niet (meer). Misschien vindt u het via een van deze pagina's.")), bg: heroFoto })}
 <section class="section-tight"><div class="wrap cta-band">
-  <a class="btn btn-dark" href="index.html">Naar de startpagina ${ICON.arrow}</a>
-  <a class="link-arrow" href="nieuws.html">Wedstrijdverslagen ${ICON.arrow}</a>
+  <a class="btn btn-dark" href="index.html">${esc(t("Naar de startpagina"))} ${ICON.arrow}</a>
+  <a class="link-arrow" href="nieuws.html">${esc(t("Wedstrijdverslagen"))} ${ICON.arrow}</a>
 </div></section>`;
 
     return { header, footer, pageHero, dogCard, healthChips, contactBlock, expectedBand, renderBlock, renderBlocks, mailParts,
-      hondenBody, hondBody, nestenKop, nestBlok, nestenBody, nieuwsKop, verslag, nieuwsBody, nietGevondenBody, paginaBody, blokNieuws: b => R.nieuws(b || {}) };
+      hondenBody, hondBody, nestenKop, nestBlok, nestenBody, nieuwsKop, verslag, nieuwsBody, nietGevondenBody, paginaBody, t, taal, blokNieuws: b => R.nieuws(b || {}) };
   }
 
-  return { esc, slug, inline, md, plain, ICON, BLOKKEN, VELDEN, KLEUR_VELDEN, LETTERS, STANDAARD, bouwModel, createSite, fmtDate, pageFile, arr, themaCss, fontsHref, isKleur };
+  return { esc, slug, inline, md, plain, ICON, BLOKKEN, VELDEN, KLEUR_VELDEN, LETTERS, STANDAARD, TALEN, UI_EXTRA, vulIn, bouwModel, createSite, fmtDate, pageFile, arr, themaCss, fontsHref, isKleur };
 });

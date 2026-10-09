@@ -8,6 +8,13 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
+  /* ---------- Talen ----------
+     De bouwstap vult TEKSTEN met de vertalingen van de teksten hieronder, per taal. */
+  const TEKSTEN = {};
+  const TAAL = document.documentElement.lang.slice(0, 2) || "nl";
+  // T("Deze website is ook in jouw taal beschikbaar.") wordt hieronder per taal opgezocht
+  const T = (s, v) => String((TEKSTEN[TAAL] || {})[s] || s).replace(/\{([a-z]+)\}/g, (m, k) => v && k in v ? v[k] : m);
+
   /* ---------- Diavoorstelling in de koppen ---------- */
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) $$(".slides").forEach(box => {
     const beelden = $$("img", box);
@@ -20,6 +27,36 @@
     }, (parseInt(box.dataset.wissel, 10) || 6) * 1000);
   });
 
+  /* ---------- Taalkeuze ---------- */
+  const keuze = $(".taalkeuze");
+  if (keuze) {
+    document.addEventListener("click", e => { if (keuze.open && !keuze.contains(e.target)) keuze.open = false; });
+    keuze.addEventListener("click", e => {
+      const a = e.target.closest("a[data-taal]");
+      if (a) try { localStorage.setItem("va-taal", a.dataset.taal); } catch (x) { /* privévenster */ }
+    });
+    // Nog geen taal gekozen en de browser spreekt een andere taal van de site? Toon een kleine hint.
+    let gekozen = null;
+    try { gekozen = localStorage.getItem("va-taal"); } catch (x) { /* privévenster */ }
+    const wens = (navigator.languages || [navigator.language || ""]).map(l => String(l).slice(0, 2).toLowerCase());
+    const beschikbaar = $$("a[data-taal]", keuze);
+    const doel = !gekozen && wens.map(w => beschikbaar.find(a => a.dataset.taal === w)).find(Boolean);
+    if (doel && doel.dataset.taal !== TAAL) {
+      const hint = document.createElement("div");
+      hint.className = "taal-hint";
+      hint.lang = doel.dataset.taal;
+      hint.innerHTML = '<span></span><a></a><button type="button" aria-label="×">×</button>';
+      const zin = "Deze website is ook in jouw taal beschikbaar.";
+      hint.querySelector("span").textContent = (TEKSTEN[doel.dataset.taal] || {})[zin] || (doel.dataset.taal === "nl" ? zin : "");
+      const link = hint.querySelector("a");
+      link.href = doel.getAttribute("href");
+      link.textContent = doel.textContent + " ›";
+      link.addEventListener("click", () => { try { localStorage.setItem("va-taal", doel.dataset.taal); } catch (x) { /* privévenster */ } });
+      hint.querySelector("button").addEventListener("click", () => { hint.remove(); try { localStorage.setItem("va-taal", TAAL); } catch (x) { /* privévenster */ } });
+      document.body.append(hint);
+    }
+  }
+
   /* ---------- Header en menu ---------- */
   const header = $(".site-header");
   const toggle = $(".menu-toggle");
@@ -29,7 +66,7 @@
   toggle.addEventListener("click", () => {
     const open = header.classList.toggle("open");
     toggle.setAttribute("aria-expanded", open);
-    toggle.setAttribute("aria-label", open ? "Menu sluiten" : "Menu openen");
+    toggle.setAttribute("aria-label", open ? T("Menu sluiten") : T("Menu openen"));
   });
 
   /* ---------- Zacht inschuiven ---------- */
@@ -53,11 +90,11 @@
   function buildLightbox() {
     lb = document.createElement("dialog");
     lb.className = "lightbox";
-    lb.setAttribute("aria-label", "Foto");
+    lb.setAttribute("aria-label", T("Foto"));
     lb.innerHTML = `<div class="lb-stage"><img alt=""></div>
-      <button class="lb-btn lb-close" aria-label="Sluiten">${ICON.x}</button>
-      <button class="lb-btn lb-prev" aria-label="Vorige foto">${ICON.prev}</button>
-      <button class="lb-btn lb-next" aria-label="Volgende foto">${ICON.next}</button>
+      <button class="lb-btn lb-close" aria-label="${T("Sluiten")}">${ICON.x}</button>
+      <button class="lb-btn lb-prev" aria-label="${T("Vorige foto")}">${ICON.prev}</button>
+      <button class="lb-btn lb-next" aria-label="${T("Volgende foto")}">${ICON.next}</button>
       <div class="lb-caption" aria-live="polite"></div>`;
     document.body.appendChild(lb);
     lbImg = $(".lb-stage img", lb);
@@ -111,7 +148,7 @@
       btn.addEventListener("click", () => {
         const open = t.classList.toggle("clamped") === false;
         btn.setAttribute("aria-expanded", open);
-        btn.firstChild.textContent = open ? "Minder tonen " : "Lees het volledige verslag ";
+        btn.firstChild.textContent = (open ? T("Minder tonen") : T("Lees het volledige verslag")) + " ";
       });
     });
 
@@ -166,12 +203,12 @@
     if (onderwerp && pick in subjects && onderwerp.options.length > subjects[pick]) onderwerp.selectedIndex = subjects[pick];
 
     if (WEB3FORMS_KEY) {
-      $("#captcha-slot").innerHTML = '<div class="h-captcha" data-captcha="true" data-lang="nl"></div>';
+      $("#captcha-slot").innerHTML = '<div class="h-captcha" data-captcha="true" data-lang="' + TAAL + '"></div>';
       const s = document.createElement("script");
       s.src = "https://web3forms.com/client/script.js";
       s.async = true;
       document.body.appendChild(s);
-      setStatus("Beveiligd tegen spam.");
+      setStatus(T("Beveiligd tegen spam."));
     }
 
     form.addEventListener("submit", async e => {
@@ -180,23 +217,23 @@
       // Bot herkend (lokveld ingevuld of te snel verstuurd): hetzelfde bedankje, niets versturen
       if (f.get("botcheck") || Date.now() - loadedAt < 3000) {
         form.reset();
-        setStatus("Bedankt! Uw bericht is verstuurd.", "ok");
+        setStatus(T("Bedankt! Uw bericht is verstuurd."), "ok");
         return;
       }
       if (!WEB3FORMS_KEY) {
-        setStatus(`Het formulier is nog niet actief. Mail ons op ${MAIL} of bel ons gerust.`, "err");
+        setStatus(T("Het formulier is nog niet actief. Mail ons op {mail} of bel ons gerust.", { mail: MAIL }), "err");
         return;
       }
       if (!f.get("h-captcha-response")) {
-        setStatus("Bevestig eerst dat u geen robot bent (het vakje boven de knop).", "err");
+        setStatus(T("Bevestig eerst dat u geen robot bent (het vakje boven de knop)."), "err");
         return;
       }
       f.delete("botcheck");
       f.append("access_key", WEB3FORMS_KEY);
-      f.append("subject", "Website Vai Avanti" + (f.get("onderwerp") ? ": " + f.get("onderwerp") : ""));
+      f.append("subject", "Website Vai Avanti" + (TAAL !== "nl" ? " (" + TAAL.toUpperCase() + ")" : "") + (f.get("onderwerp") ? ": " + f.get("onderwerp") : ""));
       f.append("from_name", "Website Vai Avanti");
       submitBtn.disabled = true;
-      setStatus("Bericht wordt verstuurd…");
+      setStatus(T("Bericht wordt verstuurd…"));
       try {
         const res = await fetch("https://api.web3forms.com/submit", {
           method: "POST",
@@ -206,9 +243,9 @@
         if (!res.ok) throw new Error(String(res.status));
         form.reset();
         window.hcaptcha?.reset();
-        setStatus("Bedankt! Uw bericht is verstuurd. We antwoorden zo snel mogelijk.", "ok");
+        setStatus(T("Bedankt! Uw bericht is verstuurd. We antwoorden zo snel mogelijk."), "ok");
       } catch (err) {
-        setStatus(`Versturen lukte niet. Probeer het opnieuw of mail ons op ${MAIL}.`, "err");
+        setStatus(T("Versturen lukte niet. Probeer het opnieuw of mail ons op {mail}.", { mail: MAIL }), "err");
       } finally {
         submitBtn.disabled = false;
       }

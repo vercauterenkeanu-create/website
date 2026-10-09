@@ -1,4 +1,6 @@
 # Bouwt de website na elke wijziging (ook vanuit Pages CMS) en zet ze online via GitHub Pages.
+# Nieuwe of gewijzigde teksten worden eerst vertaald (Engels, Duits, Italiaans, Fins, Deens) met de
+# sleutel ANTHROPIC_API_KEY uit de geheimen van de repository; de vertalingen komen in vertalingen/.
 name: Website publiceren
 
 on:
@@ -7,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -31,7 +33,22 @@ jobs:
           path: site/img
           key: fotos-${{ hashFiles('media/**') }}
           restore-keys: fotos-
-      - run: npm run build
+      - name: Vertalen en bouwen
+        run: npm run build
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - name: Nieuwe vertalingen bewaren
+        continue-on-error: true
+        run: |
+          if [ -n "$(git status --porcelain vertalingen)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add vertalingen
+            git commit -m "Vertalingen bijgewerkt"
+            git fetch --depth=50 origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

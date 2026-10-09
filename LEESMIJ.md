@@ -41,6 +41,7 @@ Aanmelden gaat met een **wachtwoord**. Achter dat wachtwoord zit een koppelcode 
 - **_bron/beheer/**: de beheerpagina.
 - **_bron/tools/cms-config.js**: zet de bloktypes en bestandsformaten ook in `.pages.yml`. Draai dit na een wijziging aan de bloktypes.
 - **media/**: alle foto's. Nieuwe foto's uit het beheer of Pages CMS komen hier terecht.
+- **vertalingen/**: de vertalingen per taal (zie Talen).
 - **.pages.yml**: hoe het beheerscherm eruitziet (velden en labels).
 - **.github/workflows/website.yml**: na elke wijziging bouwt GitHub de site en zet ze online.
 - **_bron/**: opmaak (`assets/`) en scripts (`tools/`). Shany hoeft hier nooit iets aan te doen.
@@ -55,6 +56,17 @@ Aanmelden gaat met een **wachtwoord**. Achter dat wachtwoord zit een koppelcode 
   - Een moeder met de naam van een van onze honden wordt gelinkt.
   - Nesten verschijnen bij de ouders als "Moeder van" of "Vader van".
 - Volgorde van de verslagen: de nieuwste datum eerst. Oude verslagen van Webnode hebben geen dag, daar wordt enkel het jaar getoond.
+
+## Talen
+
+De site bestaat in het Nederlands (hoofdmap) en in het Engels, Duits, Italiaans, Fins en Deens (`/en/`, `/de/`, `/it/`, `/fi/`, `/da/`). Bezoekers kiezen hun taal rechtsboven; spreekt hun browser een andere taal, dan krijgen ze onderaan een kleine hint.
+
+- Je schrijft alles in het Nederlands. Bij elke publicatie zoekt de bouwstap (`_bron/tools/vertaal.js`) welke teksten nieuw of gewijzigd zijn en laat enkel die vertalen door Claude (model `claude-opus-5-5`).
+- Daarvoor staat in GitHub een geheim **ANTHROPIC_API_KEY** (repository → Settings → Secrets and variables → Actions). Zonder sleutel blijft alles werken: nieuwe teksten staan dan in het Nederlands op de anderstalige pagina's tot de sleutel er is. Een taal die voor minder dan 80% vertaald is, komt niet online.
+- Alle vertalingen staan in `vertalingen/<taal>.json` (`nl` = bron, `vertaling` = vertaling). GitHub zet nieuwe vertalingen daar zelf bij ("Vertalingen bijgewerkt"). Een vertaling verbeteren: pas ze daar aan; zolang de Nederlandse tekst niet verandert, blijft jouw versie staan.
+- Namen van honden, mensen, renbanen en wedstrijden worden niet vertaald. Vaste teksten van de site (knoppen, labels) staan in de code als `t("...")` en worden ook automatisch vertaald.
+- Welke talen online staan, kies je in het beheer bij Instellingen → Talen.
+- Kosten: de hele site is ongeveer 50.000 tekens; een nieuw verslag vertalen naar vijf talen kost enkele eurocent.
 
 ## Zelf bekijken op de computer
 

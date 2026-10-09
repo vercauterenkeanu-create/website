@@ -60,6 +60,7 @@ const instellingen = {
       ...["accent:Accentkleur (nu goud)", "donker:Donkere kleur", "licht:Achtergrond", "beige:Tweede achtergrond", "tekst:Tekstkleur"].map(x => ({ name: x.split(":")[0], label: x.split(":")[1], type: "string", description: "Kleurcode zoals #c9a052. Leeg = standaard." })),
       { name: "titelLetter", label: "Lettertype van de titels", type: "select", options: { values: Object.keys(LETTERS.titel) } },
       { name: "tekstLetter", label: "Lettertype van de tekst", type: "select", options: { values: Object.keys(LETTERS.tekst) } }] },
+    { name: "talen", label: "Talen (automatisch vertaald)", type: "string", list: true, description: "Codes: en, de, it, fi, da." },
     { name: "menu", label: "Knop rechts in het menu", type: "object", fields: [
       { name: "knoptekst", label: "Tekst (leeg = geen knop)", type: "string" }, { name: "knoplink", label: "Gaat naar", type: "string" }] },
     { name: "voettekst", label: "Voettekst", type: "object", fields: [

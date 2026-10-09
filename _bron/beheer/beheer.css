@@ -314,3 +314,5 @@ details.groep[open] > summary { border-bottom: 1px solid var(--line); }
 @media (max-width: 900px) {
   .balk .b-btn.opslaan-knop, .balk .b-btn.goud { padding: 9px 12px; }
 }
+.taal-rij { display: flex; align-items: center; gap: 10px; }
+.taal-bekijk { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--gold-3); }
