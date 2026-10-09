@@ -1,16 +1,17 @@
 ---
 titel: Druk weekend
-datum: "2026-01-01"
-datumOnbekend: true
-volgorde: 15
-kop: "Europa Cup: brons voor Moos, sterke proeflopen"
-samenvatting: Moos werd derde in de A-finale en Flappie verbeterde zich tot 18,13. SeeYa, Nixy en Leroy liepen veelbelovende proeflopen.
-overzicht: false
+datum: 2026-01-01
 fotos:
   - /media/200000577.webp
   - /media/200000573.webp
   - /media/200000574.webp
   - /media/200000571.webp
+kop: "Europa Cup: brons voor Moos, sterke proeflopen"
+samenvatting: Moos werd derde in de A-finale en Flappie verbeterde zich tot
+  18,13. SeeYa, Nixy en Leroy liepen veelbelovende proeflopen.
+overzicht: false
+datumOnbekend: true
+volgorde: 15
 ---
 #### Liperi
 
@@ -26,7 +27,7 @@ Op zondag begonnen we met onze andere twee jongelingen, SeeYa (Vai Avanti Ylva �
 
 In de wedstrijd deden Moos (Vai Avanti Xtreme ❤️) en zus Mayzie (Vai Avanti Xamali 💜) mee in de lichtste gewichtsklasse en Flappie (Vai Avanti Tiamo ❤️) in de veteranenklasse.
 
-Meneer Moos had een geweldige eerste ronde! Een fantastische start en een zeer spannende finish, waardoor hij met de vierde tijd doorstootte naar de A-finale! In de finale wist deze kleine raket een prachtige derde plaats te behalen 🥉 ❤️
+Meneer Moos had een geweldige eerste ronde! Een fantastische start en een zeer spannende finish, waardoor hij met de vierde tijd doorstootte naar de A-finale! In de finale wist deze kleine raket een prachtige derde plaats te behalen 🥉 ❤️ 
 
 Juffrouw Mayzie had ook een ongelooflijke eerste ronde! Een geweldige start, waarbij ze van begin tot eind aan de leiding bleef. Ze klokte de zevende tijd in haar gewichtsklasse, waardoor ze door ging naar de tweede ronde in de hoop haar tijd te verbeteren. Helaas had ze een slechte start en liep ze niet echt zoals we van haar gewend zijn, dus geen verbetering van haar tijd en het werd de B-finale. In de finale had ze een redelijke start, maar we zagen dat er iets aan haar knaagde en ze eindigde als 5e. Na het bekijken van de video van de eerste ronde bleek dat ze bij de finish behoorlijk hard geraakt was en we denken dat ze wat rust en een bezoek aan de osteopaat nodig heeft!❤️‍🩹
 
