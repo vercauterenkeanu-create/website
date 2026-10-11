@@ -183,8 +183,9 @@ function naarTags(regel, namen) {
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, tekst, url) => '<a href="' + (links.push(url) - 1) + '">' + tekst + "</a>")
     .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
     .replace(/(^|[^*\w])\*([^*\n]+)\*/g, "$1<i>$2</i>");
-  // Namen en getallen met een komma of punt (tijden zoals 20.55) nooit laten aanpassen; enkel buiten bestaande tags
-  const re = new RegExp("(?<![\\p{L}\\d])(" + [...namen.map(n => reEsc(htmlEsc(n))), "\\d+[.,]\\d+"].join("|") + ")(je|tje)?(?![\\p{L}\\d])", "gu");
+  // Namen nooit laten vertalen; "Vai Avanti" samen met de rest van de stamboomnaam (Vai Avanti Thiago). Enkel buiten bestaande tags.
+  const delen = namen.map(n => n === "Vai Avanti" ? "Vai Avanti(?:\\s+(?!\\p{Lu}-)\\p{Lu}[\\p{L}'’]*)*" : reEsc(htmlEsc(n)));
+  const re = new RegExp("(?<![\\p{L}\\d])(" + delen.join("|") + ")(je|tje)?(?![\\p{L}\\d])", "gu");
   let binnenVast = 0;
   s = s.split(/(<[^>]+>)/).map(deel => {
     if (deel.startsWith("<span")) { binnenVast++; return deel; }
@@ -220,6 +221,9 @@ async function deeplVraag(teksten, taal, context) {
     throw Object.assign(new Error(res.status === 456 ? "gratis tekens van deze maand zijn op" : detail || "fout"), { status: res.status });
   }
 }
+// Racetijden staan in de verslagen vaak met een punt (21.45); in het Nederlands is dat een uur.
+// Voor DeepL worden ze kommagetallen (21,45), zodat het ze als tijd in seconden behandelt.
+const kommagetallen = s => s.replace(/(?<![\d.,])(\d+)\.(\d{2,3})(?!\d|[.,]\d)/g, "$1,$2");
 const CONTEXT = "Website van Vai Avanti, een kleine whippetkennel in Opwijk (België) die whippets fokt en ermee racet op renbanen in Europa.";
 // Vertaalt items [{ id, tekst, soort }] -> [{ id, tekst }]
 async function vertaalMetDeepL(items, taal, namen) {
@@ -229,14 +233,14 @@ async function vertaalMetDeepL(items, taal, namen) {
   // Korte teksten (één regel) samen in pakketjes van 50
   for (let i = 0; i < kort.length; i += 50) {
     const groep = kort.slice(i, i + 50).map(it => ({ it, r: regelsVan(it.tekst) }));
-    const delen = groep.map(g => g.r.find(r => r.tekst !== undefined)).map(r => naarTags(r.tekst, namen));
+    const delen = groep.map(g => g.r.find(r => r.tekst !== undefined)).map(r => naarTags(kommagetallen(r.tekst), namen));
     const vertaald = await deeplVraag(delen.map(d => d.s), taal, `${CONTEXT} Losse korte teksten van de site: knoppen, menu's, titels en labels.`);
     groep.forEach((g, j) => uit.push({ id: g.it.id, tekst: g.r.map(r => r.tekst === undefined ? r.vast : r.voor + vanTags(vertaald[j], delen[j].links) + r.na).join("") }));
   }
   // Langere teksten (verslagen, verhalen): per tekst, met de hele tekst als context
   for (const it of lang) {
     const regels = regelsVan(it.tekst);
-    const delen = regels.filter(r => r.tekst !== undefined).map(r => naarTags(r.tekst, namen));
+    const delen = regels.filter(r => r.tekst !== undefined).map(r => naarTags(kommagetallen(r.tekst), namen));
     const vertaald = await deeplVraag(delen.map(d => d.s), taal, `${CONTEXT} Soort tekst: ${it.soort}. Volledige tekst: ${it.tekst.slice(0, 3000)}`);
     let k = 0;
     uit.push({ id: it.id, tekst: regels.map(r => r.tekst === undefined ? r.vast : r.voor + vanTags(vertaald[k], delen[k++].links) + r.na).join("") });
