@@ -183,23 +183,31 @@ function naarTags(regel, namen) {
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, tekst, url) => '<a href="' + (links.push(url) - 1) + '">' + tekst + "</a>")
     .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
     .replace(/(^|[^*\w])\*([^*\n]+)\*/g, "$1<i>$2</i>");
-  // Namen nooit laten vertalen; "Vai Avanti" samen met de rest van de stamboomnaam (Vai Avanti Thiago). Enkel buiten bestaande tags.
+  // Namen worden tijdelijk een codewoord (Vqzaa, Vqzab, ...): DeepL behandelt dat als een gewone eigennaam in de zin
+  // en laat het staan. "Vai Avanti" telt samen met de rest van de stamboomnaam (Vai Avanti Thiago). Enkel buiten bestaande tags.
   const delen = namen.map(n => n === "Vai Avanti" ? "Vai Avanti(?:\\s+(?!\\p{Lu}-)\\p{Lu}[\\p{L}'’]*)*" : reEsc(htmlEsc(n)));
   const re = new RegExp("(?<![\\p{L}\\d])(" + delen.join("|") + ")(je|tje)?(?![\\p{L}\\d])", "gu");
+  const codes = [];
+  const code = i => "Vqz" + String.fromCharCode(97 + Math.floor(i / 26) % 26) + String.fromCharCode(97 + i % 26);
   let binnenVast = 0;
   s = s.split(/(<[^>]+>)/).map(deel => {
     if (deel.startsWith("<span")) { binnenVast++; return deel; }
     if (deel === "</span>") { binnenVast--; return deel; }
     if (deel.startsWith("<") || binnenVast) return deel;
-    return deel.replace(re, m => vast(m));
+    return deel.replace(re, m => code(codes.push(m) - 1));
   }).join("");
-  return { s, links };
+  return { s, links, codes: codes.map((naam, i) => ({ code: code(i), naam })) };
 }
-const vanTags = (s, links) => htmlTerug(s
-  .replace(/<a href="(\d+)"[^>]*>([\s\S]*?)<\/a>/g, (m, i, tekst) => "[" + tekst + "](" + links[+i] + ")")
-  .replace(/<b>([\s\S]*?)<\/b>/g, "**$1**")
-  .replace(/<i>([\s\S]*?)<\/i>/g, "*$1*")
-  .replace(/<span[^>]*translate="no"[^>]*>([\s\S]*?)<\/span>/g, "$1"));
+// Geeft null terug als DeepL een naam (codewoord) kwijt is
+const vanTags = (s, links, codes = []) => {
+  if (codes.some(c => !s.includes(c.code))) return null;
+  for (const c of codes) s = s.split(c.code).join(c.naam);
+  return htmlTerug(s
+    .replace(/<a href="(\d+)"[^>]*>([\s\S]*?)<\/a>/g, (m, i, tekst) => "[" + tekst + "](" + links[+i] + ")")
+    .replace(/<b>([\s\S]*?)<\/b>/g, "**$1**")
+    .replace(/<i>([\s\S]*?)<\/i>/g, "*$1*")
+    .replace(/<span[^>]*translate="no"[^>]*>([\s\S]*?)<\/span>/g, "$1"));
+};
 // Een tekst opdelen in regels; opsommingstekens, kopjes en regeleinden blijven buiten de vertaling
 function regelsVan(tekst) {
   return tekst.split(/(\n+)/).map(deel => {
@@ -235,15 +243,20 @@ async function vertaalMetDeepL(items, taal, namen) {
     const groep = kort.slice(i, i + 50).map(it => ({ it, r: regelsVan(it.tekst) }));
     const delen = groep.map(g => g.r.find(r => r.tekst !== undefined)).map(r => naarTags(kommagetallen(r.tekst), namen));
     const vertaald = await deeplVraag(delen.map(d => d.s), taal, `${CONTEXT} Losse korte teksten van de site: knoppen, menu's, titels en labels.`);
-    groep.forEach((g, j) => uit.push({ id: g.it.id, tekst: g.r.map(r => r.tekst === undefined ? r.vast : r.voor + vanTags(vertaald[j], delen[j].links) + r.na).join("") }));
+    groep.forEach((g, j) => {
+      const terug = vanTags(vertaald[j], delen[j].links, delen[j].codes);
+      if (terug !== null) uit.push({ id: g.it.id, tekst: g.r.map(r => r.tekst === undefined ? r.vast : r.voor + terug + r.na).join("") });
+    });
   }
   // Langere teksten (verslagen, verhalen): per tekst, met de hele tekst als context
   for (const it of lang) {
     const regels = regelsVan(it.tekst);
     const delen = regels.filter(r => r.tekst !== undefined).map(r => naarTags(kommagetallen(r.tekst), namen));
     const vertaald = await deeplVraag(delen.map(d => d.s), taal, `${CONTEXT} Soort tekst: ${it.soort}. Volledige tekst: ${it.tekst.slice(0, 3000)}`);
+    const terug = vertaald.map((v, k) => vanTags(v, delen[k].links, delen[k].codes));
+    if (terug.includes(null)) continue;
     let k = 0;
-    uit.push({ id: it.id, tekst: regels.map(r => r.tekst === undefined ? r.vast : r.voor + vanTags(vertaald[k], delen[k++].links) + r.na).join("") });
+    uit.push({ id: it.id, tekst: regels.map(r => r.tekst === undefined ? r.vast : r.voor + terug[k++] + r.na).join("") });
   }
   return uit;
 }
