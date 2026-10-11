@@ -15,6 +15,18 @@
   // T("Deze website is ook in jouw taal beschikbaar.") wordt hieronder per taal opgezocht
   const T = (s, v) => String((TEKSTEN[TAAL] || {})[s] || s).replace(/\{([a-z]+)\}/g, (m, k) => v && k in v ? v[k] : m);
 
+  /* ---------- Nette adresbalk ----------
+     Facebook, Google en nieuwsbrieven plakken volgcodes achter een link (?fbclid=..., ?utm_...).
+     Die halen we weg uit de adresbalk; de pagina zelf verandert niet. */
+  try {
+    const adres = new URL(location.href);
+    const codes = [...adres.searchParams.keys()].filter(k => /^(fbclid|gclid|msclkid|igshid|mc_cid|mc_eid|utm_.+)$/.test(k));
+    if (codes.length) {
+      codes.forEach(k => adres.searchParams.delete(k));
+      history.replaceState(history.state, "", adres.pathname + adres.search + adres.hash);
+    }
+  } catch (e) { /* oude browser: niets aan de hand */ }
+
   /* ---------- Diavoorstelling in de koppen ---------- */
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) $$(".slides").forEach(box => {
     const beelden = $$("img", box);

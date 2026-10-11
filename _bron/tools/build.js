@@ -123,7 +123,11 @@ function layout({ S, taal, file, title, desc, active, body, ogImage }) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 ${og ? `<meta property="og:image" content="${SITE_URL}${og}">` : ""}
-${talen.length > 1 ? `<meta property="og:locale" content="${locale.replace("-", "_")}">\n` : ""}${alternatief}<script>document.documentElement.classList.add("js");</script>
+${talen.length > 1 ? `<meta property="og:locale" content="${locale.replace("-", "_")}">\n` : ""}${alternatief}<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0f0d0a">
+<script>document.documentElement.classList.add("js");</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="${VA.fontsHref(site.thema)}" rel="stylesheet">
@@ -225,6 +229,9 @@ async function main() {
   const css = fs.readFileSync(path.join(SRC, "assets", "site.css"), "utf8") + fs.readFileSync(path.join(SRC, "assets", "extra.css"), "utf8");
   fs.writeFileSync(path.join(OUT, "assets", "site.css"), css);
   fs.copyFileSync(path.join(SRC, "assets", "logo.css"), path.join(OUT, "assets", "logo.css"));
+  // Icoontje voor het tabblad, het startscherm van een gsm en zoekresultaten
+  for (const f of ["favicon-32.png", "favicon-192.png", "favicon-512.png", "apple-touch-icon.png"]) fs.copyFileSync(path.join(SRC, "assets", f), path.join(OUT, "assets", f));
+  fs.copyFileSync(path.join(SRC, "assets", "favicon.ico"), path.join(OUT, "favicon.ico"));
   fs.copyFileSync(path.join(SRC, "assets", "blokken.js"), path.join(OUT, "assets", "blokken.js"));
   let js = fs.readFileSync(path.join(SRC, "assets", "site.js"), "utf8");
   if (S.mailParts.length === 2) js = js.replace('["vai-avanti", "hotmail.com"]', JSON.stringify(S.mailParts));
