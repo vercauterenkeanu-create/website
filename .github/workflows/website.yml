@@ -37,7 +37,7 @@ jobs:
       - name: Vertalen en bouwen
         run: npm run build
         env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY || secrets.DEEPL_API_KEYS }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       - name: Nieuwe vertalingen bewaren
         continue-on-error: true
