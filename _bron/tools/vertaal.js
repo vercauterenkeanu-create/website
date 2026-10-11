@@ -151,17 +151,108 @@ async function vertaalPakket(items, taal) {
   const tekst = antwoord.content.filter(b => b.type === "text").map(b => b.text).join("");
   return JSON.parse(tekst).vertalingen;
 }
+/* ---------- Vertalen met DeepL (gratis: 500.000 tekens per maand) ----------
+   DeepL krijgt elke regel apart, met de opmaak omgezet naar tags die het bewaart:
+   **vet** -> <b>, *schuin* -> <i>, [link](adres) -> <a>, en namen en {plaatshouders} in <x> (nooit vertalen). */
+const DEEPL_TAAL = { en: "EN-GB", de: "DE", it: "IT", fi: "FI", da: "DA" };
+const DEEPL_FORMEEL = { de: "prefer_more", it: "prefer_less" };
+// Namen die nooit vertaald worden, naast de namen van honden en pups uit de inhoud
+const ALTIJD_BEWAREN = ["Vai Avanti", "Shany", "Keanu", "MyDogDNA", "Breed Archive", "KMSH", "CGRC", "WM Revanche", "Champ of the Sand",
+  "Zilveren Haas", "Gouden Haas", "Gouden Windhond", "Gouden windhond", "Lenteprijs", "Tulpenren", "Zilveren Champignon", "3 Hartenren"];
+function namenUit(raw) {
+  const namen = new Set(ALTIJD_BEWAREN);
+  const voeg = v => { for (const n of [].concat(v || [])) if (typeof n === "string" && n.trim().length >= 3) namen.add(n.trim()); };
+  for (const d of Object.values(raw.honden || {})) [d.roepnaam, d.naam, d.andereNamen, d.vader, d.moeder].forEach(voeg);
+  for (const l of Object.values(raw.nesten || {})) {
+    [l.vader, l.moeder].forEach(voeg);
+    for (const p of l.pups || []) [p.naam, p.roepnaam, p.andereNamen].forEach(voeg);
+  }
+  voeg(((raw.site || {}).vertaling || {}).nietVertalen);
+  return [...namen].sort((a, b) => b.length - a.length);
+}
+const xmlEsc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const xmlTerug = s => s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\// Vult het geheugen aan met wat ontbreekt.");
+function naarTags(regel, namen) {
+  const links = [];
+  let s = xmlEsc(regel)
+    .replace(/\\([\\*_`[\]()#+\-.!>~|])/g, (m) => `<x>${m}</x>`)
+    .replace(/\{([a-z]+)\}/gi, m => `<x>${m}</x>`)
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, tekst, url) => `<a u="${links.push(url) - 1}">${tekst}</a>`)
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/(^|[^*\w])\*([^*\n]+)\*/g, "$1<i>$2</i>");
+  if (namen.length) {
+    const re = new RegExp(`(?<![\\p{L}\\d])(${namen.map(n => reEsc(xmlEsc(n))).join("|")})(je|tje)?(?![\\p{L}\\d])`, "gu");
+    // enkel buiten bestaande tags vervangen
+    s = s.split(/(<[^>]+>)/).map(deel => deel.startsWith("<") ? deel : deel.replace(re, m => `<x>${m}</x>`)).join("");
+  }
+  return { s, links };
+}
+const vanTags = (s, links) => xmlTerug(s
+  .replace(/<a u="(\d+)">([\s\S]*?)<\/a>/g, (m, i, tekst) => `[${tekst}](${links[+i]})`)
+  .replace(/<b>([\s\S]*?)<\/b>/g, "**$1**")
+  .replace(/<i>([\s\S]*?)<\/i>/g, "*$1*")
+  .replace(/<\/?x>/g, ""));
+// Een tekst opdelen in regels; opsommingstekens, kopjes en regeleinden blijven buiten de vertaling
+function regelsVan(tekst) {
+  return tekst.split(/(\n+)/).map(deel => {
+    if (/^\n+$/.test(deel) || !deel.trim()) return { vast: deel };
+    const m = deel.match(/^(\s*(?:[-*+]\s+|#{1,6}\s+)?)([\s\S]*?)(\s{2,}|\\)?$/);
+    return { voor: m[1], tekst: m[2], na: m[3] || "" };
+  });
+}
+async function deeplVraag(teksten, taal, context) {
+  const sleutel = process.env.DEEPL_API_KEY;
+  const basis = process.env.DEEPL_API_URL || (sleutel.endsWith(":fx") ? "https://api-free.deepl.com" : "https://api.deepl.com");
+  const body = { text: teksten, source_lang: "NL", target_lang: DEEPL_TAAL[taal], tag_handling: "xml", ignore_tags: ["x"], preserve_formatting: true, context };
+  if (DEEPL_FORMEEL[taal]) body.formality = DEEPL_FORMEEL[taal];
+  for (let poging = 0; ; poging++) {
+    const res = await fetch(`${basis}/v2/translate`, { method: "POST", headers: { Authorization: `DeepL-Auth-Key ${sleutel}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (res.ok) return (await res.json()).translations.map(t => t.text);
+    if ((res.status === 429 || res.status >= 500) && poging < 3) { await new Promise(r => setTimeout(r, 2000 * (poging + 1))); continue; }
+    let detail = ""; try { const j = await res.json(); detail = j.message || (j.error || {}).message || ""; } catch (e) { /* geen json */ }
+    throw Object.assign(new Error(res.status === 456 ? "gratis tekens van deze maand zijn op" : detail || "fout"), { status: res.status });
+  }
+}
+const CONTEXT = "Website van Vai Avanti, een kleine whippetkennel in Opwijk (België) die whippets fokt en ermee racet op renbanen in Europa.";
+// Vertaalt items [{ id, tekst, soort }] -> [{ id, tekst }]
+async function vertaalMetDeepL(items, taal, namen) {
+  const uit = [];
+  const kort = [], lang = [];
+  for (const it of items) (regelsVan(it.tekst).filter(r => r.tekst !== undefined).length > 1 ? lang : kort).push(it);
+  // Korte teksten (één regel) samen in pakketjes van 50
+  for (let i = 0; i < kort.length; i += 50) {
+    const groep = kort.slice(i, i + 50).map(it => ({ it, r: regelsVan(it.tekst) }));
+    const delen = groep.map(g => g.r.find(r => r.tekst !== undefined)).map(r => naarTags(r.tekst, namen));
+    const vertaald = await deeplVraag(delen.map(d => d.s), taal, `${CONTEXT} Losse korte teksten van de site: knoppen, menu's, titels en labels.`);
+    groep.forEach((g, j) => uit.push({ id: g.it.id, tekst: g.r.map(r => r.tekst === undefined ? r.vast : r.voor + vanTags(vertaald[j], delen[j].links) + r.na).join("") }));
+  }
+  // Langere teksten (verslagen, verhalen): per tekst, met de hele tekst als context
+  for (const it of lang) {
+    const regels = regelsVan(it.tekst);
+    const delen = regels.filter(r => r.tekst !== undefined).map(r => naarTags(r.tekst, namen));
+    const vertaald = await deeplVraag(delen.map(d => d.s), taal, `${CONTEXT} Soort tekst: ${it.soort}. Volledige tekst: ${it.tekst.slice(0, 3000)}`);
+    let k = 0;
+    uit.push({ id: it.id, tekst: regels.map(r => r.tekst === undefined ? r.vast : r.voor + vanTags(vertaald[k], delen[k++].links) + r.na).join("") });
+  }
+  return uit;
+}
+
 // Vult het geheugen aan met wat ontbreekt. Geeft { totaal, ontbrekend, vertaald, fouten } terug.
-async function vulAan(geheugen, teksten, taal, log = console.log) {
+// Vertaler: DeepL als DEEPL_API_KEY bestaat (gratis), anders Claude als ANTHROPIC_API_KEY bestaat.
+// opties.raw = de inhoud, om namen van honden en pups te kennen (die vertaalt DeepL nooit)
+async function vulAan(geheugen, teksten, taal, log = console.log, opties = {}) {
   const ontbrekend = [...teksten].filter(([s]) => !(geheugen[sleutel(s)] && geheugen[sleutel(s)].vertaling))
     .map(([s, soort]) => ({ id: sleutel(s), tekst: s, soort }));
   const stand = { totaal: teksten.size, ontbrekend: ontbrekend.length, vertaald: 0, fouten: 0 };
   if (!ontbrekend.length) return stand;
-  if (!process.env.ANTHROPIC_API_KEY) { log(`  ${taal}: ${ontbrekend.length} teksten nog niet vertaald (geen ANTHROPIC_API_KEY)`); return stand; }
+  const deepl = !!process.env.DEEPL_API_KEY;
+  if (!deepl && !process.env.ANTHROPIC_API_KEY) { log(`  ${taal}: ${ontbrekend.length} teksten nog niet vertaald (geen DEEPL_API_KEY of ANTHROPIC_API_KEY)`); return stand; }
+  const namen = deepl ? namenUit(opties.raw || {}) : [];
   const perId = new Map(ontbrekend.map(i => [i.id, i]));
   for (const pakket of pakketten(ontbrekend)) {
     try {
-      for (const v of await vertaalPakket(pakket, taal)) {
+      for (const v of await (deepl ? vertaalMetDeepL(pakket, taal, namen) : vertaalPakket(pakket, taal))) {
         const bron = perId.get(v.id);
         if (!bron) continue;
         if (klopt(bron.tekst, v.tekst)) { geheugen[v.id] = { nl: bron.tekst, vertaling: v.tekst }; stand.vertaald++; }
@@ -170,7 +261,7 @@ async function vulAan(geheugen, teksten, taal, log = console.log) {
     } catch (e) {
       stand.fouten += pakket.length;
       log(`  ${taal}: vertalen mislukt (${e.status ? e.status + " " : ""}${e.message})`);
-      if (e.status === 401 || e.status === 403) break;
+      if (e.status === 401 || e.status === 403 || e.status === 456) break;
     }
   }
   log(`  ${taal}: ${stand.vertaald} van ${ontbrekend.length} nieuwe teksten vertaald`);
@@ -191,4 +282,4 @@ function vertaalRaw(raw, woorden) {
   return loop(raw, "");
 }
 
-module.exports = { TAALNAAM, alleTeksten, scriptTeksten, laad, bewaar, woordenboek, vulAan, vertaalRaw, sleutel, klopt, systeem };
+module.exports = { TAALNAAM, alleTeksten, scriptTeksten, laad, bewaar, woordenboek, vulAan, vertaalRaw, sleutel, klopt, systeem, naarTags, vanTags, regelsVan, namenUit };

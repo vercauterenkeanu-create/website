@@ -190,7 +190,7 @@ async function main() {
   const klaar = {};
   await Promise.all(gewenst.map(async taal => {
     const geheugen = vertaal.laad(taal);
-    await vertaal.vulAan(geheugen, teksten, taal);
+    await vertaal.vulAan(geheugen, teksten, taal, console.log, { raw });
     vertaal.bewaar(taal, geheugen, teksten);
     const w = vertaal.woordenboek(geheugen);
     const dekking = [...teksten.keys()].filter(s => w.has(s)).length / (teksten.size || 1);

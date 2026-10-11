@@ -61,12 +61,14 @@ Aanmelden gaat met een **wachtwoord**. Achter dat wachtwoord zit een koppelcode 
 
 De site bestaat in het Nederlands (hoofdmap) en in het Engels, Duits, Italiaans, Fins en Deens (`/en/`, `/de/`, `/it/`, `/fi/`, `/da/`). Bezoekers kiezen hun taal rechtsboven; spreekt hun browser een andere taal, dan krijgen ze onderaan een kleine hint.
 
-- Je schrijft alles in het Nederlands. Bij elke publicatie zoekt de bouwstap (`_bron/tools/vertaal.js`) welke teksten nieuw of gewijzigd zijn en laat enkel die vertalen door Claude (model `claude-opus-5-5`).
-- Daarvoor staat in GitHub een geheim **ANTHROPIC_API_KEY** (repository → Settings → Secrets and variables → Actions). Zonder sleutel blijft alles werken: nieuwe teksten staan dan in het Nederlands op de anderstalige pagina's tot de sleutel er is. Een taal die voor minder dan 80% vertaald is, komt niet online.
+- Je schrijft alles in het Nederlands. Bij elke publicatie zoekt de bouwstap (`_bron/tools/vertaal.js`) welke teksten nieuw of gewijzigd zijn en laat enkel die vertalen.
+- Vertaler: **DeepL API Free** (geheim **DEEPL_API_KEY** in GitHub: repository → Settings → Secrets and variables → Actions). Gratis tot 500.000 tekens per maand; is dat op, dan stopt het vertalen tot de volgende maand, zonder kosten. De hele site is ongeveer 50.000 tekens, een nieuw verslag in vijf talen ongeveer 10.000 à 15.000.
+  - DeepL krijgt elke regel apart; vet, schuin, links en {plaatshouders} worden als tags bewaard. Namen van honden en pups (uit de inhoud) en een vaste lijst namen (`ALTIJD_BEWAREN` in vertaal.js: Vai Avanti, Zilveren Haas, Lenteprijs, ...) worden nooit vertaald. Extra namen kunnen in `site.json` onder `vertaling.nietVertalen`.
+  - Alternatief: zonder DeepL-sleutel maar met **ANTHROPIC_API_KEY** vertaalt Claude (`claude-opus-5-5`, betaald per gebruik).
+- Zonder sleutel blijft alles werken: nieuwe teksten staan dan in het Nederlands op de anderstalige pagina's. Een taal die voor minder dan 80% vertaald is, komt niet online.
 - Alle vertalingen staan in `vertalingen/<taal>.json` (`nl` = bron, `vertaling` = vertaling). GitHub zet nieuwe vertalingen daar zelf bij ("Vertalingen bijgewerkt"). Een vertaling verbeteren: pas ze daar aan; zolang de Nederlandse tekst niet verandert, blijft jouw versie staan.
 - Namen van honden, mensen, renbanen en wedstrijden worden niet vertaald. Vaste teksten van de site (knoppen, labels) staan in de code als `t("...")` en worden ook automatisch vertaald.
 - Welke talen online staan, kies je in het beheer bij Instellingen → Talen.
-- Kosten: de hele site is ongeveer 50.000 tekens; een nieuw verslag vertalen naar vijf talen kost enkele eurocent.
 
 ## Zelf bekijken op de computer
 
