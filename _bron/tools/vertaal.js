@@ -170,29 +170,35 @@ function namenUit(raw) {
   voeg(((raw.site || {}).vertaling || {}).nietVertalen);
   return [...namen].sort((a, b) => b.length - a.length);
 }
-const xmlEsc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const xmlTerug = s => s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
-const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\// Vult het geheugen aan met wat ontbreekt.");
+// DeepL werkt in HTML-modus: <span translate="no"> blijft onvertaald maar telt mee in de zin
+const htmlEsc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const htmlTerug = s => s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#0*39;|&#x0*27;|&apos;/gi, "'").replace(/&nbsp;|&#160;/g, " ").replace(/&amp;/g, "&");
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const vast = inhoud => '<span translate="no">' + inhoud + "</span>";
 function naarTags(regel, namen) {
   const links = [];
-  let s = xmlEsc(regel)
-    .replace(/\\([\\*_`[\]()#+\-.!>~|])/g, (m) => `<x>${m}</x>`)
-    .replace(/\{([a-z]+)\}/gi, m => `<x>${m}</x>`)
-    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, tekst, url) => `<a u="${links.push(url) - 1}">${tekst}</a>`)
+  let s = htmlEsc(regel)
+    .replace(/\\([\\*_`[\]()#+\-.!>~|])/g, m => vast(m))
+    .replace(/\{([a-z]+)\}/gi, m => vast(m))
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, tekst, url) => '<a href="' + (links.push(url) - 1) + '">' + tekst + "</a>")
     .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
     .replace(/(^|[^*\w])\*([^*\n]+)\*/g, "$1<i>$2</i>");
-  if (namen.length) {
-    const re = new RegExp(`(?<![\\p{L}\\d])(${namen.map(n => reEsc(xmlEsc(n))).join("|")})(je|tje)?(?![\\p{L}\\d])`, "gu");
-    // enkel buiten bestaande tags vervangen
-    s = s.split(/(<[^>]+>)/).map(deel => deel.startsWith("<") ? deel : deel.replace(re, m => `<x>${m}</x>`)).join("");
-  }
+  // Namen en getallen met een komma of punt (tijden zoals 20.55) nooit laten aanpassen; enkel buiten bestaande tags
+  const re = new RegExp("(?<![\\p{L}\\d])(" + [...namen.map(n => reEsc(htmlEsc(n))), "\\d+[.,]\\d+"].join("|") + ")(je|tje)?(?![\\p{L}\\d])", "gu");
+  let binnenVast = 0;
+  s = s.split(/(<[^>]+>)/).map(deel => {
+    if (deel.startsWith("<span")) { binnenVast++; return deel; }
+    if (deel === "</span>") { binnenVast--; return deel; }
+    if (deel.startsWith("<") || binnenVast) return deel;
+    return deel.replace(re, m => vast(m));
+  }).join("");
   return { s, links };
 }
-const vanTags = (s, links) => xmlTerug(s
-  .replace(/<a u="(\d+)">([\s\S]*?)<\/a>/g, (m, i, tekst) => `[${tekst}](${links[+i]})`)
+const vanTags = (s, links) => htmlTerug(s
+  .replace(/<a href="(\d+)"[^>]*>([\s\S]*?)<\/a>/g, (m, i, tekst) => "[" + tekst + "](" + links[+i] + ")")
   .replace(/<b>([\s\S]*?)<\/b>/g, "**$1**")
   .replace(/<i>([\s\S]*?)<\/i>/g, "*$1*")
-  .replace(/<\/?x>/g, ""));
+  .replace(/<span[^>]*translate="no"[^>]*>([\s\S]*?)<\/span>/g, "$1"));
 // Een tekst opdelen in regels; opsommingstekens, kopjes en regeleinden blijven buiten de vertaling
 function regelsVan(tekst) {
   return tekst.split(/(\n+)/).map(deel => {
@@ -204,7 +210,7 @@ function regelsVan(tekst) {
 async function deeplVraag(teksten, taal, context) {
   const sleutel = (process.env.DEEPL_API_KEY || "").trim();
   const basis = process.env.DEEPL_API_URL || (sleutel.endsWith(":fx") ? "https://api-free.deepl.com" : "https://api.deepl.com");
-  const body = { text: teksten, source_lang: "NL", target_lang: DEEPL_TAAL[taal], tag_handling: "xml", ignore_tags: ["x"], preserve_formatting: true, context };
+  const body = { text: teksten, source_lang: "NL", target_lang: DEEPL_TAAL[taal], tag_handling: "html", preserve_formatting: true, context };
   if (DEEPL_FORMEEL[taal]) body.formality = DEEPL_FORMEEL[taal];
   for (let poging = 0; ; poging++) {
     const res = await fetch(`${basis}/v2/translate`, { method: "POST", headers: { Authorization: `DeepL-Auth-Key ${sleutel}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
