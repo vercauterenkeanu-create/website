@@ -202,7 +202,7 @@ function regelsVan(tekst) {
   });
 }
 async function deeplVraag(teksten, taal, context) {
-  const sleutel = process.env.DEEPL_API_KEY;
+  const sleutel = (process.env.DEEPL_API_KEY || "").trim();
   const basis = process.env.DEEPL_API_URL || (sleutel.endsWith(":fx") ? "https://api-free.deepl.com" : "https://api.deepl.com");
   const body = { text: teksten, source_lang: "NL", target_lang: DEEPL_TAAL[taal], tag_handling: "xml", ignore_tags: ["x"], preserve_formatting: true, context };
   if (DEEPL_FORMEEL[taal]) body.formality = DEEPL_FORMEEL[taal];
@@ -246,8 +246,9 @@ async function vulAan(geheugen, teksten, taal, log = console.log, opties = {}) {
     .map(([s, soort]) => ({ id: sleutel(s), tekst: s, soort }));
   const stand = { totaal: teksten.size, ontbrekend: ontbrekend.length, vertaald: 0, fouten: 0 };
   if (!ontbrekend.length) return stand;
-  const deepl = !!process.env.DEEPL_API_KEY;
-  if (!deepl && !process.env.ANTHROPIC_API_KEY) { log(`  ${taal}: ${ontbrekend.length} teksten nog niet vertaald (geen DEEPL_API_KEY of ANTHROPIC_API_KEY)`); return stand; }
+  const deepl = !!(process.env.DEEPL_API_KEY || "").trim();
+  stand.motor = deepl ? "deepl" : process.env.ANTHROPIC_API_KEY ? "claude" : null;
+  if (!deepl && !process.env.ANTHROPIC_API_KEY) { stand.melding = "geen DEEPL_API_KEY of ANTHROPIC_API_KEY"; log(`  ${taal}: ${ontbrekend.length} teksten nog niet vertaald (${stand.melding})`); return stand; }
   const namen = deepl ? namenUit(opties.raw || {}) : [];
   const perId = new Map(ontbrekend.map(i => [i.id, i]));
   for (const pakket of pakketten(ontbrekend)) {
@@ -256,11 +257,12 @@ async function vulAan(geheugen, teksten, taal, log = console.log, opties = {}) {
         const bron = perId.get(v.id);
         if (!bron) continue;
         if (klopt(bron.tekst, v.tekst)) { geheugen[v.id] = { nl: bron.tekst, vertaling: v.tekst }; stand.vertaald++; }
-        else { stand.fouten++; log(`  ${taal}: vertaling afgekeurd voor "${bron.tekst.slice(0, 60)}"`); }
+        else { stand.fouten++; stand.melding = `vertaling afgekeurd voor "${bron.tekst.slice(0, 60)}"`; log(`  ${taal}: ${stand.melding}`); }
       }
     } catch (e) {
       stand.fouten += pakket.length;
-      log(`  ${taal}: vertalen mislukt (${e.status ? e.status + " " : ""}${e.message})`);
+      stand.melding = `vertalen mislukt (${e.status ? e.status + " " : ""}${e.message})`;
+      log(`  ${taal}: ${stand.melding}`);
       if (e.status === 401 || e.status === 403 || e.status === 456) break;
     }
   }

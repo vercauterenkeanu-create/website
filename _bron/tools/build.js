@@ -187,13 +187,14 @@ async function main() {
   // Vertalingen bijwerken (enkel nieuwe of gewijzigde teksten worden vertaald)
   const gewenst = (site.talen || Object.keys(vertaal.TAALNAAM)).filter(c => vertaal.TAALNAAM[c]);
   const teksten = vertaal.alleTeksten(raw);
-  const klaar = {};
+  const klaar = {}, vertaalStatus = {};
   await Promise.all(gewenst.map(async taal => {
     const geheugen = vertaal.laad(taal);
-    await vertaal.vulAan(geheugen, teksten, taal, console.log, { raw });
+    const stand = await vertaal.vulAan(geheugen, teksten, taal, console.log, { raw });
     vertaal.bewaar(taal, geheugen, teksten);
     const w = vertaal.woordenboek(geheugen);
     const dekking = [...teksten.keys()].filter(s => w.has(s)).length / (teksten.size || 1);
+    vertaalStatus[taal] = { ...stand, nogTeVertalen: [...teksten.keys()].filter(s => !w.has(s)).length, dekking: Math.round(dekking * 1000) / 10 };
     if (dekking >= 0.8) klaar[taal] = w;
     else console.warn(`${taal}: pas ${Math.round(dekking * 100)}% vertaald, deze taal komt nog niet online`);
   }));
@@ -239,7 +240,7 @@ async function main() {
   const dir = path.join(OUT, "beheer");
   fs.mkdirSync(dir, { recursive: true });
   for (const f of fs.readdirSync(path.join(SRC, "beheer"))) fs.copyFileSync(path.join(SRC, "beheer", f), path.join(dir, f));
-  fs.writeFileSync(path.join(dir, "data.json"), JSON.stringify({ mediaInfo, commit: process.env.GITHUB_SHA || null, bestanden, talen, gebouwd: new Date().toISOString() }));
+  fs.writeFileSync(path.join(dir, "data.json"), JSON.stringify({ mediaInfo, commit: process.env.GITHUB_SHA || null, bestanden, talen, vertaalStatus, gebouwd: new Date().toISOString() }));
 
   console.log(`${pages.size} pagina's gebouwd · ${paginas.length} eigen pagina's · ${honden.length} honden · ${nesten.length} nesten · ${nieuws.length} verslagen · talen: ${talen.join(", ")}`);
 }

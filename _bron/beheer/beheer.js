@@ -1032,9 +1032,16 @@
       talenVak.append(h("div", { class: "taal-rij" }, h("label", { class: "schakel", for: "taal-" + code }, vink, h("span", { class: "spoor" }), VA_TALEN[code].naam),
         online ? h("a", { href: `${SITE_ROOT}${code}/`, target: "_blank", rel: "noopener", class: "taal-bekijk" }, "Bekijk") : null));
     }
+    // Hoe stond het met de vertalingen bij de laatste publicatie?
+    const status = Object.values(S.data.vertaalStatus || {});
+    const nog = Math.max(0, ...status.map(x => x.nogTeVertalen || 0));
+    const melding = (status.find(x => x.melding) || {}).melding;
+    const statusVak = status.length ? h("div", { class: nog ? "waarschuwing" : "info" },
+      nog ? `Bij de laatste publicatie waren ${nog} ${nog === 1 ? "tekst" : "teksten"} nog niet vertaald; die staan voorlopig in het Nederlands op de anderstalige pagina's.${melding ? ` Reden: ${melding}.` : ""}`
+        : "Alle teksten zijn vertaald.") : "";
     groep(paneel, "Talen", "inst-talen",
       h("p", { class: "uitleg", style: "margin:0" }, "Je schrijft alles in het Nederlands. Bij Publiceren worden nieuwe of gewijzigde teksten automatisch vertaald naar de aangevinkte talen. Bezoekers kiezen hun taal rechtsboven in het menu."),
-      talenVak);
+      statusVak, talenVak);
 
     groep(paneel, "Verwachte nesten", "inst-verwacht",
       veld({ naam: "tonen", label: "Aankondiging tonen op de site", type: "aanuit" }, s.verwacht, pad, vol),
