@@ -247,7 +247,7 @@ async function main() {
   fs.writeFileSync(path.join(OUT, "assets", "site.js"), js);
 
   // Versienummer achter opmaak en script: een browser combineert zo nooit oude opmaak met een nieuwe pagina
-  const versie = crypto.createHash("md5").update(css).update(fs.readFileSync(path.join(SRC, "assets", "logo.css"))).update(js).digest("hex").slice(0, 10);
+  const versie = crypto.createHash("md5").update(css).update(fs.readFileSync(path.join(SRC, "assets", "logo.css"))).update(js).update(fs.readFileSync(path.join(SRC, "assets", "blokken.js"))).update(fs.readFileSync(path.join(SRC, "beheer", "beheer.js"))).update(fs.readFileSync(path.join(SRC, "beheer", "beheer.css"))).digest("hex").slice(0, 10);
   for (const map of [OUT, ...talen.slice(1).map(c => path.join(OUT, c))])
     for (const f of fs.readdirSync(map)) if (f.endsWith(".html")) {
       const p = path.join(map, f), html = fs.readFileSync(p, "utf8");
@@ -257,8 +257,11 @@ async function main() {
   // Beheerpagina + een kopie van alle inhoud (met versie-nummers van GitHub)
   const dir = path.join(OUT, "beheer");
   fs.mkdirSync(dir, { recursive: true });
-  for (const f of fs.readdirSync(path.join(SRC, "beheer"))) fs.copyFileSync(path.join(SRC, "beheer", f), path.join(dir, f));
-  fs.writeFileSync(path.join(dir, "data.json"), JSON.stringify({ mediaInfo, commit: process.env.GITHUB_SHA || null, bestanden, talen, vertaalStatus, gebouwd: new Date().toISOString() }));
+  for (const f of fs.readdirSync(path.join(SRC, "beheer"))) {
+    if (f === "index.html") fs.writeFileSync(path.join(dir, f), fs.readFileSync(path.join(SRC, "beheer", f), "utf8").replaceAll("__VERSIE__", versie));
+    else fs.copyFileSync(path.join(SRC, "beheer", f), path.join(dir, f));
+  }
+  fs.writeFileSync(path.join(dir, "data.json"), JSON.stringify({ mediaInfo, commit: process.env.GITHUB_SHA || null, versie, bestanden, talen, vertaalStatus, gebouwd: new Date().toISOString() }));
 
   console.log(`${pages.size} pagina's gebouwd · ${paginas.length} eigen pagina's · ${honden.length} honden · ${nesten.length} nesten · ${nieuws.length} verslagen · talen: ${talen.join(", ")}`);
 }

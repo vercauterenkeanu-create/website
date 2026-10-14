@@ -449,7 +449,7 @@
       frame.onload = () => { voorbeeldDoc = frame.contentDocument; voorbeeldDoc.scrollingElement.scrollTop = scroll; markeerGekozen(); };
       frame.srcdoc = `<!doctype html><html lang="nl-BE"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><base href="${SITE_ROOT}">
 <link id="va-fonts" href="${esc(fontsHref(thema))}" rel="stylesheet">
-<link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/logo.css"><style id="va-thema">${themaCss(thema)}</style><style>${VOORBEELD_CSS}</style></head>
+<link rel="stylesheet" href="assets/site.css?v=${S.data.versie || ""}"><link rel="stylesheet" href="assets/logo.css?v=${S.data.versie || ""}"><style id="va-thema">${themaCss(thema)}</style><style>${VOORBEELD_CSS}</style></head>
 <body>${B.header(v.actief)}<main>${v.main}</main>${B.footer()}<script>${VOORBEELD_JS}<\/script></body></html>`;
     }, volledig ? 0 : 140);
   }
@@ -553,7 +553,7 @@
       const { LANDEN, landCode, landNaam } = window.VA;
       const huidig = landCode(v);
       const sel = h("select", { id });
-      sel.append(h("option", { value: "" }, "— (leeg: bij ons, België)"));
+      sel.append(h("option", { value: "" }, "— (leeg = België)"));
       const voorop = LANDEN.slice(0, 6), rest = LANDEN.slice(6).sort((a, b) => landNaam(a).localeCompare(landNaam(b), "nl"));
       for (const [label, codes] of [["Meest gekozen", voorop], ["Alle landen", rest]]) {
         const groep = h("optgroup", { label });
