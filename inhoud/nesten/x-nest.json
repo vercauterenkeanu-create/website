@@ -20,26 +20,6 @@
       "stamboom": ""
     },
     {
-      "naam": "Vai Avanti Xtreme",
-      "roepnaam": "Moos",
-      "geslacht": "Reu",
-      "kleur": "Gestroomd",
-      "woontIn": "Nederland",
-      "gezondheid": [
-        "Myostatin N/N (via ouders)"
-      ],
-      "uitslagen": [
-        "3 Hartenren Geldrop 2025",
-        "Vice-Nederlands kampioen 350 m 2026",
-        "European Champ of the Sand 2026"
-      ],
-      "fotos": [
-        "/media/200000601.webp",
-        "/media/200000430.webp"
-      ],
-      "stamboom": "https://whippet.breedarchive.com/animal/view/vai-avanti-xtreme-053a66af-fc00-45c7-9c31-4cacf4ee1a18"
-    },
-    {
       "naam": "Vai Avanti Xander",
       "roepnaam": "Sky",
       "geslacht": "Reu",
@@ -69,6 +49,27 @@
         "/media/200000420.webp"
       ],
       "stamboom": "https://whippet.breedarchive.com/animal/view/vai-avanti-xena-0e7f6731-c19f-4ab3-94d6-1cf212e8b7da"
+    },
+    {
+      "naam": "Vai Avanti Xtreme",
+      "roepnaam": "Moos",
+      "geslacht": "Reu",
+      "kleur": "Gestroomd",
+      "woontIn": "Nederland",
+      "gezondheid": [
+        "Myostatin N/N (via ouders)"
+      ],
+      "uitslagen": [
+        "3 Hartenren Geldrop 2025",
+        "Vice-Nederlands kampioen 350 m 2026",
+        "European Champ of the Sand 2026",
+        "Windhund Champions League 2026"
+      ],
+      "fotos": [
+        "/media/200000601.webp",
+        "/media/200000430.webp"
+      ],
+      "stamboom": "https://whippet.breedarchive.com/animal/view/vai-avanti-xtreme-053a66af-fc00-45c7-9c31-4cacf4ee1a18"
     },
     {
       "naam": "Vai Avanti Xoi",
