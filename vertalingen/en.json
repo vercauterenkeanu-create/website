@@ -63,6 +63,10 @@
     "nl": "Mayzie wint de Grote Prijs van België 280 m",
     "vertaling": "Mayzie wins the Belgian Grand Prix 280 m"
   },
+  "072066efc402c3b8": {
+    "nl": "Woont in {land}",
+    "vertaling": "Lives in {land}"
+  },
   "079727fc75264d19": {
     "nl": "Europa Cup: brons voor Moos, sterke proeflopen",
     "vertaling": "European Cup: bronze for Moos, strong trial runs"
@@ -299,10 +303,6 @@
     "nl": "Naam",
     "vertaling": "Name"
   },
-  "26c31884a99ada0c": {
-    "nl": "woont in {land}",
-    "vertaling": "lives in {land}"
-  },
   "2b66e6fc1cc14a8c": {
     "nl": "Maserada Sul Piave\nWe waren eigenlijk van plan om er ook bij te zijn, maar helaas is het er niet van gekomen. Vandaag was het debuut van SeeYa (Vai Avanti Ylva) en wat voor een debuut was dat!🤩 Er waren heel wat ‘eerste keren’ voor SeeYa. Ze was de eerste dochter van Vienna die geboren werd, de eerste die haar rijbewijs haalde en nu ook de eerste die aan een wedstrijd meedeed! En SeeYa besloot dat ze die lijn wilde voortzetten en HAAR EERSTE WEDSTRIJD WINNEN, en alsof dat nog niet genoeg was, liep ze ook nog eens een nieuw BAANRECORD VAN 18,92‼️ (voor de finale was er een storing met de startboxen en besloten ze de wedstrijd te verplaatsen naar de 290 m). We zijn zo ontzettend trots op je, SeeYa!🩷\nBedankt Klaudia en Adrian voor het zo goed verzorgen van onze schat!🩷\nWRV Eilenburg\nVandaag stond Vai Avanti Xtreme aan de start. Het was de eerste keer dat Moos op een baan met een ander systeem liep en dat was te merken 🫣😅 In de eerste en tweede ronde kon Moos zijn weg niet vinden en ging hij twee keer slecht van start, wat we niet van hem gewend zijn. Hij slaagde er niet in zijn volledige potentieel te laten zien, dus het werd de B-finale. In de finale was het duidelijk dat hij nu wist wat hij moest doen 😅 Hij liep een ongelooflijke race en wist de B-finale te winnen!❤️ Maar de 🍒 op de taart was dat Mister Moos de Windhund Champions League wist te winnen‼️ Hij won van de 73‼️ honden die meededen aan de gewichtsraces. Nogmaals bedankt aan Merel en Sander dat jullie Moos mee hebben genomen op elk avontuur! Felicitaties aan Peter en Carina voor het ongelooflijke seizoen dat onze gestroomde jongen heeft gehad ❤️",
     "vertaling": "Maserada Sul Piave\nWe’d actually planned to be there too, but unfortunately it didn’t work out. Today was SeeYa’s (Vai Avanti Ylva) debut – and what a debut it was!🤩 There were plenty of ‘firsts’ for SeeYa. She was the first daughter of Vienna to be born, the first to get her driving licence and now also the first to take part in a competition! And SeeYa decided she wanted to carry on that tradition and WIN HER FIRST RACE, and as if that wasn’t enough, she also set a new TRACK RECORD OF 18.92‼️ (Before the final, there was a fault with the starting boxes, so they decided to move the race to the 290-metre mark). We’re so incredibly proud of you, SeeYa!🩷\nThank you, Klaudia and Adrian, for looking after our darling so well!🩷\nWRV Eilenburg\nToday, Vai Avanti Xtreme was at the starting line. It was the first time Moos had run on a track with a different layout, and it showed 🫣😅 In the first and second heats, Moos couldn’t find his way and got off to a poor start twice, which is unlike him. He didn’t manage to show his full potential, so it was off to the B final. In the final, it was clear that he now knew what he had to do 😅 He ran an incredible race and managed to win the B final!❤️ But the 🍒 on the cake was that Mister Moos managed to win the Windhound Champions League‼️ He beat the 73‼️ dogs that took part in the weight-class races. Thanks again to Merel and Sander for taking Moos along on every adventure! Congratulations to Peter and Carina on the incredible season our brindle lad has had ❤️"
@@ -423,10 +423,6 @@
     "nl": "We antwoorden zo snel mogelijk.",
     "vertaling": "We'll get back to you as soon as we can."
   },
-  "4438aa702c0a0dac": {
-    "nl": "België",
-    "vertaling": "Belgium"
-  },
   "44ab87f50573e53c": {
     "nl": "Maak kennis met de whippets van Vai Avanti: afstamming, gezondheidsresultaten en palmares per hond.",
     "vertaling": "Meet the Vai Avanti whippets: pedigree, health results and achievements for each dog."
@@ -478,10 +474,6 @@
   "4b5eb4553c9c0505": {
     "nl": "Teamlid sinds 2022",
     "vertaling": "Team member since 2022"
-  },
-  "4c4204d5523e5dd0": {
-    "nl": "Nederland",
-    "vertaling": "the Netherlands"
   },
   "4c4699121c899d44": {
     "nl": "Hoofdmenu",
@@ -678,10 +670,6 @@
   "6b7e89d85804e51a": {
     "nl": "Vandaag staan ​​alleen Tahiti en Thiago aan de start. Eerste ronde Tahiti eindigt als eerste in 21.51 🤷🏼‍♀️(niet zeker of deze tijd correct was) tweede ronde wint ze in 20.98. De finale wint ze in een tijd van 21.06!\n\nNa het winnen van de grote prijs in 2021 zet ze haar naam ook op de editie van 2022 ❤️\n\nThiago leert week na week meer en wordt 4e in zijn finale",
     "vertaling": "Only Tahiti and Thiago on the start line today. In the first round Tahiti finishes first in 21.51 🤷🏼‍♀️(not sure whether that time was right), and she wins the second round in 20.98. She wins the final in a time of 21.06!\n\nAfter winning the Grand Prix in 2021, she now puts her name on the 2022 edition too ❤️\n\nThiago is learning more week by week and finishes 4th in his final"
-  },
-  "6b8b74a624c20a2f": {
-    "nl": "Polen",
-    "vertaling": "Poland"
   },
   "6c6b0282e94f2d65": {
     "nl": "Geboren {datum}",
@@ -1190,10 +1178,6 @@
   "c8853d444d5255c0": {
     "nl": "EM Revanche",
     "vertaling": "EM Revanche"
-  },
-  "c909b138eba89ecf": {
-    "nl": "Finland",
-    "vertaling": "Finland"
   },
   "c9414ad3e0d49c43": {
     "nl": "Palmares · {n} titel",

@@ -131,8 +131,8 @@ ${talen.length > 1 ? `<meta property="og:locale" content="${locale.replace("-", 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="${VA.fontsHref(site.thema)}" rel="stylesheet">
-<link rel="stylesheet" href="assets/site.css">
-<link rel="stylesheet" href="assets/logo.css">
+<link rel="stylesheet" href="assets/site.css?v=__VERSIE__">
+<link rel="stylesheet" href="assets/logo.css?v=__VERSIE__">
 ${VA.themaCss(site.thema) ? `<style>${VA.themaCss(site.thema)}</style>\n` : ""}</head>
 <body id="top">
 ${S.header(active, file)}
@@ -140,7 +140,7 @@ ${S.header(active, file)}
 ${body}
 </main>
 ${S.footer()}
-<script src="assets/site.js"></script>
+<script src="assets/site.js?v=__VERSIE__"></script>
 </body>
 </html>
 `;
@@ -232,6 +232,9 @@ async function main() {
   // Icoontje voor het tabblad, het startscherm van een gsm en zoekresultaten
   for (const f of ["favicon-32.png", "favicon-192.png", "favicon-512.png", "apple-touch-icon.png"]) fs.copyFileSync(path.join(SRC, "assets", f), path.join(OUT, "assets", f));
   fs.copyFileSync(path.join(SRC, "assets", "favicon.ico"), path.join(OUT, "favicon.ico"));
+  // Vlaggen van de landen waar honden wonen (flag-icons, MIT)
+  fs.mkdirSync(path.join(OUT, "assets", "vlaggen"), { recursive: true });
+  for (const code of VA.LANDEN) fs.copyFileSync(path.join(ROOT, "node_modules", "flag-icons", "flags", "4x3", code.toLowerCase() + ".svg"), path.join(OUT, "assets", "vlaggen", code.toLowerCase() + ".svg"));
   fs.copyFileSync(path.join(SRC, "assets", "blokken.js"), path.join(OUT, "assets", "blokken.js"));
   let js = fs.readFileSync(path.join(SRC, "assets", "site.js"), "utf8");
   if (S.mailParts.length === 2) js = js.replace('["vai-avanti", "hotmail.com"]', JSON.stringify(S.mailParts));
@@ -242,6 +245,14 @@ async function main() {
   const scriptWoorden = Object.fromEntries(talen.slice(1).map(c => [c, Object.fromEntries(vertaal.scriptTeksten().filter(s => klaar[c].has(s)).map(s => [s, klaar[c].get(s)]))]));
   js = js.replace("const TEKSTEN = {};", () => `const TEKSTEN = ${JSON.stringify(scriptWoorden)};`);
   fs.writeFileSync(path.join(OUT, "assets", "site.js"), js);
+
+  // Versienummer achter opmaak en script: een browser combineert zo nooit oude opmaak met een nieuwe pagina
+  const versie = crypto.createHash("md5").update(css).update(fs.readFileSync(path.join(SRC, "assets", "logo.css"))).update(js).digest("hex").slice(0, 10);
+  for (const map of [OUT, ...talen.slice(1).map(c => path.join(OUT, c))])
+    for (const f of fs.readdirSync(map)) if (f.endsWith(".html")) {
+      const p = path.join(map, f), html = fs.readFileSync(p, "utf8");
+      if (html.includes("__VERSIE__")) fs.writeFileSync(p, html.replaceAll("__VERSIE__", versie));
+    }
 
   // Beheerpagina + een kopie van alle inhoud (met versie-nummers van GitHub)
   const dir = path.join(OUT, "beheer");

@@ -548,6 +548,28 @@
       if (hulp) wrap.append(hulp);
       return wrap;
     }
+    if (def.type === "land") {
+      // Keuzelijst met landen (namen in het Nederlands), met de vlag ernaast
+      const { LANDEN, landCode, landNaam } = window.VA;
+      const huidig = landCode(v);
+      const sel = h("select", { id });
+      sel.append(h("option", { value: "" }, "— (leeg: bij ons, België)"));
+      const voorop = LANDEN.slice(0, 6), rest = LANDEN.slice(6).sort((a, b) => landNaam(a).localeCompare(landNaam(b), "nl"));
+      for (const [label, codes] of [["Meest gekozen", voorop], ["Alle landen", rest]]) {
+        const groep = h("optgroup", { label });
+        for (const c of codes) groep.append(h("option", { value: c, selected: c === huidig || null }, landNaam(c)));
+        sel.append(groep);
+      }
+      const vlagBeeld = h("img", { class: "veld-vlag", alt: "", src: huidig ? `${SITE_ROOT}assets/vlaggen/${huidig.toLowerCase()}.svg` : "", hidden: !huidig || null });
+      sel.addEventListener("change", () => {
+        zet(sel.value || undefined, true);
+        vlagBeeld.hidden = !sel.value;
+        if (sel.value) vlagBeeld.src = `${SITE_ROOT}assets/vlaggen/${sel.value.toLowerCase()}.svg`;
+      });
+      wrap.append(label, h("div", { class: "land-veld" }, sel, vlagBeeld));
+      if (hulp) wrap.append(hulp);
+      return wrap;
+    }
     if (def.type === "keuze" && def.opties.length > 4) {
       const sel = h("select", { id });
       const huidig = v || def.opties[0];
