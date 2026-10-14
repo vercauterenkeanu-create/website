@@ -73,7 +73,8 @@ button { cursor: pointer; }
 .weergave { display: inline-flex; border: 1px solid rgba(232, 203, 133, .35); border-radius: 10px; overflow: hidden; }
 .weergave button { border: 0; background: none; color: #d9cfbb; padding: 8px 12px; font-size: 13px; font-weight: 600; }
 .weergave button[aria-pressed="true"] { background: rgba(232, 203, 133, .2); color: #fff; }
-.status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #d9cfbb; white-space: nowrap; }
+.status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #d9cfbb; white-space: nowrap; cursor: pointer; }
+.status.fout { color: #f0a58f; }
 .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #6fbf8b; }
 .status.vuil::before { background: var(--gold-2); }
 .status.bezig::before, .status.publiceren::before { background: var(--gold-2); animation: puls 1s infinite; }
