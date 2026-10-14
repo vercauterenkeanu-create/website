@@ -88,13 +88,18 @@
       "plaats": "Oberhausen"
     }
   ],
-  "omslagfoto": "/media/200000198.webp",
+  "omslagfoto": "/media/483507563-1220711666724002-1829025319392-202610141927.jpg",
   "fotoFocus": "center 60%",
   "fotos": [
     "/media/200000204.webp",
     "/media/200000572.webp",
-    "/media/200000217.webp"
+    "/media/200000217.webp",
+    "/media/470120929-1124223482592788-7758169615315-202610141927.jpg",
+    "/media/470584003-1129675012047635-2131098019362-202610141928.jpg",
+    "/media/492457208-1265868945541607-1725753229206-202610141928.jpg",
+    "/media/541887040-1383896983738802-6740387452186-202610141928.jpg"
   ],
   "volgorde": 3,
-  "tekst": "Flappie en Keanu zijn twee handen op één buik. Sinds zijn zesde verjaardag loopt hij bij de veteranen."
+  "tekst": "Flappie en Keanu zijn twee handen op één buik. Sinds zijn zesde verjaardag loopt hij bij de veteranen.",
+  "fotoGrootte": "Groot"
 }
