@@ -488,13 +488,13 @@ ${arr(k.links).filter(l => l.label).map(l => `          <li><a href="${esc(l.lin
 </section>`;
     };
 
-    const dogCard = d => `<a class="dog-card reveal" href="hond-${d.id}.html">
+    const dogCard = (d, metVlag = true) => `<a class="dog-card reveal" href="hond-${d.id}.html">
   <div class="dog-media">
     ${img(d.cover, { alt: `${d.call} (${d.name})`, pos: d.pos, sizes: "(max-width: 640px) 100vw, 33vw" })}
     <div class="badges">${d.sex ? `<span class="badge">${esc(t(d.sex))}</span>` : ""}${d.status ? `<span class="badge gold">${esc(d.status)}</span>` : ""}</div>
   </div>
   <div class="dog-body">
-    <div class="naam-rij"><h3>${esc(d.call)}</h3>${vlag(d.land)}</div>
+    <div class="naam-rij"><h3>${esc(d.call)}</h3>${metVlag ? vlag(d.land) : ""}</div>
     <div class="dog-official">${esc(d.name)}</div>
     <div class="dog-meta">${[d.born && t("Geboren {datum}", { datum: d.born }), d.color].filter(Boolean).map(esc).join(" · ")}</div>
     ${d.highlight ? `<div class="dog-highlight">${ICON.trophy}<span>${esc(d.highlight)}</span></div>` : ""}
@@ -609,7 +609,7 @@ ${lijst.map(c => `      <div class="stat"><strong>${esc(c.getal || "")}</strong>
   <div class="wrap">
     ${head(b, "Onze *honden*")}
     <div class="dogs-grid">
-${(D.honden || []).map(dogCard).join("\n")}
+${(D.honden || []).map(d => dogCard(d, false)).join("\n")}
     </div>
   </div>
 </section>`;
