@@ -98,21 +98,34 @@
   const b64NaarTekst = b64 => new TextDecoder().decode(b64NaarBytes(b64));
   const tekstNaarB64 = t => bytesNaarB64(new TextEncoder().encode(t));
 
+  const wachtEven = ms => new Promise(r => setTimeout(r, ms));
+  // Een GitHub-vraag met de naam van de stap erbij als ze mislukt. GitHub verwerkt net geüploade stukken
+  // (vooral foto's) soms niet snel genoeg en antwoordt dan "GitRPC::BadObjectState": even wachten en opnieuw.
+  async function ghStap(stap, pad, opts, geduldig) {
+    for (let i = 0; ; i++) {
+      try { return await gh(pad, opts); }
+      catch (e) {
+        if (geduldig && e.status === 422 && i < 6) { await wachtEven(1500 * (i + 1)); continue; }
+        e.stap = e.stap || stap; throw e;
+      }
+    }
+  }
   async function bewaarBestanden(bestanden, weg, bericht, token, tak = LIVE, poging = 1) {
-    const ref = await gh(`git/ref/heads/${tak}`, { token });
-    const vorige = await gh(`git/commits/${ref.object.sha}`, { token });
-    const boom = [];
+    const ref = await ghStap("concept ophalen", `git/ref/heads/${tak}`, { token });
+    const vorige = await ghStap("vorige versie ophalen", `git/commits/${ref.object.sha}`, { token });
+    const boom = new Map();
     for (const b of bestanden) {
       const content = b.blob ? bytesNaarB64(new Uint8Array(await b.blob.arrayBuffer())) : tekstNaarB64(b.tekst);
-      const blob = await gh("git/blobs", { method: "POST", body: { content, encoding: "base64" }, token });
+      const blob = await ghStap(b.blob ? "foto bewaren" : "tekst bewaren", "git/blobs", { method: "POST", body: { content, encoding: "base64" }, token });
       b.sha = blob.sha;
-      boom.push({ path: b.pad, mode: "100644", type: "blob", sha: blob.sha });
+      boom.set(b.pad, { path: b.pad, mode: "100644", type: "blob", sha: blob.sha });
     }
-    for (const p of weg) boom.push({ path: p, mode: "100644", type: "blob", sha: null });
-    const nieuweBoom = await gh("git/trees", { method: "POST", body: { base_tree: vorige.tree.sha, tree: boom }, token });
-    const commit = await gh("git/commits", { method: "POST", body: { message: bericht, tree: nieuweBoom.sha, parents: [ref.object.sha] }, token });
+    for (const p of weg) if (!boom.has(p)) boom.set(p, { path: p, mode: "100644", type: "blob", sha: null });
+    if (bestanden.some(b => b.blob)) await wachtEven(1000);
+    const nieuweBoom = await ghStap("nieuwe versie samenstellen", "git/trees", { method: "POST", body: { base_tree: vorige.tree.sha, tree: [...boom.values()] }, token }, true);
+    const commit = await ghStap("nieuwe versie maken", "git/commits", { method: "POST", body: { message: bericht, tree: nieuweBoom.sha, parents: [ref.object.sha] }, token }, true);
     try { await gh(`git/refs/heads/${tak}`, { method: "PATCH", body: { sha: commit.sha, force: false }, token }); }
-    catch (e) { if (e.status === 422 && poging < 3) return bewaarBestanden(bestanden, weg, bericht, token, tak, poging + 1); throw e; }
+    catch (e) { if (e.status === 422 && poging < 3) return bewaarBestanden(bestanden, weg, bericht, token, tak, poging + 1); e.stap = "concept bijwerken"; throw e; }
     return commit.sha;
   }
 
@@ -1250,7 +1263,7 @@
       : soorten.size === 1 && soorten.has("nesten") ? "Nesten aangepast via beheer"
       : soorten.size === 1 && soorten.has("paginas") ? "Pagina's aangepast via beheer"
       : "Website aangepast via beheer";
-    await bewaarBestanden(bestanden, weg, bericht, undefined, CONCEPT);
+    await bewaarBestanden(bestanden, weg.filter(p => nu[p]), bericht, undefined, CONCEPT);
     for (const b of bestanden) { if (b.upload) S.uploads[b.upload].opgeslagen = true; else if (S.bestanden[b.pad]) S.bestanden[b.pad].sha = b.sha; }
     for (const p of weg) delete S.bestanden[p];
     S.nieuw = new Set(); S.verwijderd = new Set(); S.laatsteFout = "";
@@ -1279,7 +1292,8 @@
       if (sha) volgPublicatie(sha); else werkStatusBij("Alles staat online", "ok");
     } catch (e) {
       console.error(e);
-      S.laatsteFout = `${e.status ? "GitHub " + e.status + ": " : ""}${e.detail || e.message}`;
+      const welke = S.data ? nietOpgeslagen() : [];
+      S.laatsteFout = `${e.stap ? "bij " + e.stap + ", " : ""}${e.status ? "GitHub " + e.status + ": " : ""}${e.detail || e.message}${welke.length ? " (" + welke.join(", ") + ")" : ""}`;
       werkStatusBij(publiceren ? "Publiceren mislukt" : "Opslaan mislukt", "fout");
       melding(e.status === 401 || e.status === 403 ? "Aanmelden is verlopen. Meld je opnieuw aan met het wachtwoord."
         : e.status === 409 ? "Het concept botst met een wijziging die intussen online kwam. Laat het aan Keanu weten."
