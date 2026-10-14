@@ -631,7 +631,7 @@ ${(D.honden || []).map(dogCard).join("\n")}
   <div class="wrap">
     ${head(b, "", b.linktekst ? `<a class="link-arrow" href="nesten.html">${esc(b.linktekst)} ${ICON.arrow}</a>` : "")}
     <div class="mini-grid">
-${elsewhere.map(p => `      <a class="mini reveal" href="nesten.html#${pupAnchor(p)}">${img(p.photos[0], { alt: p.call, sizes: "200px" })}<b>${esc(p.call)}${vlag(p.country)}</b><small>${esc(p.name)}<br>${esc(t("{letter}-nest", { letter: p.litter.letter }))} · ${esc(t(p.sex))}</small></a>`).join("\n")}
+${elsewhere.map(p => `      <a class="mini reveal" href="nesten.html#${pupAnchor(p)}">${img(p.photos[0], { alt: p.call, sizes: "200px" })}<b>${esc(p.call)}${vlag(p.country || "BE")}</b><small>${esc(p.name)}<br>${esc(t("{letter}-nest", { letter: p.litter.letter }))} · ${esc(t(p.sex))}</small></a>`).join("\n")}
     </div>
   </div>
 </section>`;
@@ -945,7 +945,7 @@ ${posts.slice(0, 8).map(mention).join("\n")}
       ${shot(p.photos[0], { group: g, caption: `${p.call} (${p.name})`, sizes: "(max-width: 640px) 100vw, 33vw", extra: p.photos.length > 1 ? `<span class="count">${esc(t("{n} foto's", { n: p.photos.length }))}</span>` : "" })}
       ${p.photos.slice(1).map(ph => shot(ph, { group: g, caption: `${p.call} (${p.name})`, hidden: true })).join("")}
       <div class="pup-body">
-        <div class="naam-rij"><h3>${esc(p.call)}</h3>${vlag(p.country || (d ? "BE" : ""))}</div>
+        <div class="naam-rij"><h3>${esc(p.call)}</h3>${vlag(p.country || "BE")}</div>
         <div class="dog-official">${esc(p.name)}</div>
         <div class="pup-meta">${[p.sex && t(p.sex), p.color].filter(Boolean).map(esc).join(" · ")}${!p.country && d ? ` · ${esc(t("bij ons"))}` : ""}</div>
         ${health.length ? healthChips(health) : ""}
