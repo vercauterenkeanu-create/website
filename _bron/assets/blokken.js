@@ -230,7 +230,7 @@
         { naam: "citaat", label: "Citaat", type: "tekst" }, { naam: "citaatVan", label: "Citaat van", type: "regel" }, F.knoptekst, F.knoplink],
       nieuw: { bovenschrift: "Over ons", titel: "Over *ons*", tekst: "", knoptekst: "Lees ons verhaal", knoplink: "over-ons.html" }
     },
-    team: { label: "Teamleden", omschrijving: "Foto en verhaal per persoon.", velden: [{ naam: "leden", label: "Teamleden", type: "lijst", velden: [{ naam: "naam", label: "Naam", type: "regel" }, { naam: "rol", label: "Rol", type: "regel" }, { naam: "foto", label: "Foto", type: "foto" }, { naam: "tekst", label: "Verhaal", type: "opmaak" }] }], nieuw: { leden: [{ naam: "Naam", rol: "", tekst: "" }] } },
+    team: { label: "Teamleden", omschrijving: "Foto en verhaal per persoon.", velden: [{ naam: "leden", label: "Teamleden", type: "lijst", velden: [{ naam: "naam", label: "Naam", type: "regel", hulp: "Zet *sterretjes* rond het deel dat goud moet zijn, bv. Shany *Van der Meulen*. Zonder sterretjes wordt het laatste woord goud." }, { naam: "rol", label: "Rol", type: "regel" }, { naam: "foto", label: "Foto", type: "foto" }, { naam: "tekst", label: "Verhaal", type: "opmaak" }] }], nieuw: { leden: [{ naam: "Naam", rol: "", tekst: "" }] } },
     contact: {
       label: "Contactformulier", omschrijving: "Contactgegevens en het formulier. Telefoon, e-mail en adres pas je aan bij Instellingen.",
       velden: [F.bovenschrift, F.titel, F.intro, { naam: "formulierTitel", label: "Titel van het formulier", type: "regel" }, { naam: "formulierTekst", label: "Tekst onder die titel", type: "regel" },
@@ -738,11 +738,12 @@ ${cards}
         });
       },
       team(b) {
-        const nameHtml = n => { const parts = String(n || "").split(" "); return parts.length > 1 ? `${esc(parts.slice(0, -1).join(" "))} <em>${esc(parts.slice(-1)[0])}</em>` : esc(n); };
+        // Met *sterretjes* kies je zelf welk deel goud is; anders wordt het laatste woord goud
+        const nameHtml = n => { n = String(n || ""); if (n.includes("*")) return inline(n); const parts = n.split(" "); return parts.length > 1 ? `${esc(parts.slice(0, -1).join(" "))} <em>${esc(parts.slice(-1)[0])}</em>` : esc(n); };
         return `<section class="section-tight">
   <div class="wrap">
 ${(b.leden || []).map((t, i) => `    <div class="person${i % 2 ? " flip" : ""} reveal">
-      <div class="person-photo">${img(t.foto, { alt: t.naam, sizes: "(max-width: 980px) 100vw, 40vw" })}</div>
+      <div class="person-photo">${img(t.foto, { alt: String(t.naam || "").replace(/\*/g, ""), sizes: "(max-width: 980px) 100vw, 40vw" })}</div>
       <div class="person-text">
         ${t.rol ? `<span class="eyebrow">${esc(t.rol)}</span>` : ""}
         <h2>${nameHtml(t.naam)}</h2>

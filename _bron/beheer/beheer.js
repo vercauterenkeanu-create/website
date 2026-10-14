@@ -698,7 +698,7 @@
         box.innerHTML = "";
         const lijst = obj[def.naam] || [];
         lijst.forEach((item, i) => {
-          const titel = item.roepnaam || item.naam || item.titel || item.label || [item.getal, item.tekst].filter(Boolean).join(" ") || `${i + 1}`;
+          const titel = String(item.roepnaam || item.naam || item.titel || item.label || [item.getal, item.tekst].filter(Boolean).join(" ") || `${i + 1}`).replace(/\*/g, "");
           const kaart = h("details", { class: "lijst-item", open: lijst.length <= 2 || i === openIndex || null },
             h("summary", { class: "kop" }, h("span", {}, titel, item.jaar ? ` · ${item.jaar}` : ""), h("span", { class: "kop-knoppen" },
               h("button", { type: "button", class: "icoonknop", "aria-label": "Omhoog", disabled: i === 0 || null, html: I.op, onclick: e => { e.preventDefault(); const l = [...lijst]; [l[i - 1], l[i]] = [l[i], l[i - 1]]; zet(l, true); teken(i - 1); } }),
