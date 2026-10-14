@@ -21,7 +21,7 @@ const NIET = new Set([
   "donkerte", "wissel", "icoon", "geslacht", "kleurAchtergrond", "kleurTekst", "kleurAccent", "jaar", "jaartal", "getal",
   "email", "telefoon", "instagram", "facebook", "titelLetter", "tekstLetter", "accent", "donker", "licht", "beige",
   "tonen", "fotoRechts", "nieuwsTonen", "verwachtTonen", "van", "citaatVan", "talen", "thema",
-  "fotoGrootte", "alleFotos", "grootte", "vorm", "volledig"
+  "fotoGrootte", "alleFotos", "grootte", "vorm", "volledig", "woontIn"
 ]);
 const isVertaalbaar = (veld, s) => typeof s === "string" && !NIET.has(veld) && /\p{L}/u.test(s) &&
   !/^(https?:|mailto:|tel:|\/media\/|#)/.test(s) && !/^[\w-]+\.html(#[\w-]*)?$/.test(s);

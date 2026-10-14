@@ -232,6 +232,9 @@ async function main() {
   // Icoontje voor het tabblad, het startscherm van een gsm en zoekresultaten
   for (const f of ["favicon-32.png", "favicon-192.png", "favicon-512.png", "apple-touch-icon.png"]) fs.copyFileSync(path.join(SRC, "assets", f), path.join(OUT, "assets", f));
   fs.copyFileSync(path.join(SRC, "assets", "favicon.ico"), path.join(OUT, "favicon.ico"));
+  // Vlaggen van de landen waar honden wonen (flag-icons, MIT)
+  fs.mkdirSync(path.join(OUT, "assets", "vlaggen"), { recursive: true });
+  for (const code of VA.LANDEN) fs.copyFileSync(path.join(ROOT, "node_modules", "flag-icons", "flags", "4x3", code.toLowerCase() + ".svg"), path.join(OUT, "assets", "vlaggen", code.toLowerCase() + ".svg"));
   fs.copyFileSync(path.join(SRC, "assets", "blokken.js"), path.join(OUT, "assets", "blokken.js"));
   let js = fs.readFileSync(path.join(SRC, "assets", "site.js"), "utf8");
   if (S.mailParts.length === 2) js = js.replace('["vai-avanti", "hotmail.com"]', JSON.stringify(S.mailParts));

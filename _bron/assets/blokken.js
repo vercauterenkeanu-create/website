@@ -53,6 +53,16 @@
   };
   // Tekst met {plaatshouders} invullen
   const vulIn = (s, v) => v ? String(s).replace(/\{([a-z]+)\}/gi, (m, k) => k in v ? v[k] : m) : String(s);
+  // Landen waar honden kunnen wonen (ISO-codes; de vlaggen staan in assets/vlaggen/). Eerst de buurlanden.
+  const LANDEN = ["BE", "NL", "DE", "FR", "LU", "GB", "IE", "DK", "FI", "SE", "NO", "IS", "PL", "CZ", "SK", "AT", "CH", "IT", "ES", "PT",
+    "HU", "SI", "HR", "RS", "BA", "ME", "MK", "AL", "RO", "BG", "GR", "EE", "LV", "LT", "UA", "MD", "BY", "MT", "CY", "TR", "RU",
+    "US", "CA", "MX", "BR", "AR", "CL", "AU", "NZ", "ZA", "JP", "KR", "CN", "IL", "AE"];
+  const LAND_NAMEN = { "belgië": "BE", "belgie": "BE", "nederland": "NL", "duitsland": "DE", "frankrijk": "FR", "luxemburg": "LU", "finland": "FI",
+    "polen": "PL", "zweden": "SE", "noorwegen": "NO", "denemarken": "DK", "engeland": "GB", "verenigd koninkrijk": "GB", "ierland": "IE",
+    "italië": "IT", "spanje": "ES", "oostenrijk": "AT", "zwitserland": "CH", "tsjechië": "CZ", "hongarije": "HU", "verenigde staten": "US" };
+  // "BE", "be" of "België" -> "BE"
+  const landCode = v => { const s = String(v || "").trim(); if (/^[a-z]{2}$/i.test(s)) return s.toUpperCase(); return LAND_NAMEN[s.toLowerCase()] || ""; };
+  const landNaam = (code, taal = "nl") => { try { return new Intl.DisplayNames([(TALEN[taal] || TALEN.nl).locale], { type: "region" }).of(code); } catch (e) { return code; } };
   // Vaste woorden die niet letterlijk als t-tekst in de code staan maar wel vertaald moeten worden
   const UI_EXTRA = ["Teef", "Reu"];
   const same = (a, b) => !!a && String(a).trim().toLowerCase() === String(b || "").trim().toLowerCase();
@@ -249,6 +259,7 @@
       { naam: "naam", label: "Officiële naam", type: "regel", hulp: "Zoals in de stamboom, bijvoorbeeld Vai Avanti Tiamo." },
       { naam: "geslacht", label: "Geslacht", type: "keuze", opties: ["Teef", "Reu"] },
       { naam: "status", label: "Label op de foto (mag leeg blijven)", type: "regel", hulp: "Bijvoorbeeld Veteraan, Op rust of Jong talent." },
+      { naam: "woontIn", label: "Woont in", type: "land", hulp: "Leeg = bij ons in België. De vlag komt naast de naam." },
       { naam: "geboren", label: "Geboren op", type: "datum" },
       { naam: "kleur", label: "Kleur", type: "regel" },
       { naam: "vader", label: "Vader", type: "regel" },
@@ -274,7 +285,7 @@
       { naam: "pups", label: "Pups", type: "lijst", velden: [
         { naam: "naam", label: "Officiële naam", type: "regel" }, { naam: "roepnaam", label: "Roepnaam", type: "regel" },
         { naam: "geslacht", label: "Geslacht", type: "keuze", opties: ["Teef", "Reu"] }, { naam: "kleur", label: "Kleur", type: "regel" },
-        { naam: "woontIn", label: "Woont in (land, leeg = bij ons)", type: "regel" }, { naam: "fotos", label: "Foto's", type: "fotos" },
+        { naam: "woontIn", label: "Woont in", type: "land", hulp: "Leeg = bij ons. De vlag van het land komt naast de naam." }, { naam: "fotos", label: "Foto's", type: "fotos" },
         lijstVan("gezondheid", "Gezondheidsresultaten"), lijstVan("uitslagen", "Uitslagen"),
         { naam: "stamboom", label: "Link naar de stamboom", type: "regel" }, lijstVan("andereNamen", "Andere namen in verslagen (mag leeg blijven)")] }
     ]
@@ -296,7 +307,7 @@
         highlight: d.hoogtepunt || "", pedigree: d.stamboom || "", health: arr(d.gezondheid).map(String),
         titles: arr(d.palmares).map(t => [String(t.jaar ?? ""), t.titel || "", t.plaats || ""]).filter(t => t[1]).sort((a, b) => yearOf(b[0]) - yearOf(a[0])),
         cover, pos: d.fotoFocus || "", photos: [cover, ...photos.filter(p => p !== cover)].filter(Boolean),
-        noteMd: String(d.tekst || "").trim(), extraNames: arr(d.andereNamen).map(String), order: Number(d.volgorde ?? 999), fotoGrootte: d.fotoGrootte || ""
+        noteMd: String(d.tekst || "").trim(), extraNames: arr(d.andereNamen).map(String), order: Number(d.volgorde ?? 999), fotoGrootte: d.fotoGrootte || "", land: landCode(d.woontIn) || "BE"
       };
     }).filter(d => d.call).sort((a, b) => a.order - b.order || a.call.localeCompare(b.call));
 
@@ -305,7 +316,7 @@
       sire: l.vader || "", dam: l.moeder || "", introMd: String(l.tekst || "").trim(), photos: arr(l.foto), fotoGrootte: l.fotoGrootte || "",
       pups: arr(l.pups).map(p => ({
         name: p.naam || "", call: p.roepnaam || p.naam || "", sex: p.geslacht || "", color: p.kleur || "",
-        country: p.woontIn || "", health: arr(p.gezondheid).map(String), results: arr(p.uitslagen).map(String),
+        country: landCode(p.woontIn), health: arr(p.gezondheid).map(String), results: arr(p.uitslagen).map(String),
         photos: arr(p.fotos), pedigree: p.stamboom || "", extraNames: arr(p.andereNamen).map(String)
       })).filter(p => p.call)
     })).sort((a, b) => a.bornIso.localeCompare(b.bornIso));
@@ -403,6 +414,9 @@ ${links.map(l => `        <li><a href="${esc(l.href)}" hreflang="${l.code}" lang
     };
     const VT = vul(site.voettekst || {});
 
+    // Vlaggetje met "Woont in ..." als uitleg, in de taal van de pagina
+    const vlag = (code, cls = "") => code && LANDEN.includes(code)
+      ? `<img class="vlag${cls ? " " + cls : ""}" src="assets/vlaggen/${code.toLowerCase()}.svg" width="24" height="18" alt="${esc(landNaam(code, taal))}" title="${esc(t("Woont in {land}", { land: landNaam(code, taal) }))}">` : "";
     const header = (active, bestand) => `<header class="site-header">
   <nav class="wrap nav" aria-label="${esc(t("Hoofdmenu"))}">
     <a class="brand" href="index.html" aria-label="${esc(t("Vai Avanti – startpagina"))}"><span class="brand-logo" role="img" aria-label="Vai Avanti"></span></a>
@@ -480,7 +494,7 @@ ${arr(k.links).filter(l => l.label).map(l => `          <li><a href="${esc(l.lin
     <div class="badges">${d.sex ? `<span class="badge">${esc(t(d.sex))}</span>` : ""}${d.status ? `<span class="badge gold">${esc(d.status)}</span>` : ""}</div>
   </div>
   <div class="dog-body">
-    <h3>${esc(d.call)}</h3>
+    <div class="naam-rij"><h3>${esc(d.call)}</h3>${vlag(d.land)}</div>
     <div class="dog-official">${esc(d.name)}</div>
     <div class="dog-meta">${[d.born && t("Geboren {datum}", { datum: d.born }), d.color].filter(Boolean).map(esc).join(" · ")}</div>
     ${d.highlight ? `<div class="dog-highlight">${ICON.trophy}<span>${esc(d.highlight)}</span></div>` : ""}
@@ -617,7 +631,7 @@ ${(D.honden || []).map(dogCard).join("\n")}
   <div class="wrap">
     ${head(b, "", b.linktekst ? `<a class="link-arrow" href="nesten.html">${esc(b.linktekst)} ${ICON.arrow}</a>` : "")}
     <div class="mini-grid">
-${elsewhere.map(p => `      <a class="mini reveal" href="nesten.html#${pupAnchor(p)}">${img(p.photos[0], { alt: p.call, sizes: "200px" })}<b>${esc(p.call)}</b><small>${esc(p.name)}<br>${esc(t("{letter}-nest", { letter: p.litter.letter }))} · ${esc(t(p.sex))}${p.country ? " · " + esc(p.country) : ""}</small></a>`).join("\n")}
+${elsewhere.map(p => `      <a class="mini reveal" href="nesten.html#${pupAnchor(p)}">${img(p.photos[0], { alt: p.call, sizes: "200px" })}<b>${esc(p.call)}${vlag(p.country)}</b><small>${esc(p.name)}<br>${esc(t("{letter}-nest", { letter: p.litter.letter }))} · ${esc(t(p.sex))}</small></a>`).join("\n")}
     </div>
   </div>
 </section>`;
@@ -845,7 +859,7 @@ ${(b.fotos || []).map(p => "      " + shot(p, { group: g, caption: plain(b.titel
     <div>
       <div class="crumbs"><a href="honden.html">${esc(t("Onze honden"))}</a><span>/</span><span>${esc(d.call)}</span></div>
       <span class="eyebrow">${esc(t(d.sex))}${d.status ? " · " + esc(d.status) : ""}</span>
-      <h1>${esc(d.call)}</h1>
+      <h1>${esc(d.call)}${vlag(d.land, "groot")}</h1>
       <div class="dog-official">${esc(d.name)}</div>
       ${d.highlight ? `<div class="highlight">${ICON.trophy}<span>${esc(d.highlight)}</span></div>` : ""}
       ${d.noteMd ? `<div class="note-dark">${md(d.noteMd)}</div>` : ""}
@@ -931,9 +945,9 @@ ${posts.slice(0, 8).map(mention).join("\n")}
       ${shot(p.photos[0], { group: g, caption: `${p.call} (${p.name})`, sizes: "(max-width: 640px) 100vw, 33vw", extra: p.photos.length > 1 ? `<span class="count">${esc(t("{n} foto's", { n: p.photos.length }))}</span>` : "" })}
       ${p.photos.slice(1).map(ph => shot(ph, { group: g, caption: `${p.call} (${p.name})`, hidden: true })).join("")}
       <div class="pup-body">
-        <h3>${esc(p.call)}</h3>
+        <div class="naam-rij"><h3>${esc(p.call)}</h3>${vlag(p.country || (d ? "BE" : ""))}</div>
         <div class="dog-official">${esc(p.name)}</div>
-        <div class="pup-meta">${[p.sex && t(p.sex), p.color].filter(Boolean).map(esc).join(" · ")}${p.country ? ` · ${esc(t("woont in {land}", { land: p.country }))}` : (d ? ` · ${esc(t("bij ons"))}` : "")}</div>
+        <div class="pup-meta">${[p.sex && t(p.sex), p.color].filter(Boolean).map(esc).join(" · ")}${!p.country && d ? ` · ${esc(t("bij ons"))}` : ""}</div>
         ${health.length ? healthChips(health) : ""}
         ${p.results.length ? `<ul class="pup-results">${p.results.map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : ""}
         <div class="pup-links">
@@ -1035,5 +1049,5 @@ ${ps.map(p => verslag(p)).join("\n")}
       hondenBody, hondBody, nestenKop, nestBlok, nestenBody, nieuwsKop, verslag, nieuwsBody, nietGevondenBody, paginaBody, t, taal, blokNieuws: b => R.nieuws(b || {}) };
   }
 
-  return { esc, slug, inline, md, plain, ICON, BLOKKEN, VELDEN, KLEUR_VELDEN, LETTERS, STANDAARD, TALEN, UI_EXTRA, vulIn, bouwModel, createSite, fmtDate, pageFile, arr, themaCss, fontsHref, isKleur };
+  return { esc, slug, inline, md, plain, ICON, BLOKKEN, VELDEN, KLEUR_VELDEN, LETTERS, STANDAARD, TALEN, UI_EXTRA, vulIn, LANDEN, landCode, landNaam, bouwModel, createSite, fmtDate, pageFile, arr, themaCss, fontsHref, isKleur };
 });

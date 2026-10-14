@@ -322,3 +322,6 @@ details.groep[open] > summary { border-bottom: 1px solid var(--line); }
 }
 .taal-rij { display: flex; align-items: center; gap: 10px; }
 .taal-bekijk { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--gold-3); }
+.land-veld { display: flex; align-items: center; gap: 10px; }
+.land-veld select { flex: 1; }
+.veld-vlag { width: 32px; aspect-ratio: 4 / 3; border-radius: 3px; object-fit: cover; box-shadow: 0 0 0 1px rgba(0, 0, 0, .12); }
