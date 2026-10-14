@@ -62,6 +62,12 @@
     "italië": "IT", "spanje": "ES", "oostenrijk": "AT", "zwitserland": "CH", "tsjechië": "CZ", "hongarije": "HU", "verenigde staten": "US" };
   // "BE", "be" of "België" -> "BE"
   const landCode = v => { const s = String(v || "").trim(); if (/^[a-z]{2}$/i.test(s)) return s.toUpperCase(); return LAND_NAMEN[s.toLowerCase()] || ""; };
+  // YouTube-link (youtu.be, watch?v=, shorts, embed, live) of los id -> het id van 11 tekens, anders ""
+  const ytId = v => {
+    const s = String(v || "").trim();
+    const m = s.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/);
+    return m ? m[1] : /^[\w-]{11}$/.test(s) ? s : "";
+  };
   const landNaam = (code, taal = "nl") => { try { return new Intl.DisplayNames([(TALEN[taal] || TALEN.nl).locale], { type: "region" }).of(code); } catch (e) { return code; } };
   // Vaste woorden die niet letterlijk als t-tekst in de code staan maar wel vertaald moeten worden
   const UI_EXTRA = ["Teef", "Reu"];
@@ -249,6 +255,7 @@
       { naam: "fotos", label: "Foto's", type: "fotos", hulp: "De eerste foto wordt de grote foto." },
       { naam: "fotoGrootte", label: "Grootte van de foto's", type: "keuze", opties: ["Normaal", "Klein", "Groot"], hulp: "Groot = de foto's staan breed boven de tekst." },
       { naam: "alleFotos", label: "Alle foto's tonen (niet enkel de eerste vier)", type: "aanuit" },
+      { naam: "videos", label: "Video's (YouTube)", type: "videos", hulp: "Plak de link van een YouTube-video (bv. https://youtu.be/… of https://www.youtube.com/watch?v=…). De video staat onder het verslag." },
       { naam: "tekst", label: "Verslag", type: "opmaak", hulp: "De namen van de honden worden vanzelf herkend en gelinkt." },
       { naam: "overzicht", label: "Dit is een seizoensoverzicht", type: "aanuit" },
       { naam: "kop", label: "Kop op de startpagina (mag leeg blijven)", type: "regel" },
@@ -329,7 +336,8 @@
       const dateIso = iso(p.datum) || `${String(id).slice(0, 4)}-01-01`;
       return {
         id, title: p.titel || id, dateIso, dateKnown: !!p.datum && (!p.datumOnbekend || !/-01-01$/.test(dateIso)), year: yearOf(dateIso) || yearOf(id),
-        order: Number(p.volgorde || 0), kop: p.kop || "", summary: p.samenvatting || "", recap: !!p.overzicht, photos: arr(p.fotos), fotoGrootte: p.fotoGrootte || "", alleFotos: !!p.alleFotos, body: p.tekst || ""
+        order: Number(p.volgorde || 0), kop: p.kop || "", summary: p.samenvatting || "", recap: !!p.overzicht, photos: arr(p.fotos), fotoGrootte: p.fotoGrootte || "", alleFotos: !!p.alleFotos, body: p.tekst || "",
+        videos: arr(p.videos).map(ytId).filter(Boolean)
       };
     }).sort((a, b) => b.dateIso.localeCompare(a.dateIso) || b.order - a.order || String(a.id).localeCompare(String(b.id)));
 
@@ -1007,9 +1015,15 @@ ${l.pups.map(pupCard).join("\n")}
         ${p.dogs.some(k => info[k]) ? `<div class="chips">${p.dogs.filter(k => info[k]).map(k => `<a class="chip" href="${info[k].href}">${esc(info[k].call)}</a>`).join("")}</div>` : ""}
         ${text.trim() ? `<div class="report-text${long ? " clamped" : ""}">${md(p.body)}</div>
         ${long ? `<button class="more-btn" type="button" aria-expanded="false">${esc(t("Lees het volledige verslag"))} ${ICON.down}</button>` : ""}` : ""}
+        ${(p.videos || []).length ? `<div class="report-videos">${p.videos.map(id => video(id, p.title)).join("")}</div>` : ""}
       </div>
     </article>`;
     };
+    // YouTube pas laden na een klik (site.js); zonder script opent de link YouTube
+    const video = (id, titel) => `<a class="video" href="https://www.youtube.com/watch?v=${esc(id)}" target="_blank" rel="noopener" data-yt="${esc(id)}" aria-label="${esc(t("Video afspelen"))}: ${esc(titel)}">
+          <img src="https://i.ytimg.com/vi/${esc(id)}/hqdefault.jpg" alt="" loading="lazy" width="480" height="360">
+          <span class="video-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
+        </a>`;
     const nieuwsKop = () => paginaKop("nieuws", { eyebrow: "Nieuws", title: "Van de <em>renbaan</em>" });
     const nieuwsBody = () => paginaBody("nieuws");
     const archief = () => {
@@ -1050,5 +1064,5 @@ ${ps.map(p => verslag(p)).join("\n")}
       hondenBody, hondBody, nestenKop, nestBlok, nestenBody, nieuwsKop, verslag, nieuwsBody, nietGevondenBody, paginaBody, t, taal, blokNieuws: b => R.nieuws(b || {}) };
   }
 
-  return { esc, slug, inline, md, plain, ICON, BLOKKEN, VELDEN, KLEUR_VELDEN, LETTERS, STANDAARD, TALEN, UI_EXTRA, vulIn, LANDEN, landCode, landNaam, bouwModel, createSite, fmtDate, pageFile, arr, themaCss, fontsHref, isKleur };
+  return { esc, slug, inline, md, plain, ICON, BLOKKEN, VELDEN, KLEUR_VELDEN, LETTERS, STANDAARD, TALEN, UI_EXTRA, vulIn, LANDEN, landCode, landNaam, ytId, bouwModel, createSite, fmtDate, pageFile, arr, themaCss, fontsHref, isKleur };
 });

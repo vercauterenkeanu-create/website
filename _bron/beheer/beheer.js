@@ -650,6 +650,35 @@
       wrap.append(label, sel, ander);
       return wrap;
     }
+    if (def.type === "videos") {
+      // Lijst van YouTube-links: plakken + Toevoegen, met een miniatuur per video
+      const { ytId } = window.VA;
+      const box = h("div", { class: "videos-veld" });
+      const fout = h("div", { class: "fout-tekst", hidden: true });
+      const teken = () => {
+        box.innerHTML = "";
+        (obj[def.naam] || []).forEach((link, i, lijst) => {
+          const vid = ytId(link);
+          box.append(h("div", { class: "video-rij" },
+            h("img", { class: "video-duim", alt: "", src: vid ? `https://i.ytimg.com/vi/${vid}/mqdefault.jpg` : "" }),
+            h("a", { class: "video-link", href: link, target: "_blank", rel: "noopener" }, link),
+            h("button", { type: "button", class: "icoonknop", "aria-label": "Video weghalen", html: I.weg, onclick: () => { zet(lijst.filter((_, j) => j !== i), true); teken(); } })));
+        });
+      };
+      const invoer = h("input", { type: "url", id, placeholder: "https://youtu.be/…", "aria-label": "Link van een YouTube-video" });
+      const voegToe = () => {
+        const vid = ytId(invoer.value);
+        if (!vid) { fout.textContent = "Dit is geen link naar een YouTube-video."; fout.hidden = false; return; }
+        fout.hidden = true;
+        zet([...(obj[def.naam] || []), `https://www.youtube.com/watch?v=${vid}`], true);
+        invoer.value = ""; teken();
+      };
+      invoer.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); voegToe(); } });
+      teken();
+      wrap.append(h("div", { class: "lbl" }, def.label), hulp, box,
+        h("div", { class: "video-toevoegen" }, invoer, h("button", { type: "button", class: "b-btn klein", html: I.plus + " Toevoegen", onclick: voegToe })), fout);
+      return wrap;
+    }
     if (def.type === "woorden") {
       const box = h("div", { class: "woorden" });
       const teken = () => {

@@ -952,6 +952,7 @@ content:
                 fields:
                   - name: naam
                     label: Naam
+                    description: Zet *sterretjes* rond het deel dat goud moet zijn, bv. Shany *Van der Meulen*. Zonder sterretjes wordt het laatste woord goud.
                     type: string
                   - name: rol
                     label: Rol

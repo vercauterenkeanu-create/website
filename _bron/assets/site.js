@@ -146,6 +146,22 @@
     show(group.indexOf(el));
   });
 
+  /* ---------- Video's: YouTube pas laden na een klik ---------- */
+  document.addEventListener("click", e => {
+    const v = e.target.closest("a.video[data-yt]");
+    if (!v || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    const f = document.createElement("iframe");
+    f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.dataset.yt)}?autoplay=1&rel=0`;
+    f.title = v.getAttribute("aria-label") || "YouTube";
+    f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+    f.allowFullscreen = true;
+    const box = document.createElement("div");
+    box.className = "video speelt";
+    box.append(f);
+    v.replaceWith(box);
+  });
+
   /* ---------- Verslagen: filter, lees verder, directe links ---------- */
   const archive = $("#archive");
   if (archive) {

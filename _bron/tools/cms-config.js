@@ -13,7 +13,7 @@ const veld = v => {
   if (v.hulp) base.description = v.hulp;
   switch (v.type) {
     case "regel": case "link": case "kleur": return { ...base, type: "string" };
-    case "woorden": return { ...base, type: "string", list: true };
+    case "woorden": case "videos": return { ...base, type: "string", list: true };
     case "datum": return { ...base, type: "date", options: { format: "yyyy-MM-dd" } };
     case "tekst": return { ...base, type: "text" };
     case "opmaak": return { ...base, type: "rich-text", options: { format: "markdown", media: false } };
