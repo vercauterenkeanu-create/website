@@ -619,7 +619,7 @@ ${(D.honden || []).map(d => dogCard(d, false)).join("\n")}
   <div class="wrap">
     ${b.titel || b.bovenschrift ? head(b, "") : ""}
     <div class="dogs-grid">
-${(D.honden || []).map(dogCard).join("\n")}
+${(D.honden || []).map(d => dogCard(d)).join("\n")}
     </div>
   </div>
 </section>`;
