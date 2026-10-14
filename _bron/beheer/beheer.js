@@ -48,7 +48,7 @@
     uploads: {},            // "/media/x.jpg" -> { blob, url, opgeslagen }
     geschiedenis: [],
     weergave: "computer", tab: "bewerken",
-    status: { tekst: "Alles staat online", soort: "" },
+    status: { tekst: "Alles staat online", soort: "" }, laatsteFout: "",
     bronTak: LIVE,          // waar de inhoud vandaan komt: main (= online) of het concept
     conceptVoor: false,     // staat er in het concept iets dat nog niet online is?
     open: new Set(),        // opengeklapte groepen in het paneel
@@ -98,7 +98,7 @@
   const b64NaarTekst = b64 => new TextDecoder().decode(b64NaarBytes(b64));
   const tekstNaarB64 = t => bytesNaarB64(new TextEncoder().encode(t));
 
-  async function bewaarBestanden(bestanden, weg, bericht, token, tak = LIVE) {
+  async function bewaarBestanden(bestanden, weg, bericht, token, tak = LIVE, poging = 1) {
     const ref = await gh(`git/ref/heads/${tak}`, { token });
     const vorige = await gh(`git/commits/${ref.object.sha}`, { token });
     const boom = [];
@@ -111,7 +111,8 @@
     for (const p of weg) boom.push({ path: p, mode: "100644", type: "blob", sha: null });
     const nieuweBoom = await gh("git/trees", { method: "POST", body: { base_tree: vorige.tree.sha, tree: boom }, token });
     const commit = await gh("git/commits", { method: "POST", body: { message: bericht, tree: nieuweBoom.sha, parents: [ref.object.sha] }, token });
-    await gh(`git/refs/heads/${tak}`, { method: "PATCH", body: { sha: commit.sha, force: false }, token });
+    try { await gh(`git/refs/heads/${tak}`, { method: "PATCH", body: { sha: commit.sha, force: false }, token }); }
+    catch (e) { if (e.status === 422 && poging < 3) return bewaarBestanden(bestanden, weg, bericht, token, tak, poging + 1); throw e; }
     return commit.sha;
   }
 
@@ -224,6 +225,19 @@
     return { bestanden, weg };
   }
   const isVuil = () => { const w = wijzigingen(); return w.bestanden.length + w.weg.length > 0; };
+  // Leesbare namen van wat nog niet opgeslagen is, bv. ["Lylo", "T-nest", "1 nieuwe foto"]
+  function nietOpgeslagen() {
+    const { bestanden, weg } = wijzigingen();
+    const naam = pad => {
+      const map = pad.split("/")[1], d = S.bestanden[pad] && S.bestanden[pad].data;
+      if (pad === "inhoud/site.json") return "Instellingen";
+      if (map === "paginas") return "pagina " + paginaNaam(pad);
+      return SOORT[map] && d ? SOORT[map].naam(d) : pad.split("/").pop();
+    };
+    const fotos = bestanden.filter(b => b.upload).length;
+    return [...bestanden.filter(b => !b.upload).map(b => naam(b.pad)), ...weg.map(p => naam(p) + " (verwijderd)"),
+      ...(fotos ? [fotos === 1 ? "1 nieuwe foto" : `${fotos} nieuwe foto's`] : [])];
+  }
 
   /* ---------- Ongedaan maken ---------- */
   // Typen in hetzelfde veld telt als één stap; elke andere wijziging is een eigen stap.
@@ -1177,14 +1191,23 @@
     if (tekst !== undefined) S.status = { tekst, soort: soort || "" };
     const vuil = S.data ? isVuil() : false;
     let toon = S.status;
-    if (toon.soort !== "bezig" && vuil) toon = { tekst: "Niet opgeslagen wijzigingen", soort: "vuil" };
+    if (toon.soort !== "bezig" && toon.soort !== "fout" && vuil) toon = { tekst: "Niet opgeslagen wijzigingen", soort: "vuil" };
     else if (toon.soort !== "bezig" && toon.soort !== "fout" && S.conceptVoor) toon = { tekst: "Opgeslagen, nog niet online", soort: "concept" };
     const el = $("#status");
-    if (el) { el.textContent = toon.tekst; el.title = toon.tekst; el.className = "status " + toon.soort; }
+    if (el) {
+      el.textContent = toon.tekst; el.className = "status " + toon.soort;
+      el.title = [toon.tekst, vuil ? "Nog niet opgeslagen: " + nietOpgeslagen().join(", ") : "", S.laatsteFout ? "Fout: " + S.laatsteFout : "", "Klik voor uitleg"].filter(Boolean).join("\n");
+    }
     const bezig = toon.soort === "bezig";
     const knop = $("#knop-opslaan"), pub = $("#knop-publiceren");
     if (knop) knop.disabled = bezig || !vuil;
     if (pub) pub.disabled = bezig || (!vuil && !S.conceptVoor);
+  }
+  function uitlegStatus() {
+    const lijst = S.data ? nietOpgeslagen() : [];
+    melding(h("span", {},
+      lijst.length ? h("span", {}, h("b", {}, "Nog niet opgeslagen: "), lijst.join(", "), ". ") : h("span", {}, S.conceptVoor ? "Alles is opgeslagen, maar nog niet gepubliceerd. " : "Alles is opgeslagen. "),
+      S.laatsteFout ? h("span", {}, h("br"), h("b", {}, "Laatste fout: "), S.laatsteFout.replace(/\.?$/, ". "), "Stuur deze tekst door naar Keanu als het blijft mislukken.") : ""), true);
   }
   function werkTabsBij() {
     const werk = $(".werk");
@@ -1219,6 +1242,7 @@
     const boom = await gh(`git/trees/${CONCEPT}?recursive=1`);
     const nu = Object.fromEntries(boom.tree.map(t => [t.path, t.sha]));
     const botsing = [...bestanden.filter(b => b.oudeSha && nu[b.pad] && nu[b.pad] !== b.oudeSha).map(b => b.pad), ...weg.filter(p => nu[p] && S.bestanden[p] && nu[p] !== S.bestanden[p].sha)];
+    if (botsing.length) S.laatsteFout = "Opslaan gestopt: iemand anders paste intussen ook " + botsing.map(p => p.split("/").pop()).join(", ") + " aan.";
     if (botsing.length && !confirm(`Iemand anders heeft intussen ook iets aangepast aan:\n${botsing.map(p => "• " + p.split("/").slice(1).join("/")).join("\n")}\n\nToch opslaan? Hun wijziging aan die bestanden gaat dan verloren.`)) return false;
     const soorten = new Set([...bestanden.map(b => b.pad), ...weg].filter(p => p.startsWith("inhoud/")).map(p => p.split("/")[1]));
     const bericht = soorten.size === 1 && soorten.has("nieuws") ? "Wedstrijdverslag aangepast via beheer"
@@ -1229,7 +1253,7 @@
     await bewaarBestanden(bestanden, weg, bericht, undefined, CONCEPT);
     for (const b of bestanden) { if (b.upload) S.uploads[b.upload].opgeslagen = true; else if (S.bestanden[b.pad]) S.bestanden[b.pad].sha = b.sha; }
     for (const p of weg) delete S.bestanden[p];
-    S.nieuw = new Set(); S.verwijderd = new Set();
+    S.nieuw = new Set(); S.verwijderd = new Set(); S.laatsteFout = "";
     S.conceptVoor = true; S.bronTak = CONCEPT;
     onthoudOrigineel();
     return true;
@@ -1255,10 +1279,11 @@
       if (sha) volgPublicatie(sha); else werkStatusBij("Alles staat online", "ok");
     } catch (e) {
       console.error(e);
+      S.laatsteFout = `${e.status ? "GitHub " + e.status + ": " : ""}${e.detail || e.message}`;
       werkStatusBij(publiceren ? "Publiceren mislukt" : "Opslaan mislukt", "fout");
       melding(e.status === 401 || e.status === 403 ? "Aanmelden is verlopen. Meld je opnieuw aan met het wachtwoord."
         : e.status === 409 ? "Het concept botst met een wijziging die intussen online kwam. Laat het aan Keanu weten."
-        : `${publiceren ? "Publiceren" : "Opslaan"} mislukt: ${e.detail || e.message}. Probeer het opnieuw.`);
+        : `${publiceren ? "Publiceren" : "Opslaan"} mislukt: ${e.detail || e.message}. Probeer het opnieuw.`, true);
     }
   }
   async function volgPublicatie(sha) {
@@ -1284,12 +1309,12 @@
   }
 
   /* ---------- Melding ---------- */
-  function melding(inhoud) {
+  function melding(inhoud, blijf) {
     document.querySelectorAll(".melding").forEach(m => m.remove());
     const el = h("div", { class: "melding", role: "status" }, inhoud, h("button", { class: "icoonknop", style: "color:#fff", "aria-label": "Sluiten", html: I.weg, onclick: () => el.remove() }));
     document.body.append(el);
     clearTimeout(melding.t);
-    melding.t = setTimeout(() => el.remove(), 9000);
+    if (!blijf) melding.t = setTimeout(() => el.remove(), 9000);
   }
 
   /* ---------- Schermen ---------- */
@@ -1307,7 +1332,7 @@
       h("span", { class: "ruimte" }),
       h("div", { class: "weergave", role: "group", "aria-label": "Voorbeeld als" },
         ["computer:Computer", "gsm:Gsm"].map(x => { const [k, l] = x.split(":"); return h("button", { "aria-pressed": String(S.weergave === k), onclick: e => { S.weergave = k; e.target.parentNode.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b === e.target))); schaalVoorbeeld(); } }, l); })),
-      h("span", { class: "status", id: "status" }),
+      h("span", { class: "status", id: "status", role: "button", tabindex: "0", onclick: uitlegStatus, onkeydown: e => { if (e.key === "Enter") uitlegStatus(); } }),
       h("button", { class: "b-btn", title: "Ongedaan maken (Ctrl+Z)", "aria-label": "Ongedaan maken", html: I.ongedaan, onclick: ongedaanMaken }),
       h("a", { class: "b-btn verberg-smal", href: SITE_ROOT, target: "_blank", rel: "noopener", html: "Bekijk site " + I.extern }),
       h("button", { class: "b-btn opslaan-knop", id: "knop-opslaan", title: "Bewaart je werk. Bezoekers zien het nog niet. (Ctrl+S)", onclick: () => opslaan(false) }, "Opslaan"),
@@ -1428,7 +1453,7 @@
   window.addEventListener("resize", () => { const b = $(".balk"); if (b) document.documentElement.style.setProperty("--balk-h", b.offsetHeight + "px"); schaalVoorbeeld(); });
   window.addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); opslaan(false); }
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.target.closest("input,textarea")) { e.preventDefault(); ongedaanMaken(); }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.target.closest("input,textarea,select,[contenteditable]")) { e.preventDefault(); ongedaanMaken(); }
   });
   window.addEventListener("beforeunload", e => { if (S.data && isVuil()) { e.preventDefault(); e.returnValue = ""; } });
 
