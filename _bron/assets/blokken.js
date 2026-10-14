@@ -222,7 +222,7 @@
     },
     nesten: { label: "Onze nesten (overzicht)", omschrijving: "De kaartjes van alle nesten, met de verwachte nesten eronder.", velden: [F.bovenschrift, F.titel, F.intro, F.linktekst], nieuw: { bovenschrift: "Pups & nesten", titel: "Onze *nesten*", intro: "", linktekst: "Alle nesten en pups" } },
     nestenlijst: { label: "Alle nesten met pups", omschrijving: "Elk nest met al zijn pups, foto's en stambomen.", velden: [{ naam: "verwachtTonen", label: "Verwachte nesten bovenaan tonen", type: "aanuit" }], nieuw: { verwachtTonen: true } },
-    verwacht: { label: "Verwachte nesten", omschrijving: "De aankondiging van de verwachte nesten. De tekst pas je aan bij Instellingen.", velden: [], nieuw: {} },
+    verwacht: { label: "Verwachte nesten", omschrijving: "De aankondiging van de verwachte nesten. Je past ze hieronder aan; ze is dezelfde op elke pagina waar ze staat.", velden: [], nieuw: {} },
     overons: {
       label: "Over ons (kort)", omschrijving: "Twee foto's, een korte tekst en een citaat.",
       velden: [F.bovenschrift, F.titel, { naam: "tekst", label: "Tekst", type: "tekst" }, { naam: "foto1", label: "Grote foto", type: "foto" }, { naam: "foto2", label: "Kleine foto", type: "foto" },

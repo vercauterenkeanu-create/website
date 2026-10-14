@@ -379,8 +379,9 @@
     document.addEventListener("click", function (e) {
       var a = e.target.closest("a,button,label,input,select,textarea");
       if (a) e.preventDefault();
-      var b = e.target.closest("[data-blok]");
-      parent.postMessage({ vaBlok: b ? +b.dataset.blok : null, vaZone: e.target.closest(".site-header") ? "kop" : e.target.closest(".site-footer") ? "voet" : "" }, "*");
+      var b = e.target.closest("[data-blok]"), nest = e.target.closest(".litter-block[id]"), hond = e.target.closest('a[href^="hond-"]');
+      parent.postMessage({ vaBlok: b ? +b.dataset.blok : null, vaZone: e.target.closest(".site-header") ? "kop" : e.target.closest(".site-footer") ? "voet" : e.target.closest(".expected-band") ? "verwacht" : "",
+        vaNest: nest ? nest.id : "", vaHond: hond ? hond.getAttribute("href").slice(5, -5) : "" }, "*");
     }, true);
     document.addEventListener("submit", function (e) { e.preventDefault(); }, true);
     setInterval(function () {
@@ -479,7 +480,17 @@
   }
   window.addEventListener("message", e => {
     if (!e.data || !("vaBlok" in e.data)) return;
+    const verwacht = e.data.vaZone === "verwacht";
+    if (verwacht) { S.open.add("Verwachte nesten"); S.naarInstelling = "inst-verwacht"; }
+    // In Nesten en Honden opent een klik op een nest of hond in het voorbeeld dat nest of die hond
+    const gevonden = S.sectie === "nesten" && !verwacht && e.data.vaNest ? bestandenIn("nesten").find(p => slug(S.bestanden[p].data.letter || idVan(p)) === e.data.vaNest)
+      : S.sectie === "honden" && e.data.vaHond ? bestandenIn("honden").find(p => slug(idVan(p)) === e.data.vaHond) : null;
+    if (gevonden && gevonden !== huidigItem(S.sectie)) { S.tab = "bewerken"; open(S.sectie, gevonden); werkTabsBij(); return; }
     if (S.sectie === "paginas" && e.data.vaBlok !== null) { S.blok = e.data.vaBlok; S.paginaInst = false; S.tab = "bewerken"; }
+    else if (verwacht) {
+      if (S.sectie !== "instellingen") { S.sectie = "nesten"; S.item.nesten = null; }
+      S.tab = "bewerken"; tekenAlles(); return;
+    }
     else if (e.data.vaZone === "kop" || e.data.vaZone === "voet") {
       S.sectie = "instellingen"; S.tab = "bewerken"; S.naarInstelling = e.data.vaZone === "kop" ? "inst-menu" : "inst-voettekst";
       S.open.add(e.data.vaZone === "kop" ? "Menu bovenaan" : "Voettekst");
@@ -803,8 +814,10 @@
       h("button", { type: "button", class: "b-link terug", html: I.terug + " Alle blokken van " + esc(paginaNaam(S.pagina)), onclick: () => { S.blok = null; tekenPaneel(); markeerGekozen(); } }),
       h("div", {}, h("h3", {}, `Blok ${i + 1} van ${lijst.length}`), h("h2", {}, def.label)),
       def.omschrijving ? h("p", { class: "uitleg" }, def.omschrijving) : "");
-    if (b.type === "verwacht" || b.type === "contact") paneel.append(h("button", { type: "button", class: "b-btn", style: "justify-self:start", html: I.tandwiel + " Naar de instellingen", onclick: () => { S.sectie = "instellingen"; S.naarInstelling = b.type === "verwacht" ? "inst-verwacht" : "inst-contact"; S.open.add(b.type === "verwacht" ? "Verwachte nesten" : "Contactgegevens"); tekenAlles(); } }));
-    else if (!def.velden.length) paneel.append(h("div", { class: "info" }, "Dit blok heeft geen eigen tekst om aan te passen. Je kunt het wel verplaatsen, weghalen of een eigen kleur geven."));
+    if (b.type === "contact") paneel.append(h("button", { type: "button", class: "b-btn", style: "justify-self:start", html: I.tandwiel + " Naar de instellingen", onclick: () => { S.sectie = "instellingen"; S.naarInstelling = "inst-contact"; S.open.add("Contactgegevens"); tekenAlles(); } }));
+    else if (!def.velden.length && b.type !== "verwacht") paneel.append(h("div", { class: "info" }, "Dit blok heeft geen eigen tekst om aan te passen. Je kunt het wel verplaatsen, weghalen of een eigen kleur geven."));
+    if (b.type === "verwacht") S.open.add("Verwachte nesten");
+    if (["verwacht", "nestenlijst", "nesten"].includes(b.type)) verwachtGroep(paneel, "Deze aankondiging is dezelfde op elke pagina waar ze staat.");
     velden(paneel, [...def.velden, ...KLEUR_VELDEN], b, S.pagina);
     paneel.append(h("div", { class: "acties" },
       h("button", { type: "button", class: "b-btn klein", html: I.op + " Omhoog", disabled: i === 0 || null, onclick: () => { verplaatsBlok(i, i - 1); markeerGekozen(true); } }),
@@ -959,6 +972,7 @@
           h("button", { type: "button", class: "icoonknop", "aria-label": "Omlaag", disabled: i === items.length - 1 || null, html: I.neer, onclick: () => verplaats(i, i + 1) }))
       })));
     } else {
+      verwachtGroep(paneel, "De aankondiging bovenaan de pagina Nesten (en op de startpagina). Klik hier of op de aankondiging in het voorbeeld om ze aan te passen.");
       const items = paden.map(p => ({ p, d: S.bestanden[p].data })).sort((a, b) => String(b.d.geboren || "9").localeCompare(String(a.d.geboren || "9")));
       for (const { p, d } of items) lijst.append(lijstRij({
         duim: d.foto || ((d.pups || [])[0] && (d.pups[0].fotos || [])[0]), titel: SOORT.nesten.naam(d),
@@ -994,6 +1008,21 @@
     paneel.append(h("div", { class: "acties" }, ...bevestigKnop(`${s.enkelvoud[0].toUpperCase() + s.enkelvoud.slice(1)} verwijderen`, `Dit ${s.enkelvoud} verwijderen?`, () => {
       voorWijziging([pad]); S.verwijderd.add(pad); S.item[sectie] = null; gewijzigd(true); tekenPaneel();
     })));
+  }
+
+  // De aankondiging van verwachte nesten (staat in site.json, maar je past ze aan waar je ze ziet)
+  function verwachtGroep(paneel, uitleg) {
+    const pad = "inhoud/site.json", s = S.bestanden[pad].data;
+    s.verwacht = s.verwacht || {};
+    const vol = () => vernieuwVoorbeeld(true);
+    groep(paneel, "Verwachte nesten", "inst-verwacht",
+      uitleg ? h("p", { class: "uitleg", style: "margin:0" }, uitleg) : "",
+      veld({ naam: "tonen", label: "Aankondiging tonen op de site", type: "aanuit" }, s.verwacht, pad, vol),
+      veld({ naam: "label", label: "Klein opschrift (bv. Verwacht in 2027)", type: "regel" }, s.verwacht, pad, vol),
+      veld({ naam: "titel", label: "Titel", type: "regel", hulp: "Zet *sterretjes* rond een woord om het goud en schuin te maken." }, s.verwacht, pad),
+      veld({ naam: "tekst", label: "Tekst", type: "tekst" }, s.verwacht, pad),
+      veld({ naam: "knoptekst", label: "Tekst op de knop (leeg = geen knop)", type: "regel" }, s.verwacht, pad),
+      veld({ naam: "knoplink", label: "Knop gaat naar", type: "link" }, s.verwacht, pad));
   }
 
   /* ---------- Paneel: instellingen ---------- */
@@ -1065,13 +1094,7 @@
       h("p", { class: "uitleg", style: "margin:0" }, "Je schrijft alles in het Nederlands. Bij Publiceren worden nieuwe of gewijzigde teksten automatisch vertaald naar de aangevinkte talen. Bezoekers kiezen hun taal rechtsboven in het menu."),
       statusVak, talenVak);
 
-    groep(paneel, "Verwachte nesten", "inst-verwacht",
-      veld({ naam: "tonen", label: "Aankondiging tonen op de site", type: "aanuit" }, s.verwacht, pad, vol),
-      veld({ naam: "label", label: "Klein opschrift (bv. Verwacht in 2027)", type: "regel" }, s.verwacht, pad, vol),
-      veld({ naam: "titel", label: "Titel", type: "regel", hulp: "Zet *sterretjes* rond een woord om het goud en schuin te maken." }, s.verwacht, pad),
-      veld({ naam: "tekst", label: "Tekst", type: "tekst" }, s.verwacht, pad),
-      veld({ naam: "knoptekst", label: "Tekst op de knop (leeg = geen knop)", type: "regel" }, s.verwacht, pad),
-      veld({ naam: "knoplink", label: "Knop gaat naar", type: "link" }, s.verwacht, pad));
+    verwachtGroep(paneel);
 
     groep(paneel, "Contactgegevens", "inst-contact",
       ...["telefoon:Telefoon", "email:E-mailadres", "plaats:Postcode en gemeente", "instagram:Link naar Instagram", "facebook:Link naar Facebook"]
