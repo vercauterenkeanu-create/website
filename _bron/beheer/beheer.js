@@ -110,16 +110,29 @@
       }
     }
   }
+  // Stuurt de inhoud en foto's naar GitHub, 4 tegelijk. Een tweede oproep wacht op hetzelfde werk.
+  function maakBlobs(bestanden, token) {
+    if (!bestanden.blobs) {
+      let i = 0;
+      const werker = async () => {
+        while (i < bestanden.length) {
+          const b = bestanden[i++];
+          const content = b.blob ? bytesNaarB64(new Uint8Array(await b.blob.arrayBuffer())) : tekstNaarB64(b.tekst);
+          b.sha = (await ghStap(b.blob ? "foto bewaren" : "tekst bewaren", "git/blobs", { method: "POST", body: { content, encoding: "base64" }, token })).sha;
+        }
+      };
+      bestanden.blobs = Promise.all(Array.from({ length: Math.min(4, bestanden.length) }, werker));
+      bestanden.blobs.catch(() => { /* de fout komt bij het wachten */ });
+    }
+    return bestanden.blobs;
+  }
   async function bewaarBestanden(bestanden, weg, bericht, token, tak = LIVE, poging = 1) {
+    const klaar = maakBlobs(bestanden, token);
     const ref = await ghStap("concept ophalen", `git/ref/heads/${tak}`, { token });
     const vorige = await ghStap("vorige versie ophalen", `git/commits/${ref.object.sha}`, { token });
+    await klaar;
     const boom = new Map();
-    for (const b of bestanden) {
-      const content = b.blob ? bytesNaarB64(new Uint8Array(await b.blob.arrayBuffer())) : tekstNaarB64(b.tekst);
-      const blob = await ghStap(b.blob ? "foto bewaren" : "tekst bewaren", "git/blobs", { method: "POST", body: { content, encoding: "base64" }, token });
-      b.sha = blob.sha;
-      boom.set(b.pad, { path: b.pad, mode: "100644", type: "blob", sha: blob.sha });
-    }
+    for (const b of bestanden) boom.set(b.pad, { path: b.pad, mode: "100644", type: "blob", sha: b.sha });
     for (const p of weg) if (!boom.has(p)) boom.set(p, { path: p, mode: "100644", type: "blob", sha: null });
     if (bestanden.some(b => b.blob)) await wachtEven(1000);
     const nieuweBoom = await ghStap("nieuwe versie samenstellen", "git/trees", { method: "POST", body: { base_tree: vorige.tree.sha, tree: [...boom.values()] }, token }, true);
@@ -138,8 +151,7 @@
   const vergelijk = () => gh(`compare/${LIVE}...${CONCEPT}`);
   const haalLiveBinnen = () => gh("merges", { method: "POST", body: { base: CONCEPT, head: LIVE, commit_message: "Online versie meegenomen in het concept" } });
   async function maakConceptKlaar() {
-    const live = await gh(`git/ref/heads/${LIVE}`);
-    const concept = await refVan(CONCEPT);
+    const [live, concept] = await Promise.all([gh(`git/ref/heads/${LIVE}`), refVan(CONCEPT)]);
     if (!concept) { await gh("git/refs", { method: "POST", body: { ref: `refs/heads/${CONCEPT}`, sha: live.object.sha } }); return; }
     if (concept.object.sha === live.object.sha) return;
     const v = await vergelijk();
@@ -147,7 +159,7 @@
     else if (v.behind_by > 0) await haalLiveBinnen();
   }
   async function publiceerConcept() {
-    const live = await gh(`git/ref/heads/${LIVE}`), concept = await refVan(CONCEPT);
+    const [live, concept] = await Promise.all([gh(`git/ref/heads/${LIVE}`), refVan(CONCEPT)]);
     if (!concept || concept.object.sha === live.object.sha) return null;
     const v = await vergelijk();
     if (v.ahead_by === 0) return null;
@@ -317,7 +329,7 @@
     let beeld;
     try { beeld = await createImageBitmap(bestand, { imageOrientation: "from-image" }); }
     catch (e) { throw new Error(`"${bestand.name}" kan niet gelezen worden. Kies een JPG- of PNG-foto.`); }
-    const k = Math.min(1, 2000 / Math.max(beeld.width, beeld.height));
+    const k = Math.min(1, 1600 / Math.max(beeld.width, beeld.height));
     const c = document.createElement("canvas");
     c.width = Math.round(beeld.width * k); c.height = Math.round(beeld.height * k);
     c.getContext("2d").drawImage(beeld, 0, 0, c.width, c.height);
@@ -1250,6 +1262,7 @@
     definitievePaden();
     const { bestanden, weg } = wijzigingen();
     if (!bestanden.length && !weg.length) return true;
+    maakBlobs(bestanden); // foto's al versturen terwijl het concept klaargezet wordt
     await maakConceptKlaar();
     // Heeft iemand anders deze bestanden intussen aangepast?
     const boom = await gh(`git/trees/${CONCEPT}?recursive=1`);
@@ -1303,7 +1316,7 @@
   async function volgPublicatie(sha) {
     const start = Date.now();
     while (Date.now() - start < 8 * 60 * 1000) {
-      await new Promise(r => setTimeout(r, 8000));
+      await new Promise(r => setTimeout(r, Date.now() - start < 15000 ? 15000 : 3000));
       try {
         const r = await gh(`actions/runs?head_sha=${sha}&per_page=1`);
         const run = r.workflow_runs && r.workflow_runs[0];

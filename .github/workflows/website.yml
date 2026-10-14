@@ -18,16 +18,26 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+# Bouwen en online zetten in één job: zo wacht de site niet op een tweede machine.
 jobs:
   bouwen:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
+      - name: Geïnstalleerde onderdelen van de vorige keer hergebruiken
+        id: onderdelen
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node20-${{ hashFiles('package-lock.json') }}
+      - if: steps.onderdelen.outputs.cache-hit != 'true'
+        run: npm ci
       - name: Verkleinde foto's van de vorige keer hergebruiken
         uses: actions/cache@v4
         with:
@@ -54,13 +64,5 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
-
-  publiceren:
-    needs: bouwen
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
