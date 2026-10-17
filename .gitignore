@@ -7,3 +7,7 @@ node_modules/
 _bron/raw/
 _bron/raw-img/
 _bron/content.json
+
+# Teller: lokale testgegevens van wrangler
+.dev.vars
+.wrangler/

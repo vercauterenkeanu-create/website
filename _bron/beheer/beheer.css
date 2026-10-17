@@ -334,3 +334,55 @@ details.groep[open] > summary { border-bottom: 1px solid var(--line); }
 .video-link { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: inherit; }
 .video-toevoegen { display: flex; gap: 8px; }
 .video-toevoegen input { flex: 1; min-width: 0; }
+
+/* ---------- Statistieken ---------- */
+:root { --staaf: #b0791e; --staaf-spoor: #f1e9da; --raster: #ece4d6; }
+#app[data-sectie="statistieken"] .weergave, #app[data-sectie="statistieken"] .mobiel-tabs { display: none; }
+.stats-werk { display: block; overflow-y: auto; background: var(--ivory); }
+.stats { max-width: 1180px; margin: 0 auto; padding: 28px 24px 48px; display: grid; gap: 20px; }
+.stats-kop { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; }
+.stats-kop h3 { margin: 0; font: 700 12px/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--gold-3); }
+.stats-kop h2 { margin: 4px 0 0; font: 600 34px/1.1 var(--serif); }
+.stats-inhoud { display: grid; gap: 20px; }
+.stats-tegels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 14px; }
+.stats-tegel, .stats-kaart { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; min-width: 0; }
+.stats-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.stats-waarde { font: 600 40px/1.15 var(--sans); letter-spacing: -.01em; margin: 4px 0 6px; }
+.stats-verschil { font-size: 13px; font-weight: 600; color: var(--muted); }
+.stats-verschil.op { color: var(--ok); }
+.stats-verschil.neer { color: var(--err); }
+.stats-kaart h4 { margin: 0 0 12px; font-size: 15px; }
+.stats-raster { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px; align-items: start; }
+.zuilen-doos { position: relative; }
+.zuilen { display: block; width: 100%; height: auto; overflow: visible; }
+.zuilen .zuil { fill: var(--staaf); }
+.zuilen .raster { stroke: var(--raster); stroke-width: 1; }
+.zuilen .basislijn { stroke: #cfc4b1; stroke-width: 1; }
+.zuilen .as { fill: var(--muted); font: 500 11px var(--sans); font-variant-numeric: tabular-nums; }
+.zuilen .raak { fill: transparent; cursor: default; }
+.zuilen .raak:hover { fill: rgba(176, 121, 30, .07); }
+.stats-tip { position: absolute; z-index: 2; pointer-events: none; background: var(--ink); color: #fff; border-radius: 8px; padding: 7px 10px; font-size: 13px; line-height: 1.35; white-space: nowrap; box-shadow: 0 8px 20px -6px rgba(0, 0, 0, .35); }
+.stats-tip span { color: #d9cfbb; }
+.staaf-lijst { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.staaf-rij { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; gap: 12px; align-items: center; font-size: 14px; }
+.staaf-naam { display: flex; align-items: center; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.stats-vlag { width: 20px; aspect-ratio: 4 / 3; border-radius: 2px; object-fit: cover; flex: none; box-shadow: 0 0 0 1px rgba(0, 0, 0, .08); }
+.staaf-spoor { height: 8px; border-radius: 4px; background: var(--staaf-spoor); overflow: hidden; }
+.staaf { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--staaf); }
+.staaf-getal { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.staaf-getal small { font-weight: 500; color: var(--muted); }
+.stats-meer { margin-top: 10px; }
+.stats-meer summary, .stats-tabel summary { cursor: pointer; color: var(--gold-3); font-weight: 700; font-size: 13px; }
+.stats-meer .staaf-lijst { margin-top: 10px; }
+.stats-tabel { margin-top: 12px; }
+.stats-tabel table { margin-top: 8px; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.stats-tabel th, .stats-tabel td { padding: 4px 16px 4px 0; text-align: left; border-bottom: 1px solid var(--raster); }
+.stats-leeg { margin: 0; color: var(--muted); }
+.stats-noot { display: grid; gap: 12px; padding-top: 4px; }
+.stats-noot p, .stats-sinds { margin: 0; font-size: 13px; color: var(--muted); max-width: 75ch; }
+@media (max-width: 900px) {
+  .stats { padding: 18px 16px 40px; }
+  .stats-waarde { font-size: 32px; }
+  .secties { overflow-x: auto; scrollbar-width: none; }
+  .secties button { flex: none; padding: 8px 9px; font-size: 13px; }
+}

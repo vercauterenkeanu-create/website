@@ -1,0 +1,12 @@
+{
+  "name": "vai-avanti-teller",
+  "private": true,
+  "scripts": {
+    "lokaal": "wrangler d1 execute vai-avanti-teller --local --file=schema.sql && wrangler dev --port 8793",
+    "tabel": "wrangler d1 execute vai-avanti-teller --remote --file=schema.sql",
+    "plaatsen": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.147.0"
+  }
+}

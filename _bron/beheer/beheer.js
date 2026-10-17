@@ -19,7 +19,7 @@
   const SITE_TYPES = ["hero", "cijfers", "honden", "hondenlijst", "uitnesten", "nieuws", "verslagen", "gezondheid", "nesten", "nestenlijst", "verwacht", "overons", "team", "contact"];
   // Kleur die het kleurvakje toont zolang er niets gekozen is
   const STANDAARD_KLEUR = { kleurAchtergrond: "#ffffff", kleurTekst: "#1d1a15", kleurAccent: "#c9a052", accent: "#c9a052", donker: "#0f0d0a", licht: "#fffcf6", beige: "#f6f1e7", tekst: "#1d1a15" };
-  const SECTIES = [["paginas", "Pagina's"], ["nieuws", "Verslagen"], ["honden", "Honden"], ["nesten", "Nesten"], ["instellingen", "Instellingen"]];
+  const SECTIES = [["paginas", "Pagina's"], ["nieuws", "Verslagen"], ["honden", "Honden"], ["nesten", "Nesten"], ["instellingen", "Instellingen"], ["statistieken", "Statistieken"]];
 
   const I = {
     plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
@@ -1374,9 +1374,172 @@
   }
 
   /* ---------- Schermen ---------- */
+  /* ---------- Statistieken (bezoekersteller, zie _bron/teller) ---------- */
+  const PERIODES = [["7", "7 dagen"], ["30", "30 dagen"], ["365", "12 maanden"], ["alles", "Alles"]];
+  const NIET_TELLEN = "va-niet-tellen";
+  const MAANDEN = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+  const twee = n => String(n).padStart(2, "0");
+  const lokaleDag = (d = new Date()) => `${d.getFullYear()}-${twee(d.getMonth() + 1)}-${twee(d.getDate())}`;
+  const plusDagen = (dag, n) => { const d = new Date(dag + "T12:00:00"); d.setDate(d.getDate() + n); return lokaleDag(d); };
+  const getal = n => new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 1 }).format(n);
+  const dagLabel = dag => { const [j, m, d] = dag.split("-"); return `${+d} ${MAANDEN[m - 1]}`; };
+  const maandLabel = maand => { const [j, m] = maand.split("-"); return `${MAANDEN[m - 1]} ${j}`; };
+
+  // Totalen van één periode uit de rijen [dag, soort, sleutel, aantal]
+  function vatSamen(rijen, van, tot) {
+    const uit = { bezoeken: 0, weergaven: 0, perDag: new Map(), land: new Map(), bron: new Map(), pagina: new Map(), taal: new Map(), toestel: new Map() };
+    for (const [dag, soort, sleutel, aantal] of rijen) {
+      if (dag < van || dag > tot) continue;
+      if (soort === "bezoeken") { uit.bezoeken += aantal; uit.perDag.set(dag, (uit.perDag.get(dag) || 0) + aantal); }
+      else if (soort === "weergaven") uit.weergaven += aantal;
+      else if (uit[soort] instanceof Map) uit[soort].set(sleutel, (uit[soort].get(sleutel) || 0) + aantal);
+    }
+    return uit;
+  }
+  // Bezoeken per dag (korte periode) of per maand (lange periode), lege dagen en maanden als 0
+  function reeksVan(perDag, van, tot) {
+    const dagen = [];
+    for (let d = van; d <= tot; d = plusDagen(d, 1)) dagen.push(d);
+    if (dagen.length <= 62) return dagen.map(d => ({ label: dagLabel(d), lang: `${dagLabel(d)} ${d.slice(0, 4)}`, waarde: perDag.get(d) || 0 }));
+    const maanden = new Map();
+    for (const d of dagen) maanden.set(d.slice(0, 7), (maanden.get(d.slice(0, 7)) || 0) + (perDag.get(d) || 0));
+    return [...maanden].map(([m, w]) => ({ label: maandLabel(m), lang: maandLabel(m), waarde: w }));
+  }
+  const mooieStap = max => { const p = 10 ** Math.floor(Math.log10(max)); return [1, 2, 5, 10].map(k => k * p).find(s => max / s <= 4) || p * 10; };
+
+  // Zuilen in SVG: hoogstens 24 px dik, afgeronde top, vierkant op de basislijn, haarlijnen, tooltip bij aanwijzen
+  function zuilen(reeks, eenheid, breedte) {
+    const NS = "http://www.w3.org/2000/svg";
+    const B = Math.round(Math.min(1100, Math.max(280, breedte || 760))), H = B < 500 ? 200 : 230, L = 40, R = 8, BOVEN = 12, ONDER = 28, basis = H - ONDER;
+    const max = Math.max(1, ...reeks.map(r => r.waarde)), stap = mooieStap(max), top = Math.ceil(max / stap) * stap;
+    const y = v => basis - (v / top) * (basis - BOVEN);
+    const vak = (B - L - R) / reeks.length, dik = Math.min(24, Math.max(2, vak - 2));
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${B} ${H}`); svg.setAttribute("class", "zuilen"); svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", `${eenheid}: ${reeks.map(r => `${r.lang} ${r.waarde}`).join(", ")}`);
+    let inhoud = "";
+    for (let v = 0; v <= top; v += stap) inhoud += `<line class="raster" x1="${L}" x2="${B - R}" y1="${y(v)}" y2="${y(v)}"/><text class="as" x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${getal(v)}</text>`;
+    const elke = Math.ceil(reeks.length / Math.max(3, Math.floor((B - L) / 80)));
+    reeks.forEach((r, i) => {
+      const x = L + i * vak + (vak - dik) / 2, h = basis - y(r.waarde), rr = Math.min(4, h, dik / 2);
+      if (r.waarde > 0) inhoud += `<path class="zuil" d="M${x},${basis}V${basis - h + rr}Q${x},${basis - h} ${x + rr},${basis - h}H${x + dik - rr}Q${x + dik},${basis - h} ${x + dik},${basis - h + rr}V${basis}Z"/>`;
+      if ((reeks.length - 1 - i) % elke === 0) inhoud += `<text class="as" x="${x + dik / 2}" y="${H - 8}" text-anchor="middle">${esc(r.label)}</text>`;
+      inhoud += `<rect class="raak" data-i="${i}" x="${L + i * vak}" y="${BOVEN}" width="${vak}" height="${basis - BOVEN}"/>`;
+    });
+    svg.innerHTML = inhoud + `<line class="basislijn" x1="${L}" x2="${B - R}" y1="${basis}" y2="${basis}"/>`;
+    const tip = h("div", { class: "stats-tip", hidden: true });
+    const doos = h("div", { class: "zuilen-doos" }, svg, tip);
+    svg.addEventListener("pointermove", e => {
+      const raak = e.target.closest(".raak");
+      if (!raak) { tip.hidden = true; return; }
+      const r = reeks[+raak.dataset.i], vlak = doos.getBoundingClientRect(), k = raak.getBoundingClientRect();
+      tip.innerHTML = `<b>${getal(r.waarde)}</b> ${r.waarde === 1 ? eenheid.replace(/en$/, "") : eenheid}<br><span>${esc(r.lang)}</span>`;
+      tip.hidden = false;
+      tip.style.left = Math.min(vlak.width - tip.offsetWidth, Math.max(0, k.left - vlak.left + k.width / 2 - tip.offsetWidth / 2)) + "px";
+      tip.style.top = Math.max(0, y(r.waarde) / H * vlak.height - tip.offsetHeight - 8) + "px";
+    });
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; });
+    return doos;
+  }
+
+  // Lijst met staafjes: [sleutel, aantal], hoogste eerst; na 8 regels "Toon alle"
+  function staafLijst(titel, kaart, opmaak) {
+    const items = [...kaart].sort((a, b) => b[1] - a[1]);
+    const totaal = items.reduce((s, [, a]) => s + a, 0), max = Math.max(1, ...items.map(([, a]) => a));
+    const rij = ([k, a]) => h("li", { class: "staaf-rij" },
+      h("span", { class: "staaf-naam" }, ...opmaak(k)),
+      h("span", { class: "staaf-spoor" }, h("span", { class: "staaf", style: `width:${Math.max(2, a / max * 100)}%` })),
+      h("span", { class: "staaf-getal" }, getal(a), h("small", {}, ` ${Math.round(a / totaal * 100)}%`)));
+    const lijst = h("ul", { class: "staaf-lijst" }, items.slice(0, 8).map(rij));
+    const kaartEl = h("section", { class: "stats-kaart" }, h("h4", {}, titel));
+    if (!items.length) kaartEl.append(h("p", { class: "stats-leeg" }, "Nog niets geteld in deze periode."));
+    else kaartEl.append(lijst);
+    if (items.length > 8) kaartEl.append(h("details", { class: "stats-meer" }, h("summary", {}, `Toon alle ${items.length}`), h("ul", { class: "staaf-lijst" }, items.slice(8).map(rij))));
+    return kaartEl;
+  }
+
+  const landRegel = code => {
+    const { LANDEN, landNaam } = window.VA;
+    if (code === "XX") return ["Onbekend"];
+    if (code === "T1") return ["Tor-netwerk"];
+    return [LANDEN.includes(code) ? h("img", { class: "stats-vlag", alt: "", src: `${SITE_ROOT}assets/vlaggen/${code.toLowerCase()}.svg` }) : "", landNaam(code)];
+  };
+  const paginaRegel = pad => {
+    if (pad === "/") return ["Startpagina"];
+    const f = pad.replace(/^\//, ""), hond = f.match(/^hond-(.+)\.html$/);
+    if (hond) { const p = bestandenIn("honden").find(x => slug(idVan(x)) === hond[1]); return ["Hond: " + (p ? S.bestanden[p].data.roepnaam || hond[1] : hond[1])]; }
+    const pg = bestandenIn("paginas").find(p => pageFile(idVan(p)) === f);
+    return [pg ? paginaNaam(pg) : f === "404.html" ? "Pagina niet gevonden" : pad];
+  };
+
+  async function tekenStatistieken() {
+    const vak = $("#stats");
+    if (!vak) return;
+    const periode = S.statsPeriode || "30";
+    const nietTellen = h("input", { type: "checkbox", id: "niet-tellen", checked: opslag.get(NIET_TELLEN) === "1" || null });
+    nietTellen.addEventListener("change", () => { opslag.set(NIET_TELLEN, nietTellen.checked ? "1" : "0"); });
+    vak.innerHTML = "";
+    vak.append(h("div", { class: "stats-kop" },
+      h("div", {}, h("h3", {}, "Bezoekers van de website"), h("h2", {}, "Statistieken")),
+      h("div", { class: "keuzes stats-periodes", role: "group", "aria-label": "Periode" }, PERIODES.map(([k, l]) => h("button", {
+        type: "button", "aria-pressed": String(k === periode), onclick: () => { S.statsPeriode = k; tekenStatistieken(); }
+      }, l)))));
+    const inhoud = h("div", { class: "stats-inhoud" }, h("p", { class: "stats-leeg" }, "Cijfers worden opgehaald…"));
+    vak.append(inhoud, h("div", { class: "stats-noot" },
+      h("p", {}, "Geteld zonder cookies: er wordt niets per bezoeker bewaard, enkel totalen per dag. Bezoekers met een advertentieblokker worden soms niet geteld. Een bezoek begint wanneer iemand van een andere site, een app of rechtstreeks binnenkomt; de herkomst is de site waar die vandaan kwam."),
+      h("label", { class: "schakel", for: "niet-tellen" }, nietTellen, h("span", { class: "spoor" }), "Mijn eigen bezoeken op dit toestel niet meetellen")));
+
+    const toon = (...els) => { inhoud.innerHTML = ""; inhoud.append(...els); };
+    if (!S.data.teller) return toon(h("p", { class: "stats-leeg" }, "De bezoekersteller staat nog niet aan."));
+    if (!S.token || S.demo) return toon(h("p", { class: "stats-leeg" }, "Meld je aan met het wachtwoord om de cijfers te zien."));
+
+    const tot = lokaleDag(), n = periode === "alles" ? 0 : +periode;
+    const van = n ? plusDagen(tot, -(n - 1)) : null, vorigeVan = n ? plusDagen(tot, -(2 * n - 1)) : null, vorigeTot = n ? plusDagen(tot, -n) : null;
+    let data;
+    try {
+      const res = await fetch(`${S.data.teller}/cijfers?${new URLSearchParams(n ? { van: vorigeVan, tot } : { tot })}`, { headers: { Authorization: `Bearer ${S.token}` }, cache: "no-store" });
+      if (!res.ok) throw Object.assign(new Error("teller " + res.status), { status: res.status });
+      data = await res.json();
+    } catch (e) {
+      console.error(e);
+      return toon(h("p", { class: "stats-leeg" }, e.status === 401 ? "Geen toegang tot de cijfers. Meld je opnieuw aan." : "De cijfers konden niet opgehaald worden. Controleer de internetverbinding en probeer opnieuw."));
+    }
+    if (S.statsPeriode !== undefined && (S.statsPeriode || "30") !== periode) return; // intussen andere periode gekozen
+    const begin = van || data.sinds || tot;
+    const nu = vatSamen(data.rijen, begin, tot), vorig = n ? vatSamen(data.rijen, vorigeVan, vorigeTot) : null;
+    if (!data.sinds) return toon(h("p", { class: "stats-leeg" }, "Nog geen bezoeken geteld. Zodra iemand de site bezoekt, verschijnen hier de cijfers."));
+
+    const verschil = (a, b) => {
+      if (!vorig || !b) return "";
+      const p = Math.round((a - b) / b * 100), op = p >= 0;
+      return h("span", { class: "stats-verschil " + (p === 0 ? "" : op ? "op" : "neer") }, `${p === 0 ? "=" : op ? "▲" : "▼"} ${p === 0 ? "gelijk" : (op ? "+" : "") + p + "%"} t.o.v. de ${PERIODES.find(x => x[0] === periode)[1]} ervoor`);
+    };
+    const tegel = (label, waarde, extra) => h("div", { class: "stats-tegel" }, h("div", { class: "stats-label" }, label), h("div", { class: "stats-waarde" }, waarde), extra || "");
+    const reeks = reeksVan(nu.perDag, begin, tot);
+    const perMaand = reeks.length && !/^\d+ [a-z]+$/.test(reeks[0].label);
+    const tabel = h("details", { class: "stats-tabel" }, h("summary", {}, "Toon als tabel"),
+      h("table", {}, h("thead", {}, h("tr", {}, h("th", {}, perMaand ? "Maand" : "Dag"), h("th", {}, "Bezoeken"))),
+        h("tbody", {}, reeks.map(r => h("tr", {}, h("td", {}, r.lang), h("td", {}, getal(r.waarde)))))));
+    const TOESTEL = { gsm: "Gsm", tablet: "Tablet", computer: "Computer" };
+    toon(
+      h("div", { class: "stats-tegels" },
+        tegel("Bezoeken", getal(nu.bezoeken), verschil(nu.bezoeken, vorig && vorig.bezoeken)),
+        tegel("Bekeken pagina's", getal(nu.weergaven), verschil(nu.weergaven, vorig && vorig.weergaven)),
+        tegel("Pagina's per bezoek", nu.bezoeken ? getal(nu.weergaven / nu.bezoeken) : "–")),
+      h("section", { class: "stats-kaart breed" }, h("h4", {}, perMaand ? "Bezoeken per maand" : "Bezoeken per dag"), zuilen(reeks, "bezoeken", vak.clientWidth - 42), tabel),
+      h("div", { class: "stats-raster" },
+        staafLijst("Landen", nu.land, landRegel),
+        staafLijst("Herkomst", nu.bron, k => [k]),
+        staafLijst("Meest bekeken pagina's", nu.pagina, paginaRegel),
+        staafLijst("Taal van de site", nu.taal, k => [(VA_TALEN[k] || {}).naam || k]),
+        staafLijst("Gsm of computer", nu.toestel, k => [TOESTEL[k] || k])),
+      h("p", { class: "stats-sinds" }, `Geteld sinds ${fmtDate(data.sinds)}.`));
+  }
+
   function tekenAlles() {
     const app = $("#app");
     app.innerHTML = "";
+    app.dataset.sectie = S.sectie;
     const tabs = h("nav", { class: "secties", "aria-label": "Onderdelen" }, SECTIES.map(([k, label]) => h("button", {
       type: "button", "aria-pressed": String(S.sectie === k),
       onclick: () => { S.sectie = k; S.tab = "bewerken"; if (k === "paginas") { S.blok = null; S.paginaInst = false; } tekenAlles(); }
@@ -1396,13 +1559,18 @@
       h("div", { class: "mobiel-tabs" },
         h("button", { "data-tab": "bewerken", onclick: () => { S.tab = "bewerken"; werkTabsBij(); } }, "Bewerken"),
         h("button", { "data-tab": "voorbeeld", onclick: () => { S.tab = "voorbeeld"; werkTabsBij(); } }, "Voorbeeld")));
-    const werk = h("div", { class: "werk", "data-tab": S.tab },
-      h("section", { class: "voorbeeld", "aria-label": "Voorbeeld" },
-        h("div", { class: "voorbeeld-kader" }, h("iframe", { id: "voorbeeld-frame", title: "Voorbeeld" }))),
-      h("aside", { class: "paneel", id: "paneel" }, h("div", { class: "paneel-in", id: "paneel-in" })));
+    // Statistieken gebruiken het hele scherm; de andere onderdelen hebben een voorbeeld en een paneel
+    const werk = S.sectie === "statistieken" ? h("div", { class: "werk stats-werk" }, h("main", { class: "stats", id: "stats" }))
+      : h("div", { class: "werk", "data-tab": S.tab },
+        h("section", { class: "voorbeeld", "aria-label": "Voorbeeld" },
+          h("div", { class: "voorbeeld-kader" }, h("iframe", { id: "voorbeeld-frame", title: "Voorbeeld" }))),
+        h("aside", { class: "paneel", id: "paneel" }, h("div", { class: "paneel-in", id: "paneel-in" })));
     app.append(balk, werk);
     document.documentElement.style.setProperty("--balk-h", balk.offsetHeight + "px");
+    const gekozen = tabs.querySelector('[aria-pressed="true"]');
+    if (gekozen && tabs.scrollWidth > tabs.clientWidth) tabs.scrollLeft = gekozen.offsetLeft - (tabs.clientWidth - gekozen.offsetWidth) / 2;
     voorbeeldDoc = null; voorbeeldSleutel = "";
+    if (S.sectie === "statistieken") { werkStatusBij(); tekenStatistieken(); return; }
     tekenPaneel(); werkStatusBij(); werkTabsBij();
     vernieuwVoorbeeld(true);
   }
@@ -1495,6 +1663,8 @@
     try {
       await laad();
       S.status = { tekst: "Alles staat online", soort: "" };
+      // Wie zich aanmeldt, telt op dit toestel niet mee in de statistieken (uit te zetten bij Statistieken)
+      if (S.token && !S.demo && opslag.get(NIET_TELLEN) === null) opslag.set(NIET_TELLEN, "1");
       tekenAlles();
       if (S.demo) melding("Je kijkt rond zonder aan te melden: alles werkt, behalve opslaan.");
     } catch (e) {

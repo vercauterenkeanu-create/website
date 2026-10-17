@@ -241,6 +241,9 @@ async function main() {
   const cfgFile = path.join(SRC, "config.json");
   const cfg = fs.existsSync(cfgFile) ? JSON.parse(fs.readFileSync(cfgFile, "utf8")) : {};
   if (cfg.web3formsKey) js = js.replace('const WEB3FORMS_KEY = "";', `const WEB3FORMS_KEY = ${JSON.stringify(cfg.web3formsKey)};`);
+  // Adres van de bezoekersteller (_bron/teller); leeg = niet tellen
+  const teller = process.env.TELLER_URL || cfg.teller || "";
+  if (teller) js = js.replace('const TELLER = "";', `const TELLER = ${JSON.stringify(teller)};`);
   // De vaste teksten van site.js per taal
   const scriptWoorden = Object.fromEntries(talen.slice(1).map(c => [c, Object.fromEntries(vertaal.scriptTeksten().filter(s => klaar[c].has(s)).map(s => [s, klaar[c].get(s)]))]));
   js = js.replace("const TEKSTEN = {};", () => `const TEKSTEN = ${JSON.stringify(scriptWoorden)};`);
@@ -261,7 +264,7 @@ async function main() {
     if (f === "index.html") fs.writeFileSync(path.join(dir, f), fs.readFileSync(path.join(SRC, "beheer", f), "utf8").replaceAll("__VERSIE__", versie));
     else fs.copyFileSync(path.join(SRC, "beheer", f), path.join(dir, f));
   }
-  fs.writeFileSync(path.join(dir, "data.json"), JSON.stringify({ mediaInfo, commit: process.env.GITHUB_SHA || null, versie, bestanden, talen, vertaalStatus, gebouwd: new Date().toISOString() }));
+  fs.writeFileSync(path.join(dir, "data.json"), JSON.stringify({ mediaInfo, commit: process.env.GITHUB_SHA || null, versie, teller: teller || null, bestanden, talen, vertaalStatus, gebouwd: new Date().toISOString() }));
 
   console.log(`${pages.size} pagina's gebouwd · ${paginas.length} eigen pagina's · ${honden.length} honden · ${nesten.length} nesten · ${nieuws.length} verslagen · talen: ${talen.join(", ")}`);
 }

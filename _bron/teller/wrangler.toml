@@ -1,0 +1,10 @@
+# Bezoekersteller van www.vai-avanti.be (zie worker.js). Plaatsen: npm run plaatsen
+name = "vai-avanti-teller"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vai-avanti-teller"
+database_id = "NOG-INVULLEN"

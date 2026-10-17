@@ -15,6 +15,31 @@
   // T("Deze website is ook in jouw taal beschikbaar.") wordt hieronder per taal opgezocht
   const T = (s, v) => String((TEKSTEN[TAAL] || {})[s] || s).replace(/\{([a-z]+)\}/g, (m, k) => v && k in v ? v[k] : m);
 
+  /* ---------- Bezoekersteller (zonder cookies) ----------
+     Meldt elke bekeken pagina aan de teller (_bron/teller): welke pagina, taal, gsm of computer, en bij het
+     begin van een bezoek van welke site de bezoeker komt. Er wordt niets per bezoeker bewaard.
+     De bouwstap vult TELLER in. Een toestel uitzetten kan in de beheer (Statistieken). */
+  const TELLER = "";
+  try {
+    const eigen = h => /(^|\.)vai-avanti\.be$/.test(h) || h === location.hostname;
+    const soort = (performance.getEntriesByType("navigation")[0] || {}).type;
+    if (TELLER && localStorage.getItem("va-niet-tellen") !== "1") {
+      let ref = "";
+      try { ref = document.referrer ? new URL(document.referrer).hostname : ""; } catch (x) { /* geen geldige verwijzing */ }
+      const zoek = new URLSearchParams(location.search);
+      const bron = zoek.get("utm_source") || ["fbclid", "gclid", "igshid"].find(k => zoek.has(k)) || "";
+      const ua = navigator.userAgent;
+      const toestel = /iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua)) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "tablet" : /Mobi|iPhone|Android/i.test(ua) ? "gsm" : "computer";
+      const gegevens = JSON.stringify({
+        p: location.pathname.replace(/^\/(en|de|it|fi|da)(?=\/)/, "").replace(/\/index\.html$/, "/") || "/",
+        r: ref && !eigen(ref) ? ref : "", b: bron, t: TAAL, g: toestel,
+        n: (!ref || !eigen(ref)) && soort !== "reload" && soort !== "back_forward" ? 1 : 0
+      });
+      if (navigator.sendBeacon) navigator.sendBeacon(TELLER + "/tel", gegevens);
+      else fetch(TELLER + "/tel", { method: "POST", body: gegevens, keepalive: true, mode: "no-cors" });
+    }
+  } catch (e) { /* tellen mag de site nooit hinderen */ }
+
   /* ---------- Nette adresbalk ----------
      Facebook, Google en nieuwsbrieven plakken volgcodes achter een link (?fbclid=..., ?utm_...).
      Die halen we weg uit de adresbalk; de pagina zelf verandert niet. */

@@ -87,6 +87,19 @@ Open daarna http://localhost:8790.
 
 Zonder sleutel toont het formulier het e-mailadres en telefoonnummer; het opent nooit een e-mailprogramma.
 
+## Statistieken (bezoekersteller)
+
+De beheer heeft een onderdeel **Statistieken**: bezoeken per dag of maand, landen, herkomst (Google, Facebook, Instagram, rechtstreeks…), meest bekeken pagina's, taal en gsm/computer.
+
+- De teller staat in `_bron/teller/`: een kleine Cloudflare Worker met een D1-database (gratis abonnement). Hij bewaart enkel totalen per dag, geen cookies en niets per bezoeker.
+- `site.js` meldt elke bekeken pagina met `navigator.sendBeacon`. Een bezoek begint wanneer iemand van een andere site, een app of rechtstreeks binnenkomt; herladen en doorklikken tellen enkel als bekeken pagina.
+- De beheer haalt de cijfers op met dezelfde koppelcode als voor opslaan; de teller controleert bij GitHub of die code schrijfrechten heeft.
+- Wie zich in de beheer aanmeldt, telt op dat toestel niet meer mee (uit te zetten onderaan Statistieken).
+- Het adres van de teller staat in `_bron/config.json`: `{ "teller": "https://vai-avanti-teller.….workers.dev" }`.
+
+Plaatsen of bijwerken (in `_bron/teller`, na `npx wrangler login`): `npm install`, `npm run tabel` (eenmalig) en `npm run plaatsen`.
+Lokaal testen: `npm run lokaal` (teller op poort 8793, testinstellingen in `.dev.vars`).
+
 ## Deelbare link (claude.ai)
 
 `npm run share` maakt `_deelbaar/`. Daarmee werkt Claude de link bij.
