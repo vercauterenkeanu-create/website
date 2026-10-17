@@ -1166,7 +1166,8 @@
 
     groep(paneel, "Contactgegevens", "inst-contact",
       ...["telefoon:Telefoon", "email:E-mailadres", "plaats:Postcode en gemeente", "instagram:Link naar Instagram", "facebook:Link naar Facebook"]
-        .map(x => { const [naam, label] = x.split(":"); return veld({ naam, label, type: "regel" }, s.contact, pad, vol); }));
+        .map(x => { const [naam, label] = x.split(":"); return veld({ naam, label, type: "regel" }, s.contact, pad, vol); }),
+      veld({ naam: "formulierSleutel", label: "Sleutel van het contactformulier (Web3Forms)", type: "regel", hulp: "Maak gratis een sleutel aan op web3forms.com met het e-mailadres waarop berichten moeten toekomen; de sleutel komt per mail. Plak hem hier en publiceer. Leeg = het formulier is niet actief." }, s.contact, pad));
 
     paneel.append(h("h3", { style: "margin-top:10px" }, "Dit toestel"),
       h("div", { class: "acties", style: "border-top:0;padding-top:0" }, h("button", { class: "b-btn klein", onclick: afmelden }, S.demo ? "Aanmelden met wachtwoord" : "Afmelden op dit toestel")));

@@ -83,7 +83,7 @@ Open daarna http://localhost:8790.
 ## Contactformulier
 
 1. Maak een gratis sleutel aan op https://web3forms.com.
-2. Zet de sleutel in `_bron/config.json`: `{ "web3formsKey": "jouw-sleutel" }`.
+2. Plak de sleutel in de beheer: Instellingen → Contactgegevens → "Sleutel van het contactformulier", en publiceer. (Of zet hem in `_bron/config.json`: `{ "web3formsKey": "jouw-sleutel" }`.)
 
 Zonder sleutel toont het formulier het e-mailadres en telefoonnummer; het opent nooit een e-mailprogramma.
 

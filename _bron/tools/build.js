@@ -240,7 +240,9 @@ async function main() {
   if (S.mailParts.length === 2) js = js.replace('["vai-avanti", "hotmail.com"]', JSON.stringify(S.mailParts));
   const cfgFile = path.join(SRC, "config.json");
   const cfg = fs.existsSync(cfgFile) ? JSON.parse(fs.readFileSync(cfgFile, "utf8")) : {};
-  if (cfg.web3formsKey) js = js.replace('const WEB3FORMS_KEY = "";', `const WEB3FORMS_KEY = ${JSON.stringify(cfg.web3formsKey)};`);
+  // Sleutel van het contactformulier: in de beheer (Instellingen, Contactgegevens) of in _bron/config.json
+  const formulierSleutel = String(cfg.web3formsKey || (site.contact || {}).formulierSleutel || "").trim();
+  if (formulierSleutel) js = js.replace('const WEB3FORMS_KEY = "";', `const WEB3FORMS_KEY = ${JSON.stringify(formulierSleutel)};`);
   // Adres van de bezoekersteller (_bron/teller); leeg = niet tellen
   const teller = process.env.TELLER_URL || cfg.teller || "";
   if (teller) js = js.replace('const TELLER = "";', `const TELLER = ${JSON.stringify(teller)};`);
